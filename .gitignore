@@ -1,0 +1,7 @@
+.vscode
+.idea
+.env
+build
+target
+dist
+out
