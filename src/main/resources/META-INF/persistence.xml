@@ -7,13 +7,14 @@
 
     <persistence-unit name="sigob" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-
         <!-- CLASSES -->
         <!-- <class>org.javapi.sigob.entity.Name</class> -->
         <class>org.javapi.sigob.entity.Cliente</class>
+        <class>org.javapi.sigob.entity.Estoque</class>
+        <class>org.javapi.sigob.entity.Produto</class>
         <class>org.javapi.sigob.entity.Venda</class>
+        <class>org.javapi.sigob.entity.ProdutosEstoques</class>
         <class>org.javapi.sigob.entity.ProdutosVendas</class>
-
 
         <properties>
             <!-- JDBC CONFIGURATION -->
