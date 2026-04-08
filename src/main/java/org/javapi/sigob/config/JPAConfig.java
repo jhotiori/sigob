@@ -17,7 +17,7 @@ public class JPAConfig {
         return factory.createEntityManager();
     }
 
-    public static void closeEntityManager() {
+    public static void closeEntityFactory() {
         if (factory != null) {
             factory.close();
             factory = null;
