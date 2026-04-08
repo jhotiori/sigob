@@ -10,6 +10,10 @@
 
         <!-- CLASSES -->
         <!-- <class>org.javapi.sigob.entity.Name</class> -->
+        <class>org.javapi.sigob.entity.Cliente</class>
+        <class>org.javapi.sigob.entity.Venda</class>
+        <class>org.javapi.sigob.entity.ProdutosVendas</class>
+
 
         <properties>
             <!-- JDBC CONFIGURATION -->
