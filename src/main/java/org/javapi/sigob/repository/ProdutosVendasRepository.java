@@ -6,8 +6,8 @@ import java.util.List;
 
 
 public class ProdutosVendasRepository {
+    private final EntityManager em;
 
-    private EntityManager em;
     public ProdutosVendasRepository(EntityManager em) {
         this.em = em;
     }
