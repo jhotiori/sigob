@@ -1,7 +1,10 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Estoque;
+import org.javapi.sigob.exception.EstoqueException;
 import org.javapi.sigob.repository.EstoqueRepository;
 
 import jakarta.persistence.EntityManager;
