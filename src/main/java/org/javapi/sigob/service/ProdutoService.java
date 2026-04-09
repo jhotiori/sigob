@@ -111,4 +111,8 @@ public class ProdutoService {
             throw new ProdutoException("Custo de venda do produto não pode ser nulo ou menor ou igual a zero");
         }
     }
+
+    public boolean exists(Produto produto) {
+        return this.repository.contains(produto);
+    }
 }
