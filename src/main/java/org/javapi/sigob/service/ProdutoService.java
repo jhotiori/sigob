@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Produto;
+import org.javapi.sigob.exception.ProdutoException;
 import org.javapi.sigob.repository.ProdutoRepository;
 
 import jakarta.persistence.EntityManager;

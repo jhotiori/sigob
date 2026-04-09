@@ -4,15 +4,16 @@ import java.util.List;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.ProdutosEstoques;
+import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
-public class ProdutosEstoqueService {
+public class ProdutosEstoquesService {
     private final ProdutosEstoquesRepository repository;
 
-    public ProdutosEstoqueService(ProdutosEstoquesRepository repository) {
+    public ProdutosEstoquesService(ProdutosEstoquesRepository repository) {
         this.repository = repository;
     }
 
@@ -76,7 +77,7 @@ public class ProdutosEstoqueService {
 
     private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) {
         if (produtoEstoque == null) {
-            throw new ProdutosEstoquesException("ProdutosEstoques não pode ser nulo");
+            throw new ProdutosEstoquesException("Produtos não pode ser nulo");
         }
         validateObservacao(produtoEstoque.getDsObservacao());
         validateQuantidade(produtoEstoque.getNrQuantidade());
