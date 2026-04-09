@@ -10,10 +10,10 @@ import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
-public class ProdutosEstoqueService {
+public class ProdutosEstoquesService {
     private final ProdutosEstoquesRepository repository;
 
-    public ProdutosEstoqueService(ProdutosEstoquesRepository repository) {
+    public ProdutosEstoquesService(ProdutosEstoquesRepository repository) {
         this.repository = repository;
     }
 

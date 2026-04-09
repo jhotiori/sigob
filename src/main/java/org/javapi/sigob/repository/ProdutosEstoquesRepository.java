@@ -7,7 +7,7 @@ import org.javapi.sigob.entity.ProdutosEstoques;
 import jakarta.persistence.EntityManager;
 
 public class ProdutosEstoquesRepository {
-    private EntityManager em;
+    private final EntityManager em;
 
     public ProdutosEstoquesRepository(EntityManager em) {
         this.em = em;
