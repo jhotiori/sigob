@@ -1,6 +1,7 @@
-package com.nerdstock.model;
+package org.javapi.sigob.entity;
 
 import jakarta.persistence.*;
+
 @Entity
 @Table(name = "categorias")
 public class Categoria {

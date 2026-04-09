@@ -64,8 +64,7 @@ public class AcessoService {
 
     public Acesso getByCodigo(String codigo) {
         validateCodigo(codigo);
-        List<Acesso> acessos = this.repository.findByName(codigo);
-        return acessos.isEmpty() ? null : acessos.get(0);
+        return this.repository.findByCodigo(codigo);
     }
 
     public List<Acesso> getAll() {

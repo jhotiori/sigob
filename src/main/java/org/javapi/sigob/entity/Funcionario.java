@@ -1,8 +1,6 @@
-package com.nerdstock.model;
+package org.javapi.sigob.entity;
 
 import jakarta.persistence.*;
-
-import java.lang.annotation.Native;
 
 @Entity
 @Table(name = "funcionarios")
@@ -22,9 +20,9 @@ public class Funcionario {
     private Acesso acesso;
 
     //Constructor
-    public void Funcionario() {}
+    public Funcionario() {}
 
-    public void Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
+    public Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
         this.idFuncionario = idFuncionario;
         this.nmFuncionario = nmFuncionario;
         this.cdFuncionario = cdFuncionario;

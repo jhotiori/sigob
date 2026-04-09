@@ -65,8 +65,7 @@ public class FuncionarioService {
 
     public Funcionario getByCodigo(String codigo) {
         validateCodigo(codigo);
-        List<Funcionario> funcionarios = this.repository.findByName(codigo);
-        return funcionarios.isEmpty() ? null : funcionarios.get(0);
+        return this.repository.findByCodigo(codigo);
     }
 
     public List<Funcionario> getAll() {

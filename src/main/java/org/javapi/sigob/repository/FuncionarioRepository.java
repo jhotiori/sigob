@@ -1,47 +1,53 @@
-package com.nerdstock.repositories;
+package org.javapi.sigob.repository;
 
-import com.nerdstock.model.Funcionario;
+import org.javapi.sigob.entity.Funcionario;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
 public class FuncionarioRepository {
-    private EntityManager em;
+    private final EntityManager em;
 
     public FuncionarioRepository(EntityManager em) {
         this.em = em;
     }
 
-    public Funcionario findById(int id){
+    public Funcionario findById(int id) {
         return em.find(Funcionario.class, id);
     }
 
-    public void create(Funcionario funcionario){
-        em.getTransaction().begin();
+    public void create(Funcionario funcionario) {
         em.persist(funcionario);
-        em.getTransaction().commit();
     }
 
-    public void update(Funcionario funcionario){
-        em.getTransaction().begin();
+    public void update(Funcionario funcionario) {
         em.merge(funcionario);
-        em.getTransaction().commit();
     }
 
-    public void delete(Funcionario funcionario){
-        em.getTransaction().begin();
+    public void delete(Funcionario funcionario) {
         em.remove(em.contains(funcionario) ? funcionario : em.merge(funcionario));
-        em.getTransaction().commit();
     }
 
-    public List<Funcionario> findAll(){
-        return em.createQuery("select f from funcionarios f", Funcionario.class).getResultList();
+    public boolean contains(Funcionario funcionario) {
+        return em.contains(funcionario);
     }
 
-    public List<Funcionario> findByName(String name){
-        return em.createQuery("select f from funcionarios f where nmFuncionario like :str", Funcionario.class)
-                .setParameter("str", name+"%")
+    public List<Funcionario> findAll() {
+        return em.createQuery("select f from Funcionario f", Funcionario.class).getResultList();
+    }
+
+    public List<Funcionario> findByName(String nome) {
+        return em.createQuery("select f from Funcionario f where f.nmFuncionario like :str", Funcionario.class)
+                .setParameter("str", nome + "%")
                 .getResultList();
     }
 
+    public Funcionario findByCodigo(String codigo) {
+        return em.createQuery("select f from Funcionario f where f.cdFuncionario = :codigo", Funcionario.class)
+                .setParameter("codigo", codigo)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
 }

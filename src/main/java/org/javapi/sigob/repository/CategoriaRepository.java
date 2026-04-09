@@ -1,45 +1,52 @@
-package com.nerdstock.repositories;
+package org.javapi.sigob.repository;
 
-import com.nerdstock.model.Categoria;
+import org.javapi.sigob.entity.Categoria;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 
 public class CategoriaRepository {
-    private EntityManager em;
-    public CategoriaRepository(EntityManager em){
+    private final EntityManager em;
+
+    public CategoriaRepository(EntityManager em) {
         this.em = em;
     }
 
-    public Categoria findById(int id){
+    public Categoria findById(int id) {
         return em.find(Categoria.class, id);
     }
 
-    public void create(Categoria categoria){
-        em.getTransaction().begin();
+    public void create(Categoria categoria) {
         em.persist(categoria);
-        em.getTransaction().commit();
     }
 
-    public void update(Categoria categoria){
-        em.getTransaction().begin();
+    public void update(Categoria categoria) {
         em.merge(categoria);
-        em.getTransaction().commit();
     }
 
-    public void delete(Categoria categoria){
-        em.getTransaction().begin();
+    public void delete(Categoria categoria) {
         em.remove(em.contains(categoria) ? categoria : em.merge(categoria));
-        em.getTransaction().commit();
     }
 
-    public List<Categoria> findAll(){
-        return em.createQuery("select c from categorias c", Categoria.class).getResultList();
+    public boolean contains(Categoria categoria) {
+        return em.contains(categoria);
     }
 
-    public List<Categoria> findByName(String prefixo){
-        return em.createQuery("select c from categorias c where c.nmCategoria like :prefix", Categoria.class)
+    public List<Categoria> findAll() {
+        return em.createQuery("select c from Categoria c", Categoria.class).getResultList();
+    }
+
+    public List<Categoria> findByName(String prefixo) {
+        return em.createQuery("select c from Categoria c where c.nmCategoria like :prefix", Categoria.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
     }
 
+    public Categoria findByCodigo(String codigo) {
+        return em.createQuery("select c from Categoria c where c.cdCategoria = :codigo", Categoria.class)
+                .setParameter("codigo", codigo)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
 }

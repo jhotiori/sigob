@@ -64,8 +64,7 @@ public class CategoriaService {
 
     public Categoria getByCodigo(String codigo) {
         validateCodigo(codigo);
-        List<Categoria> categorias = this.repository.findByName(codigo);
-        return categorias.isEmpty() ? null : categorias.get(0);
+        return this.repository.findByCodigo(codigo);
     }
 
     public List<Categoria> getAll() {
