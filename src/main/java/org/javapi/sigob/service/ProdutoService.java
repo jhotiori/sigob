@@ -3,7 +3,6 @@ package org.javapi.sigob.service;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Produto;
 import org.javapi.sigob.exception.ProdutoException;
 import org.javapi.sigob.repository.ProdutoRepository;
@@ -18,63 +17,58 @@ public class ProdutoService {
         this.repository = repository;
     }
 
-    public void save(Produto produto) {
+    public void save(Produto produto, EntityManager em) {
         validateProduto(produto);
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
 
+        EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            this.repository.create(produto);
+            int idProduto = produto.getIdProduto();
+
+            if (idProduto > 0) {
+                this.repository.update(produto);
+            } else {
+                this.repository.create(produto);
+            }
             tx.commit();
         } catch (Exception e) {
-            tx.rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
             throw e;
-        } finally {
-            em.close();
         }
+    }
+
+    public void create(Produto produto) {
+        validateProduto(produto);
+        this.repository.create(produto);
     }
 
     public void update(Produto produto) {
         validateProduto(produto);
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-
-        try {
-            tx.begin();
-            this.repository.update(produto);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            throw e;
-        } finally {
-            em.close();
+        if (produto.getIdProduto() <= 0) {
+            throw new ProdutoException("ID do produto deve ser maior que zero para atualizar");
         }
+        this.repository.update(produto);
     }
 
     public void delete(Produto produto) {
-        if (this.repository.contains(produto)) {
-            this.repository.delete(produto);
-        }
+        this.repository.delete(produto);
     }
 
-    public boolean contains(Produto produto) {
-        return this.repository.contains(produto);
-    }
-
-    public List<Produto> findByNome(String nome) {
-        validateNome(nome);
-        return this.repository.findByNome(nome);
-    }
-
-    public Produto findById(int id) {
+    public Produto getById(int id) {
         if (id <= 0) {
-            throw new IllegalArgumentException("Id do produto não pode ser menor ou igual a zero");
+            throw new ProdutoException("ID do produto não pode ser menor ou igual a zero");
         }
         return this.repository.findById(id);
     }
 
-    public List<Produto> findAll() {
+    public List<Produto> getByNome(String nome) {
+        validateNome(nome);
+        return this.repository.findByNome(nome);
+    }
+
+    public List<Produto> getAll() {
         return this.repository.findAll();
     }
 
