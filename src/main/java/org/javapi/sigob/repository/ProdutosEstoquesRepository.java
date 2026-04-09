@@ -13,26 +13,24 @@ public class ProdutosEstoquesRepository {
         this.em = em;
     }
 
-    public ProdutosEstoques findById(int id) {
-        return em.find(ProdutosEstoques.class, id);
-    }
-
     public void create(ProdutosEstoques produtoEstoque) {
-        em.getTransaction().begin();
         em.persist(produtoEstoque);
-        em.getTransaction().commit();
     }
 
     public void update(ProdutosEstoques produtoEstoque) {
-        em.getTransaction().begin();
         em.merge(produtoEstoque);
-        em.getTransaction().commit();
     }
 
     public void delete(ProdutosEstoques produtoEstoque) {
-        em.getTransaction().begin();
         em.remove(em.contains(produtoEstoque) ? produtoEstoque : em.merge(produtoEstoque));
-        em.getTransaction().commit();
+    }
+
+    public boolean contains(ProdutosEstoques produtoEstoque) {
+        return em.contains(produtoEstoque);
+    }
+
+    public ProdutosEstoques findById(int id) {
+        return em.find(ProdutosEstoques.class, id);
     }
 
     public List<ProdutosEstoques> findAll() {

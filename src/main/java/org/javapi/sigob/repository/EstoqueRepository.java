@@ -13,26 +13,20 @@ public class EstoqueRepository {
         this.em = em;
     }
 
-    public Estoque findById(int id) {
-        return em.find(Estoque.class, id);
-    }
-
     public void create(Estoque estoque) {
-        em.getTransaction().begin();
         em.persist(estoque);
-        em.getTransaction().commit();
     }
 
     public void update(Estoque estoque) {
-        em.getTransaction().begin();
         em.merge(estoque);
-        em.getTransaction().commit();
+    }
+
+    public boolean contains(Estoque estoque) {
+        return em.contains(estoque);
     }
 
     public void delete(Estoque estoque) {
-        em.getTransaction().begin();
         em.remove(em.contains(estoque) ? estoque : em.merge(estoque));
-        em.getTransaction().commit();
     }
 
     public List<Estoque> findAll() {
@@ -43,5 +37,9 @@ public class EstoqueRepository {
         return em.createQuery("select e from estoques e where e.nmEstoque like :prefix", Estoque.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
+    }
+
+    public Estoque findById(int id) {
+        return em.find(Estoque.class, id);
     }
 }
