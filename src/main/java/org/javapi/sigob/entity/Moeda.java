@@ -3,7 +3,7 @@ package org.javapi.sigob.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "meodas")
+@Table(name = "moedas")
 public class Moeda {
 
     @Id

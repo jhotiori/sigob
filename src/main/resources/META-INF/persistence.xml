@@ -16,6 +16,10 @@
         <class>org.javapi.sigob.entity.ProdutosEstoques</class>
         <class>org.javapi.sigob.entity.ProdutosVendas</class>
 
+        <class>org.javapi.sigob.entity.Categoria</class>
+        <class>org.javapi.sigob.entity.Acesso</class>
+        <class>org.javapi.sigob.entity.Funcionario</class>
+        <class>org.javapi.sigob.entity.Moeda</class>
         <properties>
             <!-- JDBC CONFIGURATION -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
