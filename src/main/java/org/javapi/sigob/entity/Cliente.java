@@ -1,55 +1,102 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity(name = "clientes")
 public class Cliente {
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idCliente;
 
-    @Column (name = "nmCliente")
+    @Column(name = "nmCliente")
     private String nmCliente;
 
-    @Column (name = "nrDocumento")
+    @Column(name = "nrDocumento")
     private String nrDocumento;
 
-    //Constructor
-    public Cliente() {};
+    /**
+     * Construtor para criar um novo Cliente
+     *
+     * @return Cliente - O Cliente criado
+     */
+    public Cliente() {
+    };
 
+    /**
+     * Construtor para criar um novo Cliente
+     *
+     * @param idCliente   O ID do Cliente
+     * @param nmCliente   O Nome do Cliente
+     * @param nrDocumento O Documento do Cliente
+     * @return Cliente - O Cliente criado
+     */
     public Cliente(int idCliente, String nmCliente, String nrDocumento) {
         this.idCliente = idCliente;
         this.nmCliente = nmCliente;
         this.nrDocumento = nrDocumento;
     }
 
-    //Setters
-    public void  setIdCliente(int idCliente) {
+    /**
+     * Atribui o ID do Cliente
+     *
+     * @param idCliente O ID do Cliente
+     */
+    public void setIdCliente(int idCliente) {
         this.idCliente = idCliente;
     }
-    public void  setNmCliente(String nmCliente) {
+
+    /**
+     * Atribui o Nome do Cliente
+     *
+     * @param nmCliente O Nome do Cliente
+     */
+    public void setNmCliente(String nmCliente) {
         this.nmCliente = nmCliente;
     }
-    public void  setNrDocumento(String nrDocumento) {
+
+    /**
+     * Atribui o Documento do Cliente
+     *
+     * @param nrDocumento O Documento do Cliente
+     */
+    public void setNrDocumento(String nrDocumento) {
         this.nrDocumento = nrDocumento;
     }
 
-    //Getters
+    /**
+     * Retorna o ID do Cliente
+     *
+     * @return idCliente - O ID do Cliente
+     */
     public int getIdCliente() {
-        return idCliente;
-    }
-    public String getNmCliente() {
-        return nmCliente;
-    }
-    public String getNrDocumento() {
-        return nrDocumento;
+        return this.idCliente;
     }
 
-    //ToString
+    /**
+     * Retorna o Nome do Cliente
+     *
+     * @return nmCliente - O Nome do Cliente
+     */
+    public String getNmCliente() {
+        return this.nmCliente;
+    }
+
+    /**
+     * Retorna o Documento do Cliente
+     *
+     * @return nrDocumento - O Documento do Cliente
+     */
+    public String getNrDocumento() {
+        return this.nrDocumento;
+    }
+
     @Override
     public String toString() {
-        String obj;
-        obj = String.format("ID: %d\nNM: %s | DOC: %s", idCliente, nmCliente, nrDocumento);
-        return obj;
+        return "Cliente(Id = %d, Nome = %s, Documento = %s)"
+                .formatted(this.getIdCliente(), this.getNmCliente(), this.getNrDocumento());
     }
 }
