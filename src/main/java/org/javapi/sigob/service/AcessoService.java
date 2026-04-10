@@ -1,86 +1,114 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.exception.AcessoException;
 import org.javapi.sigob.repository.AcessoRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import java.util.List;
-
 public class AcessoService {
     private final AcessoRepository repository;
 
+    /**
+     * Cria um novo AcessoService
+     *
+     * @param repository O repositorio de Acesso
+     * @return AcessoService - O servico
+     */
     public AcessoService(AcessoRepository repository) {
         this.repository = repository;
     }
 
-    public void save(Acesso acesso, EntityManager em) {
+    /**
+     * Salva um acesso
+     * @param acesso O acesso a ser salvo
+     * @throws AcessoException Se o acesso for invalido
+     */
+    public void save(Acesso acesso) {
         validateAcesso(acesso);
-
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            int idAcesso = acesso.getIdAcesso();
-
-            if (idAcesso > 0) {
-                this.repository.update(acesso);
-            } else {
-                this.repository.create(acesso);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            throw e;
-        }
+        this.repository.save(acesso);
     }
 
-    public void create(Acesso acesso) {
-        validateAcesso(acesso);
-        this.repository.create(acesso);
-    }
-
+    /**
+     * Atualiza um acesso
+     * @param acesso O acesso a ser atualizado
+     * @throws AcessoException Se o acesso for invalido
+     */
     public void update(Acesso acesso) {
         validateAcesso(acesso);
-        if (acesso.getIdAcesso() <= 0) {
-            throw new AcessoException("ID do acesso deve ser maior que zero para atualizar");
-        }
         this.repository.update(acesso);
     }
 
-    public Acesso getById(int id) {
-        if (id <= 0) {
-            throw new AcessoException("ID do acesso não pode ser menor ou igual a zero");
+    /**
+     * Deleta um acesso
+     * @param acesso O acesso a ser deletado
+     */
+    public void delete(Acesso acesso) {
+        if (this.repository.contains(acesso)) {
+            this.repository.delete(acesso);
         }
-        return this.repository.findById(id);
     }
 
-    public List<Acesso> getByNome(String nome) {
-        validateNome(nome);
-        return this.repository.findByName(nome);
+    /**
+     * Confere se um acesso existe
+     * @param acesso O acesso para conferir
+     * @return boolean - true se o Acesso existe, false se nao existir
+     */
+    public boolean contains(Acesso acesso) {
+        return this.repository.contains(acesso);
     }
 
-    public Acesso getByCodigo(String codigo) {
-        validateCodigo(codigo);
-        return this.repository.findByCodigo(codigo);
-    }
-
-    public List<Acesso> getAll() {
+    /**
+     * Retorna uma lista com todos os Acessos
+     * @return List<Acesso> - A lista de Acessos
+     */
+    public List<Acesso> findAll() {
         return this.repository.findAll();
     }
 
-    public void delete(Acesso acesso) {
-        this.repository.delete(acesso);
+    /**
+     * Busca um Acesso pelo seu ID
+     * @param id O ID do Acesso
+     * @return Acesso - O Acesso buscado
+     */
+    public Acesso findById(int id) {
+        validateId(id);
+        return this.repository.findById(id);
+    }
+
+    /**
+     * Retorna uma lista de acessos que possuem o nome informado
+     * @param nome O nome para procurar
+     * @return List<Acesso> - A lista de Acessos
+     */
+    public List<Acesso> findByNome(String nome) {
+        validateNome(nome);
+        return this.repository.findByNome(nome);
+    }
+
+    /**
+     * Busca um Acesso pelo seu codigo
+     * @param codigo O codigo do Acesso
+     * @return Acesso - O Acesso buscado
+     */
+    public Acesso findByCodigo(String codigo) {
+        validateCodigo(codigo);
+        return this.repository.findByCodigo(codigo);
     }
 
     private void validateAcesso(Acesso acesso) {
         if (acesso == null) {
             throw new AcessoException("Acesso não pode ser nulo");
         }
+        validateId(acesso.getIdAcesso());
         validateNome(acesso.getNmAcesso());
         validateCodigo(acesso.getCdAcesso());
+    }
+
+    private void validateId(int id) {
+        if (id <= 0) {
+            throw new AcessoException("ID do acesso deve ser maior que zero");
+        }
     }
 
     private void validateNome(String nome) {

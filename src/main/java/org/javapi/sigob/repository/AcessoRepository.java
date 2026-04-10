@@ -6,6 +6,8 @@ import jakarta.persistence.EntityManager;
 
 import org.javapi.sigob.entity.Acesso;
 
+import jakarta.persistence.EntityTransaction;
+
 public class AcessoRepository {
     private final EntityManager em;
 
@@ -23,8 +25,25 @@ public class AcessoRepository {
      *
      * @param acesso O acesso para ser criado
      */
-    public void create(Acesso acesso) {
-        em.persist(acesso);
+    public void save(Acesso acesso) {
+        if (acesso.getIdAcesso() > 0) {
+            update(acesso);
+            return;
+        }
+
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.persist(acesso);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
     /**
@@ -33,7 +52,19 @@ public class AcessoRepository {
      * @param acesso O acesso para ser atualizado
      */
     public void update(Acesso acesso) {
-        em.merge(acesso);
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.merge(acesso);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
     /**
@@ -42,7 +73,19 @@ public class AcessoRepository {
      * @param acesso O acesso para ser deletado
      */
     public void delete(Acesso acesso) {
-        em.remove(em.contains(acesso) ? acesso : em.merge(acesso));
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.remove(manager.contains(acesso) ? acesso : manager.merge(acesso));
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
     /**
