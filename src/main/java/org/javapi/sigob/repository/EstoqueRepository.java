@@ -12,6 +12,7 @@ public class EstoqueRepository {
 
     /**
      * Cria um novo EstoqueRepository
+     *
      * @param em O EntityManager
      * @return EstoqueRepository - Um novo EstoqueRepository
      */
@@ -21,6 +22,7 @@ public class EstoqueRepository {
 
     /**
      * Salva um estoque
+     *
      * @param estoque O estoque para ser salvo
      */
     public void save(Estoque estoque) {
@@ -41,6 +43,7 @@ public class EstoqueRepository {
 
     /**
      * Atualiza um estoque
+     *
      * @param estoque O estoque para ser atualizado
      */
     public void update(Estoque estoque) {
@@ -61,6 +64,7 @@ public class EstoqueRepository {
 
     /**
      * Confere se um estoque existe
+     *
      * @param estoque O estoque para conferir
      * @return boolean - true se o estoque existe, false se nao
      */
@@ -70,6 +74,7 @@ public class EstoqueRepository {
 
     /**
      * Deleta um estoque
+     *
      * @param estoque O estoque para ser deletado
      */
     public void delete(Estoque estoque) {
@@ -90,6 +95,7 @@ public class EstoqueRepository {
 
     /**
      * Retorna uma lista com todos os estoques
+     *
      * @return List<Estoque> - A lista de estoques
      */
     public List<Estoque> findAll() {
@@ -98,6 +104,7 @@ public class EstoqueRepository {
 
     /**
      * Busca um estoque pelo id
+     *
      * @param id O id do estoque
      * @return Estoque - O estoque encontrado
      */
@@ -107,6 +114,7 @@ public class EstoqueRepository {
 
     /**
      * Busca estoques pelo prefixo
+     *
      * @param nome O prefixo do estoque
      * @return List<Estoque> - A lista de estoques encontrados
      */

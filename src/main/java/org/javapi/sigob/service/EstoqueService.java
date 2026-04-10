@@ -11,6 +11,7 @@ public class EstoqueService {
 
     /**
      * Cria um novo EstoqueService
+     *
      * @param repository O repositorio de estoques
      * @return EstoqueService - O serviço de estoques
      */
@@ -20,6 +21,7 @@ public class EstoqueService {
 
     /**
      * Salva um estoque
+     *
      * @param estoque O estoque para ser salvo
      * @throws EstoqueException Se o estoque for invalido
      */
@@ -30,6 +32,7 @@ public class EstoqueService {
 
     /**
      * Atualiza um estoque
+     *
      * @param estoque O estoque para ser atualizado
      * @throws EstoqueException Se o estoque for invalido
      */
@@ -40,6 +43,7 @@ public class EstoqueService {
 
     /**
      * Deleta um estoque
+     *
      * @param estoque O estoque para ser deletado
      */
     public void delete(Estoque estoque) {
@@ -50,6 +54,7 @@ public class EstoqueService {
 
     /**
      * Confere se um estoque existe
+     *
      * @param estoque O estoque para conferir
      * @return boolean - true se o estoque existe, false se nao
      */
@@ -59,6 +64,7 @@ public class EstoqueService {
 
     /**
      * Retorna uma lista com todos os estoques
+     *
      * @return List<Estoque> - A lista de estoques
      */
     public List<Estoque> findAll() {
@@ -67,6 +73,7 @@ public class EstoqueService {
 
     /**
      * Busca um estoque pelo id
+     *
      * @param id O id do estoque
      * @return Estoque - O estoque encontrado
      */
@@ -76,6 +83,7 @@ public class EstoqueService {
 
     /**
      * Busca estoques pelo prefixo
+     *
      * @param prefixo O prefixo do estoque
      * @return List<Estoque> - A lista de estoques encontrados
      */
