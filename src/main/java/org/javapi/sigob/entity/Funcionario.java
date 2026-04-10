@@ -21,9 +21,9 @@ public class Funcionario {
     private Acesso acesso;
 
     //Constructor
-    public void Funcionario() {}
+    public Funcionario() {}
 
-    public void Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
+    public Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
         this.idFuncionario = idFuncionario;
         this.nmFuncionario = nmFuncionario;
         this.cdFuncionario = cdFuncionario;
