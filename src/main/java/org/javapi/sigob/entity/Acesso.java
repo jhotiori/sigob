@@ -1,67 +1,127 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "acessos")
 public class Acesso {
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idAcesso;
 
-    @Column (name = "nmAcesso")
+    @Column(name = "nmAcesso")
     private String nmAcesso;
 
-    @Column (name = "cdAcesso")
+    @Column(name = "cdAcesso")
     private String cdAcesso;
 
-    @Column (name = "dsAcesso")
+    @Column(name = "dsAcesso")
     private String dsAcesso;
 
-    //Constructor
-    public Acesso() {}
+    /**
+     * Construtor para criar um novo acesso
+     *
+     * @return Acesso - O acesso criado
+     */
+    public Acesso() {
+    }
 
-    public Acesso(int idAcesso, String nmAcesso, String cdAcesso, String dsAcesso){
+    /**
+     * Construtor para criar um novo acesso
+     *
+     * @param idAcesso O ID do acesso
+     * @param nmAcesso O nome do acesso
+     * @param cdAcesso O código do acesso
+     * @param dsAcesso A descrição do acesso
+     * @return Acesso - O acesso criado
+     */
+    public Acesso(int idAcesso, String nmAcesso, String cdAcesso, String dsAcesso) {
         this.idAcesso = idAcesso;
         this.nmAcesso = nmAcesso;
         this.cdAcesso = cdAcesso;
         this.dsAcesso = dsAcesso;
     }
 
-    //Setters
-    public void setIdAcesso(int idAcesso){
+    /**
+     * Atribui o ID do acesso
+     *
+     * @param idAcesso O ID do acesso
+     */
+    public void setIdAcesso(int idAcesso) {
         this.idAcesso = idAcesso;
     }
-    public void setNmAcesso(String nmAcesso){
+
+    /**
+     * Atribui o nome do acesso
+     *
+     * @param nmAcesso O nome do acesso
+     */
+    public void setNmAcesso(String nmAcesso) {
         this.nmAcesso = nmAcesso;
     }
-    public void setCdAcesso(String cdAcesso){
+
+    /**
+     * Atribui o código do acesso
+     *
+     * @param cdAcesso O código do acesso
+     */
+    public void setCdAcesso(String cdAcesso) {
         this.cdAcesso = cdAcesso;
     }
-    public void setDsAcesso(String dsAcesso){
+
+    /**
+     * Atribui a descrição do acesso
+     *
+     * @param dsAcesso
+     */
+    public void setDsAcesso(String dsAcesso) {
         this.dsAcesso = dsAcesso;
     }
 
-    //Getters
-    public int getIdAcesso(){
+    /**
+     * Retorna o ID do acesso
+     *
+     * @return idAcesso - O ID do acesso
+     */
+    public int getIdAcesso() {
         return this.idAcesso;
     }
-    public String getNmAcesso(){
+
+    /**
+     * Retorna o nome do acesso
+     *
+     * @return nmAcesso - O nome do acesso
+     */
+    public String getNmAcesso() {
         return this.nmAcesso;
     }
-    public String getCdAcesso(){
+
+    /**
+     * Retorna o código do acesso
+     *
+     * @return cdAcesso - O código do acesso
+     */
+    public String getCdAcesso() {
         return this.cdAcesso;
     }
-    public String getDsAcesso(){
+
+    /**
+     * Retorna a descrição do acesso
+     *
+     * @return dsAcesso - A descrição do acesso
+     */
+    public String getDsAcesso() {
         return this.dsAcesso;
     }
 
-    //ToString
     @Override
-    public String toString(){
-        String obj;
-        obj = String.format("ID: %d | CD: s% | NM: %s\nDS: %s", this.idAcesso, this.cdAcesso, this.nmAcesso, this.dsAcesso);
-        return obj;
+    public String toString() {
+        return "Acesso(Id = %d, Nome = %s, Codigo = %s, Descricao = %s)"
+                .formatted(this.getIdAcesso(), this.getNmAcesso(), this.getCdAcesso(), this.getDsAcesso());
     }
 }
-
