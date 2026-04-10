@@ -7,15 +7,7 @@ import org.javapi.sigob.exception.ClienteException;
 import org.javapi.sigob.repository.ClienteRepository;
 
 public class ClienteService {
-    private ClienteRepository repository;
-
-    /**
-     * Construtor padrão do servico
-     *
-     * @return ClienteService - O servico
-     */
-    public ClienteService() {
-    }
+    private final ClienteRepository repository;
 
     /**
      * Cria um novo ClienteService

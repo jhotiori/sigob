@@ -13,7 +13,7 @@ import org.javapi.sigob.repository.ProdutosVendasRepository;
 import org.javapi.sigob.repository.VendaRepository;
 
 public class ProdutosVendasService {
-    private ProdutosVendasRepository repository;
+    private final ProdutosVendasRepository repository;
 
     /**
      * Cria um novo ProdutosVendasService
