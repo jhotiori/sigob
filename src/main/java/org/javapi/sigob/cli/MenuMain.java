@@ -65,14 +65,14 @@ public class MenuMain extends Menu {
     private void buildMenuAdmin() {
         addEntry("Cadastros", () -> new MenuCadastros().show());
         addEntry("Estoques",  () -> new MenuEstoques().show());
-        addEntry("Vendas",    () -> new MenuVendaOps().show());
+        addEntry("Vendas",    () -> new MenuVendas().show());
     }
 
     private void buildMenuEstoque() {
-        addEntry("Estoques", () -> new MenuEstoqueOps().show());
+        addEntry("Estoques", () -> new MenuEstoques().show());
     }
 
     private void buildMenuVendas() {
-        addEntry("Vendas", () -> new MenuVendaOps().show());
+        addEntry("Vendas", () -> new MenuVendas().show());
     }
 }

@@ -8,6 +8,7 @@ import org.javapi.sigob.entity.Venda;
 import org.javapi.sigob.exception.ProdutosVendasException;
 import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.repository.ProdutosVendasRepository;
+import org.javapi.sigob.repository.VendaRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ProdutosVendasService {
             throw new ProdutosVendasException("Produto não localizado!");
         }
 
-        var vendService = new VendaService();
+        var vendService = new VendaService(new VendaRepository(em));
         if(venda == null || vendService.exists(venda)){
             throw new ProdutosVendasException("Venda não localizado!");
         }

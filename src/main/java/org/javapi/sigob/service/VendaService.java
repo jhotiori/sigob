@@ -14,10 +14,7 @@ public class VendaService {
     private EntityManager em;
     private VendaRepository repos;
 
-    public VendaService(){}
-
-    public VendaService(EntityManager em, VendaRepository repos) {
-        this.em = em;
+    public VendaService(VendaRepository repos){
         this.repos = repos;
     }
 
@@ -29,10 +26,6 @@ public class VendaService {
         var flPago = venda.isFlPago();
         var cliente = venda.getCliente();
         var funcionario = venda.getFuncionario();
-
-        if(vlVenda == null || vlVenda.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new VendaException("Valor da venda incorreto!");
-        }
 
         if(cliente == null){
             throw new VendaException("Cliente não encontrado!");
@@ -58,6 +51,10 @@ public class VendaService {
 
     public List<Venda> getByData(ZonedDateTime dtInicio, ZonedDateTime dtFim){
         return repos.findByDtVenda(dtInicio, dtFim);
+    }
+
+    public List<Venda> getAll() {
+        return repos.findAll();
     }
 
     public void Delete(Venda venda){
