@@ -21,6 +21,7 @@ public class AcessoService {
 
     /**
      * Salva um acesso
+     *
      * @param acesso O acesso a ser salvo
      * @throws AcessoException Se o acesso for invalido
      */
@@ -31,6 +32,7 @@ public class AcessoService {
 
     /**
      * Atualiza um acesso
+     *
      * @param acesso O acesso a ser atualizado
      * @throws AcessoException Se o acesso for invalido
      */
@@ -41,6 +43,7 @@ public class AcessoService {
 
     /**
      * Deleta um acesso
+     *
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
@@ -51,6 +54,7 @@ public class AcessoService {
 
     /**
      * Confere se um acesso existe
+     *
      * @param acesso O acesso para conferir
      * @return boolean - true se o Acesso existe, false se nao existir
      */
@@ -60,6 +64,7 @@ public class AcessoService {
 
     /**
      * Retorna uma lista com todos os Acessos
+     *
      * @return List<Acesso> - A lista de Acessos
      */
     public List<Acesso> findAll() {
@@ -68,6 +73,7 @@ public class AcessoService {
 
     /**
      * Busca um Acesso pelo seu ID
+     *
      * @param id O ID do Acesso
      * @return Acesso - O Acesso buscado
      */
@@ -78,6 +84,7 @@ public class AcessoService {
 
     /**
      * Retorna uma lista de acessos que possuem o nome informado
+     *
      * @param nome O nome para procurar
      * @return List<Acesso> - A lista de Acessos
      */
@@ -88,6 +95,7 @@ public class AcessoService {
 
     /**
      * Busca um Acesso pelo seu codigo
+     *
      * @param codigo O codigo do Acesso
      * @return Acesso - O Acesso buscado
      */
