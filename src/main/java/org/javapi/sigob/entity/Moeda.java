@@ -1,67 +1,127 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "moedas")
 public class Moeda {
-
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idMoeda;
 
-    @Column (name = "nmMoeda")
+    @Column(name = "nmMoeda")
     private String nmMoeda;
 
-    @Column (name = "dsCifrao")
+    @Column(name = "dsCifrao")
     private String dsCifrao;
 
-    @Column (name = "dsSigla")
+    @Column(name = "dsSigla")
     private String dsSigla;
 
-    //Constructor
-    public Moeda(){}
+    /**
+     * Construtor para criar uma nova Mo
+     *
+     * @return Moeda - A moeda que foi criada
+     */
+    public Moeda() {
+    }
 
-    public Moeda(int id, String nm, String dsCifrao, String dsSigla){
+    /**
+     * Construtor para criar uma nova Moeda
+     *
+     * @param id       ID da moeda
+     * @param nm       Nome da moeda
+     * @param dsCifrao Cifrao da moeda
+     * @param dsSigla  Sigla da moeda
+     * @return Moeda - A moeda que foi criada
+     */
+    public Moeda(int id, String nm, String dsCifrao, String dsSigla) {
         this.idMoeda = id;
         this.nmMoeda = nm;
         this.dsCifrao = dsCifrao;
         this.dsSigla = dsSigla;
     }
 
-    //Setter
-    public void setIdMoeda(int id){
+    /**
+     * Atribui o ID da Moeda
+     *
+     * @param id O ID da Moeda
+     */
+    public void setIdMoeda(int id) {
         this.idMoeda = id;
     }
-    public void setNmMoeda(String nm){
+
+    /**
+     * Atribui o Nome da Moeda
+     *
+     * @param nm O Nome da Moeda
+     */
+    public void setNmMoeda(String nm) {
         this.nmMoeda = nm;
     }
-    public void setDsCifrao(String ds){
+
+    /**
+     * Atribui o Cifrao da Moeda
+     *
+     * @param ds O Cifrao da Moeda
+     */
+    public void setDsCifrao(String ds) {
         this.dsCifrao = ds;
     }
-    public void setDsSigla(String ds){
+
+    /**
+     * Atribui a Sigla da Moeda
+     *
+     * @param ds A Sigla da Moeda
+     */
+    public void setDsSigla(String ds) {
         this.dsSigla = ds;
     }
 
-    //Getters
-    public int getIdMoeda(){
+    /**
+     * Retorna o ID da Moeda
+     *
+     * @return idMoeda - O ID da Moeda
+     */
+    public int getIdMoeda() {
         return this.idMoeda;
     }
-    public String getNmMoeda(){
+
+    /**
+     * Retorna o Nome da Moeda
+     *
+     * @return nmMoeda - O Nome da Moeda
+     */
+    public String getNmMoeda() {
         return this.nmMoeda;
     }
+
+    /**
+     * Retorna o Cifrao da Moeda
+     *
+     * @return dsCifrao - O Cifrao da Moeda
+     */
     public String getDsCifrao() {
-        return dsCifrao;
-    }
-    public String getDsSigla() {
-        return dsSigla;
+        return this.dsCifrao;
     }
 
-    //toString
+    /**
+     * Retorna a Sigla da Moeda
+     *
+     * @return dsSigla - A Sigla da Moeda
+     */
+    public String getDsSigla() {
+        return this.dsSigla;
+    }
+
     @Override
-    public String toString(){
-        String obj;
-        obj = String.format("ID: %d | NM: %s\nSIGLA: %s | CIFRAO: %s",idMoeda, nmMoeda, dsSigla, dsCifrao);
-        return obj;
+    public String toString() {
+        return "Moeda(Id = %d, Nome = %s, Cifrao = %s, Sigla = %s)"
+                .formatted(this.getIdMoeda(), this.getNmMoeda(), this.getDsCifrao(), this.getDsSigla());
     }
 }
