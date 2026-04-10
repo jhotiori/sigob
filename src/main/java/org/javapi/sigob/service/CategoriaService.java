@@ -54,7 +54,9 @@ public class CategoriaService {
      * @param categoria A Categoria para ser removida
      */
     public void delete(Categoria categoria) {
-        this.repository.delete(categoria);
+        if (this.repository.contains(categoria)) {
+            this.repository.delete(categoria);
+        }
     }
 
     /**
