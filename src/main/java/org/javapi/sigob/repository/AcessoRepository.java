@@ -7,7 +7,7 @@ import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.Acesso;
 
 public class AcessoRepository {
-    private EntityManager em;
+    private final EntityManager em;
 
     /**
      * Cria um novo AcessoRepository
