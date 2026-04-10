@@ -2,67 +2,54 @@ package org.javapi.sigob.repository;
 
 import jakarta.persistence.*;
 import org.javapi.sigob.entity.Acesso;
-
 import java.util.List;
 
 public class AcessoRepository {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idFuncionario;
+    private EntityManager em;
 
-    @Column(name = "nmFuncionario")
-    private String nmFuncionario;
-
-    @Column (name = "cdFuncionario")
-    private String cdFuncionario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "fk_idAcesso")
-    private Acesso acesso;
-
-    //Constructor
-    public void Funcionario() {}
-
-    public void Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
-        this.idFuncionario = idFuncionario;
-        this.nmFuncionario = nmFuncionario;
-        this.cdFuncionario = cdFuncionario;
-        this.acesso = new Acesso();
+    public AcessoRepository(EntityManager em){
+        this.em = em;
     }
 
-    //Setters
-    public void setIdFuncionario(int idFuncionario) {
-        this.idFuncionario = idFuncionario;
-    }
-    public void setNmFuncionario(String nmFuncionario) {
-        this.nmFuncionario = nmFuncionario;
-    }
-    public void setCdFuncionario(String cdFuncionario) {
-        this.cdFuncionario = cdFuncionario;
-    }
-    public void setAcesso(Acesso acesso) {
-        this.acesso = acesso;
+    public Acesso findById(int id){
+        return em.find(Acesso.class,id);
     }
 
-    //Getters
-    public int getIdFuncionario() {
-        return idFuncionario;
-    }
-    public String getNmFuncionario() {
-        return nmFuncionario;
-    }
-    public String getCdFuncionario() {
-        return cdFuncionario;
-    }
-    public Acesso getAcesso() {
-        return acesso;
+    public void create(Acesso acesso){
+        em.getTransaction().begin();
+        em.persist(acesso);
+        em.getTransaction().commit();
     }
 
-    //ToString
-    @Override
-    public String toString(){
-        String obj;
-        obj = String.format("ID: %d | CD: %s | NM: %s",this.idFuncionario, this.cdFuncionario, this.nmFuncionario);
-        return obj;
+    public void update(Acesso acesso){
+        em.getTransaction().begin();
+        em.merge(acesso);
+        em.getTransaction().commit();
+    }
+
+    public void delete(Acesso acesso){
+        em.getTransaction().begin();
+        em.remove(em.contains(acesso) ? acesso : em.merge(acesso));
+        em.getTransaction().commit();
+    }
+
+    public List<Acesso> findAll(){
+        return em.createQuery("select a from acessos a").getResultList();
+    }
+
+    public List<Acesso> findByName(String name){
+        return em.createQuery("select a from acessos a where nmAcesso like :str", Acesso.class)
+                .setParameter("str", name + "%")
+                .getResultList();
+    }
+
+    public boolean exists(Acesso acesso){
+        return em.contains(acesso);
+    }
+
+    public Acesso findByCodigo(String codigo){
+        return em.createQuery("select a from acessos a where cdAcesso like :str", Acesso.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
     }
 }

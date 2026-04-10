@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import jakarta.persistence.EntityManager;
+import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.entity.Moeda;
 
 import java.util.List;
@@ -38,9 +39,19 @@ public class MoedaRepository {
         return em.createQuery("select m from moedas m", Moeda.class).getResultList();
     }
 
-    public List<Moeda> findByName(String name){
+    public List<Moeda> findByNome(String name){
         return em.createQuery("select m from moedas m where nmMoeda like :str", Moeda.class)
                 .setParameter("str", name + "%")
                 .getResultList();
+    }
+
+    public Moeda findByCodigo(String codigo){
+        return em.createQuery("select m from moedas m where cdMoeda like :str", Moeda.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
+    }
+
+    public Boolean exists(Moeda moeda){
+        return em.contains(moeda);
     }
 }

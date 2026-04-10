@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import jakarta.persistence.EntityManager;
+import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Funcionario;
 
 import java.util.List;
@@ -42,5 +43,15 @@ public class FuncionarioRepository {
         return em.createQuery("select f from funcionarios f where nmFuncionario like :str", Funcionario.class)
                 .setParameter("str", name+"%")
                 .getResultList();
+    }
+
+    public Funcionario findByCodigo(String codigo){
+        return em.createQuery("select f from funcionarios f where cdFuncionario like :str", Funcionario.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
+    }
+
+    public Boolean exists(Funcionario funcionario){
+        return em.contains(funcionario);
     }
 }

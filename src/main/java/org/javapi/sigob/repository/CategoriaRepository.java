@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import jakarta.persistence.EntityManager;
+import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Categoria;
 
 import java.util.List;
@@ -43,4 +44,13 @@ public class CategoriaRepository {
                 .getResultList();
     }
 
+    public Categoria findByCodigo(String codigo){
+        return em.createQuery("select c from categorias c where cdCategoria like :str", Categoria.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
+    }
+
+    public Boolean exists(Categoria categoria){
+        return em.contains(categoria);
+    }
 }
