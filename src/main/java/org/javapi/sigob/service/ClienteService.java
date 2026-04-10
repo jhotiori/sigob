@@ -35,7 +35,9 @@ public class ClienteService {
      * @return Cliente - O Cliente salvo
      */
     public Cliente save(Cliente cliente) {
-        validateCliente(cliente);
+        validateNome(cliente.getNmCliente());
+        validateDocumento(cliente.getNrDocumento());
+
         int id = cliente.getIdCliente();
         String nome = cliente.getNmCliente();
         String documento = cliente.getNrDocumento();
@@ -62,7 +64,6 @@ public class ClienteService {
      * @return boolean - true se o Cliente existe, false se nao
      */
     public boolean contains(Cliente cliente) {
-        validateCliente(cliente);
         return this.repository.contains(cliente);
     }
 
@@ -73,7 +74,6 @@ public class ClienteService {
      * @throws ClienteException Se o cliente for invalido
      */
     public void delete(Cliente cliente) {
-        validateCliente(cliente);
         if (this.repository.contains(cliente)) {
             this.repository.remove(cliente);
         }

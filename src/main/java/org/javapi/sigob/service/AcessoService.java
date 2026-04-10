@@ -26,7 +26,8 @@ public class AcessoService {
      * @throws AcessoException Se o acesso for invalido
      */
     public void save(Acesso acesso) {
-        validateAcesso(acesso);
+        validateNome(acesso.getNmAcesso());
+        validateCodigo(acesso.getCdAcesso());
         this.repository.save(acesso);
     }
 

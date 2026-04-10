@@ -25,7 +25,8 @@ public class CategoriaService {
      * @param categoria A Categoria para ser salva
      */
     public void save(Categoria categoria) {
-        validateCategoria(categoria);
+        validateNome(categoria.getNmCategoria());
+        validateCodigo(categoria.getCdCategoria());
 
         if (categoria.getIdCategoria() > 0) {
             this.repository.update(categoria);
@@ -42,9 +43,6 @@ public class CategoriaService {
      */
     public void update(Categoria categoria) {
         validateCategoria(categoria);
-        if (categoria.getIdCategoria() <= 0) {
-            throw new CategoriaException("ID da categoria deve ser maior que zero para atualizar");
-        }
         this.repository.update(categoria);
     }
 
@@ -86,9 +84,7 @@ public class CategoriaService {
      * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
     public Categoria findById(int id) {
-        if (id <= 0) {
-            throw new CategoriaException("ID da categoria não pode ser menor ou igual a zero");
-        }
+        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -118,8 +114,15 @@ public class CategoriaService {
         if (categoria == null) {
             throw new CategoriaException("Categoria não pode ser nula");
         }
+        validateId(categoria.getIdCategoria());
         validateNome(categoria.getNmCategoria());
         validateCodigo(categoria.getCdCategoria());
+    }
+
+    private void validateId(int id) {
+        if (id <= 0) {
+            throw new CategoriaException("ID da categoria deve ser maior que zero");
+        }
     }
 
     private void validateNome(String nome) {
