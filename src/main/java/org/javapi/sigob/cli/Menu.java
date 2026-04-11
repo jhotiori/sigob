@@ -1,88 +1,58 @@
 package org.javapi.sigob.cli;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+
+import org.javapi.sigob.util.Inputter;
 
 public abstract class Menu {
     static class Entry {
-        String name;
-        Runnable action;
+        final String nome;
+        final Runnable callback;
 
-        Entry(String name, Runnable action) {
-            this.name   = name;
-            this.action = action;
+        Entry(String nome, Runnable callback) {
+            this.nome = nome;
+            this.callback = callback;
         }
     }
 
-    private final List<Entry> entries = new ArrayList<>();
-    private final Scanner     scanner = new Scanner(System.in);
-    protected     String      title   = "Menu";
+    protected final String titulo;
+    private final List<Entry> entradas;
 
-    protected void addEntry(String name, Runnable action) {
-        entries.add(new Entry(name, action));
+    public Menu(String titulo) {
+        this.titulo = titulo;
+        this.entradas = new ArrayList<>();
     }
 
-    public void show() {
+    protected void adicionarEntrada(String nome, Runnable callback) {
+        this.entradas.add(new Entry(nome, callback));
+    }
+
+    public void exibir() {
         while (true) {
-            System.out.println("\n╔══════════════════════════╗");
-            System.out.printf( "║  %-24s  ║%n", title);
-            System.out.println("╚══════════════════════════╝");
+            String divisores = "─".repeat(25);
+            String banner = "%s %s %s".formatted(divisores, this.titulo, divisores);
+            String footer = "─".repeat(banner.length());
 
-            for (int i = 0; i < entries.size(); i++) {
-                System.out.printf("[%d] %s%n", i + 1, entries.get(i).name);
+            System.out.println(banner);
+            for (int index = 0; index < this.entradas.size(); index++) {
+                System.out.println("[%d] - %s".formatted(index + 1, this.entradas.get(index).nome));
             }
-            System.out.println("[0] Voltar / Sair");
-            System.out.print("\nEscolha: ");
+            System.out.println(footer);
 
-            try {
-                int choice = Integer.parseInt(scanner.nextLine().trim());
-                if (choice == 0) break;
-                run(choice - 1);
-            } catch (NumberFormatException e) {
-                System.out.println("⚠  Entrada inválida. Digite um número.");
-            } catch (Exception e) {
-                System.out.println("✗  Erro: " + e.getMessage());
+            int opcao = Inputter.lerInt("Insira uma opção: ");
+
+            if (opcao == 0) {
+                break;
             }
+
+            this.rodar(opcao);
         }
     }
 
-    protected void run(int index) {
-        if (index >= 0 && index < entries.size()) {
-            entries.get(index).action.run();
-        } else {
-            System.out.println("⚠  Opção inválida.");
+    protected void rodar(int index) {
+        if (index > 0 && index <= this.entradas.size()) {
+            this.entradas.get(index - 1).callback.run();
         }
-    }
-
-    protected String lerString(String prompt) {
-        System.out.print(prompt);
-        String val = scanner.nextLine().trim();
-        if (val.isBlank()) throw new IllegalArgumentException("Valor não pode ser vazio.");
-        return val;
-    }
-
-    protected int lerInt(String prompt) {
-        System.out.print(prompt);
-        try {
-            return Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Valor inválido. Digite um número inteiro.");
-        }
-    }
-
-    protected BigDecimal lerDecimal(String prompt) {
-        System.out.print(prompt);
-        try {
-            return new BigDecimal(scanner.nextLine().trim().replace(",", "."));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Valor inválido. Ex: 10.50");
-        }
-    }
-
-    protected boolean lerBoolean(String prompt) {
-        System.out.print(prompt + " (s/n): ");
-        return scanner.nextLine().trim().equalsIgnoreCase("s");
     }
 }
