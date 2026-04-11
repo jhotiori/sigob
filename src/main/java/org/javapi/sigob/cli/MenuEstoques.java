@@ -127,10 +127,11 @@ public class MenuEstoques extends Menu {
             }
 
             System.out.println("\n── Estoques destino ──");
+            ProdutosEstoques finalOrigem = origem;
             new EstoqueService(new EstoqueRepository(em))
                     .findAll()
                     .stream()
-                    .filter(e -> e.getIdEstoque() != origem.getEstoque().getIdEstoque()) // exclui origem
+                    .filter(e -> e.getIdEstoque() != finalOrigem.getEstoque().getIdEstoque()) // exclui origem
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
             int idEstoqueDestino = Inputter.lerInt("\nID do estoque destino: ");
