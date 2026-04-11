@@ -116,7 +116,7 @@ public class CategoriaRepository {
      * @return Categoria - A categoria buscada
      */
     public Categoria findByCodigo(String codigo){
-        return em.createQuery("select c from categorias c where cdCategoria like :str", Categoria.class)
+        return em.createQuery("select c from categorias c where c.cdCategoria like :str", Categoria.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
     }

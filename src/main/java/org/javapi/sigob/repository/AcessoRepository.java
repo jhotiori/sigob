@@ -104,7 +104,7 @@ public class AcessoRepository {
      * @return List<Acesso> - Todos os acessos
      */
     public List<Acesso> findAll() {
-        return em.createQuery("select a from acessos a").getResultList();
+        return em.createQuery("select a from acessos a", Acesso.class).getResultList();
     }
 
     /**
@@ -124,7 +124,7 @@ public class AcessoRepository {
      * @return List<Acesso> - Os acessos encontrados
      */
     public List<Acesso> findByNome(String nome) {
-        return em.createQuery("select a from acessos a where nmAcesso like :str", Acesso.class)
+        return em.createQuery("select a from acessos a where a.nmAcesso like :str", Acesso.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
@@ -136,7 +136,7 @@ public class AcessoRepository {
      * @return List<Acesso> - Os acessos encontrados
      */
     public Acesso findByCodigo(String codigo) {
-        return em.createQuery("select a from acessos a where cdAcesso like :str", Acesso.class)
+        return em.createQuery("select a from acessos a where a.cdAcesso like :str", Acesso.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
     }

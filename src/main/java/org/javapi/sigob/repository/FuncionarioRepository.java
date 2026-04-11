@@ -119,7 +119,7 @@ public class FuncionarioRepository {
      * @return List<Funcionario> - A lista de funcionarios
      */
     public List<Funcionario> findByNome(String nome) {
-        return em.createQuery("select f from funcionarios f where nmFuncionario like :str", Funcionario.class)
+        return em.createQuery("select f from funcionarios f where f.nmFuncionario like :str", Funcionario.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
@@ -131,7 +131,7 @@ public class FuncionarioRepository {
      * @return Funcionario - O funcionario
      */
     public Funcionario findByCodigo(String codigo) {
-        return em.createQuery("select f from funcionarios f where cdFuncionario like :str", Funcionario.class)
+        return em.createQuery("select f from funcionarios f where f.cdFuncionario like :str", Funcionario.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
     }
