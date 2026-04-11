@@ -108,7 +108,7 @@ public class ClienteService {
      * @param documento O Documento do Cliente
      * @return Cliente - O Cliente buscado
      */
-    public Cliente findByDocumento(String documento) {
+    public List<Cliente> findByDocumento(String documento) {
         validateDocumento(documento);
         return this.repository.findByDocumento(documento);
     }

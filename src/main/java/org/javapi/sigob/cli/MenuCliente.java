@@ -8,6 +8,8 @@ import org.javapi.sigob.service.ClienteService;
 import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
 
+import java.util.List;
+
 public class MenuCliente extends Menu {
 
     public MenuCliente() {
@@ -79,7 +81,7 @@ public class MenuCliente extends Menu {
         EntityManager em = JPAConfig.getEntityManager();
         try {
             String doc = Inputter.lerString("Documento: ");
-            Cliente c = getService(em).findByDocumento(doc);
+            List<Cliente> c = getService(em).findByDocumento(doc);
             System.out.println(c != null ? c : "✗ Não encontrado.");
         } finally {
             em.close();
