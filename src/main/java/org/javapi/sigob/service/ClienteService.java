@@ -1,85 +1,142 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.exception.ClienteException;
 import org.javapi.sigob.repository.ClienteRepository;
 
-import java.util.List;
-
 public class ClienteService {
-    private ClienteRepository repos;
+    private final ClienteRepository repository;
 
-    public ClienteService() {
+    /**
+     * Cria um novo ClienteService
+     *
+     * @param repository O repositorio
+     * @return ClienteService - O servico
+     */
+    public ClienteService(ClienteRepository repository) {
+        this.repository = repository;
     }
 
-    public ClienteService(ClienteRepository repos) {
-        this.repos = repos;
-    }
+    /**
+     * Salva ou atualiza um Cliente
+     *
+     * @param cliente O Cliente
+     * @throws ClienteException Se um cliente com o mesmo documento ja existir
+     * @return Cliente - O Cliente salvo
+     */
+    public Cliente save(Cliente cliente) {
+        validateNome(cliente.getNmCliente());
+        validateDocumento(cliente.getNrDocumento());
 
-    public Cliente save(Cliente cliente){
+        int id = cliente.getIdCliente();
+        String nome = cliente.getNmCliente();
+        String documento = cliente.getNrDocumento();
 
-        //Recuperar os dados
-        var idCliente = cliente.getIdCliente();
-        var nmCliente = cliente.getNmCliente();
-        var nrDocumento = cliente.getNrDocumento();
-
-        //Validar os dados
-        if(nmCliente.isBlank()){
-            throw new ClienteException("O nome do cliente é obrigatório!");
-        }
-
-        if(nrDocumento.isBlank()){
-            throw new ClienteException("O documento do cliente é obrigatório!");
-        } else if(getByDoc(nrDocumento) != null){
+        if (findByDocumento(documento) != null) {
             throw new ClienteException("Cliente com o mesmo documento já cadastrado!");
         }
 
-        //Cria o objeto final
-        var resultCliente = new Cliente(idCliente, nmCliente, nrDocumento);
-
-        //Valida se é CREATE ou UPDATE
-        if(idCliente > 0){
-            repos.update(resultCliente);
+        var novoCliente = new Cliente(id, nome, documento);
+        if (id > 0) {
+            this.repository.update(novoCliente);
         } else {
-            repos.create(resultCliente);
+            this.repository.save(novoCliente);
         }
 
-        return resultCliente;
+        return novoCliente;
     }
 
-    public Cliente getByDoc(String doc){
-        if(doc.isBlank()){
-            return null;
+    /**
+     * Confere se um cliente existe
+     *
+     * @param cliente O Cliente
+     * @throws ClienteException Se o cliente for invalido
+     * @return boolean - true se o Cliente existe, false se nao
+     */
+    public boolean contains(Cliente cliente) {
+        return this.repository.contains(cliente);
+    }
+
+    /**
+     * Remove um Cliente
+     *
+     * @param cliente O Cliente para ser removido
+     * @throws ClienteException Se o cliente for invalido
+     */
+    public void delete(Cliente cliente) {
+        if (this.repository.contains(cliente)) {
+            this.repository.remove(cliente);
         }
-        return repos.findByDoc(doc);
     }
 
-    public Cliente getById(int id){
-        if(id > 0){
-            return repos.findById(id);
+    /**
+     * Retorna uma lista com todos os Clientes
+     *
+     * @return List<Cliente> - A lista de clientes
+     */
+    public List<Cliente> findAll() {
+        return this.repository.findAll();
+    }
+
+    /**
+     * Retorna um Cliente pelo seu ID
+     *
+     * @param id O ID do Cliente
+     * @return Cliente - O Cliente buscado
+     */
+    public Cliente findById(int id) {
+        validateId(id);
+        return this.repository.findById(id);
+    }
+
+    /**
+     * Retorna uma lista com todos os Clientes com o nome informado
+     *
+     * @param nome O Nome do Cliente
+     * @return List<Cliente> - A lista de clientes
+     */
+    public List<Cliente> findByNome(String nome) {
+        validateNome(nome);
+        return this.repository.findByNome(nome);
+    }
+
+    /**
+     * Retorna um Cliente pelo seu documento
+     *
+     * @param documento O Documento do Cliente
+     * @return Cliente - O Cliente buscado
+     */
+    public Cliente findByDocumento(String documento) {
+        validateDocumento(documento);
+        return this.repository.findByDocumento(documento);
+    }
+
+    private void validateCliente(Cliente cliente) {
+        if (cliente == null) {
+            throw new ClienteException("Cliente não pode ser nulo");
         }
-        throw new ClienteException("Id não informado para busca!");
+        validateId(cliente.getIdCliente());
+        validateNome(cliente.getNmCliente());
+        validateDocumento(cliente.getNrDocumento());
     }
 
-    public List<Cliente> getAll(){
-        return repos.findAll();
-    }
-
-    public List<Cliente> getByNome(String nome){
-        if(nome.isBlank()){
-            throw new ClienteException("Nome não informado para busca!");
+    private void validateId(int id) {
+        if (id <= 0) {
+            throw new ClienteException("Id do cliente deve ser maior que zero");
         }
-        return repos.findByName(nome);
     }
 
-    public boolean exists (Cliente cliente){
-        return repos.exists(cliente);
+    private void validateNome(String nome) {
+        if (nome == null || nome.isBlank()) {
+            throw new ClienteException("Nome do cliente não pode ser nulo ou vazio");
+        }
     }
 
-    //basicamente valida se o cliente existe e depois deleta se houver registro igual
-    public void delete(Cliente cliente){
-        if(exists(cliente)) {
-            repos.remove(cliente);
+    private void validateDocumento(String documento) {
+        if (documento == null || documento.isBlank()) {
+            throw new ClienteException("Documento do cliente não pode ser nulo ou vazio");
         }
     }
 }

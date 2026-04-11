@@ -1,57 +1,138 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Categoria;
-import org.javapi.sigob.entity.Funcionario;
-
 import java.util.List;
 
-public class FuncionarioRepository {
-    private EntityManager em;
+import org.javapi.sigob.entity.Funcionario;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
+public class FuncionarioRepository {
+    private final EntityManager em;
+
+    /**
+     * Cria um novo FuncionarioRepository
+     *
+     * @param em O EntityManager
+     * @return FuncionarioRepository - O repositorio
+     */
     public FuncionarioRepository(EntityManager em) {
         this.em = em;
     }
 
-    public Funcionario findById(int id){
-        return em.find(Funcionario.class, id);
+    /**
+     * Salva um novo Funcionario
+     *
+     * @param funcionario O Funcionario para salvar
+     */
+    public void save(Funcionario funcionario) {
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.persist(funcionario);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
-    public void create(Funcionario funcionario){
-        em.getTransaction().begin();
-        em.persist(funcionario);
-        em.getTransaction().commit();
+    /**
+     * Atualiza um Funcionario
+     *
+     * @param funcionario O funcionario para atualizar
+     */
+    public void update(Funcionario funcionario) {
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.merge(funcionario);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
-    public void update(Funcionario funcionario){
-        em.getTransaction().begin();
-        em.merge(funcionario);
-        em.getTransaction().commit();
+    /**
+     * Deleta um funcionario
+     *
+     * @param funcionario O funcionario para deletar
+     */
+    public void delete(Funcionario funcionario) {
+        EntityManager manager = this.em;
+        EntityTransaction transaction = manager.getTransaction();
+
+        try {
+            transaction.begin();
+            manager.remove(manager.contains(funcionario) ? funcionario : manager.merge(funcionario));
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
-    public void delete(Funcionario funcionario){
-        em.getTransaction().begin();
-        em.remove(em.contains(funcionario) ? funcionario : em.merge(funcionario));
-        em.getTransaction().commit();
+    /**
+     * Confer se um funcionario existe
+     *
+     * @param funcionario O funcionario para conferir
+     * @return boolean - true se o funcionario existe, false se nao
+     */
+    public boolean contains(Funcionario funcionario) {
+        return em.contains(funcionario);
     }
 
-    public List<Funcionario> findAll(){
+    /**
+     * Retorna uma lista com todos os funcionarios
+     *
+     * @return List<Funcionario> - A lista de funcionarios
+     */
+    public List<Funcionario> findAll() {
         return em.createQuery("select f from funcionarios f", Funcionario.class).getResultList();
     }
 
-    public List<Funcionario> findByName(String name){
+    /**
+     * Busca um funcionario pelo id
+     *
+     * @param id O ID do funcionario
+     * @return Funcionario - O funcionario
+     */
+    public Funcionario findById(int id) {
+        return em.find(Funcionario.class, id);
+    }
+
+    /**
+     * Busca um por funcionarios que contem o nome
+     *
+     * @param nome O nome para procurar
+     * @return List<Funcionario> - A lista de funcionarios
+     */
+    public List<Funcionario> findByNome(String nome) {
         return em.createQuery("select f from funcionarios f where nmFuncionario like :str", Funcionario.class)
-                .setParameter("str", name+"%")
+                .setParameter("str", nome + "%")
                 .getResultList();
     }
 
-    public Funcionario findByCodigo(String codigo){
+    /**
+     * Busca um por funcionarios que contem o codigo
+     *
+     * @param codigo O codigo para procurar
+     * @return Funcionario - O funcionario
+     */
+    public Funcionario findByCodigo(String codigo) {
         return em.createQuery("select f from funcionarios f where cdFuncionario like :str", Funcionario.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
-    }
-
-    public Boolean exists(Funcionario funcionario){
-        return em.contains(funcionario);
     }
 }
