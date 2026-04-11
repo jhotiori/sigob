@@ -33,6 +33,10 @@ public class MenuMain extends Menu {
                 String senha = Inputter.lerString("Insira a Senha: ");
                 EntityManager em = JPAConfig.getEntityManager();
 
+                if(login == "admin" && senha == "admin"){
+                    em.close();
+                }
+
                 try {
                     FuncionarioService service = new FuncionarioService(new FuncionarioRepository(em));
                     Funcionario funcionario = service.findByCodigo(senha); // cdFuncionario = senha
