@@ -1,6 +1,11 @@
 package org.javapi.sigob.cli;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
+
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
@@ -18,18 +23,14 @@ import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.ProdutosVendasService;
 import org.javapi.sigob.service.VendaService;
 
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-import java.util.List;
-
 public class MenuVendas extends Menu {
 
     public MenuVendas() {
-        this.title = "Operações de Venda";
-        addEntry("Listar vendas",   this::listarVendas);
-        addEntry("Iniciar nova venda", this::iniciarVenda);
-        addEntry("Editar carrinho", this::editarCarrinho);
-        addEntry("Finalizar venda", this::fecharVenda);
+        super("Operações de Venda");
+        adicionarEntrada("Listar vendas", this::listarVendas);
+        adicionarEntrada("Iniciar nova venda", this::iniciarVenda);
+        adicionarEntrada("Editar carrinho", this::editarCarrinho);
+        adicionarEntrada("Finalizar venda", this::fecharVenda);
     }
 
     private VendaService getVendaService(EntityManager em) {
@@ -62,8 +63,7 @@ public class MenuVendas extends Menu {
                     v.getVlVenda() != null ? v.getVlVenda() : BigDecimal.ZERO,
                     v.isFlPago() ? "Sim" : "Não",
                     v.getCliente().getNmCliente(),
-                    v.getFuncionario().getNmFuncionario()
-            ));
+                    v.getFuncionario().getNmFuncionario()));
         } finally {
             em.close();
         }
@@ -72,19 +72,23 @@ public class MenuVendas extends Menu {
     private void iniciarVenda() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            ClienteService clienteService       = new ClienteService(new ClienteRepository(em));
-            FuncionarioService funcService      = new FuncionarioService(new FuncionarioRepository(em));
+            ClienteService clienteService = new ClienteService(new ClienteRepository(em));
+            FuncionarioService funcService = new FuncionarioService(new FuncionarioRepository(em));
 
             Cliente cliente = resolverCliente(clienteService);
-            if (cliente == null) return;
+            if (cliente == null)
+                return;
 
             System.out.println("\n── Funcionários disponíveis ──");
-            funcService.getAll().forEach(f ->
-                    System.out.printf("[%d] %s%n", f.getIdFuncionario(), f.getNmFuncionario()));
+            funcService.getAll()
+                    .forEach(f -> System.out.printf("[%d] %s%n", f.getIdFuncionario(), f.getNmFuncionario()));
 
             int idFuncionario = lerInt("\nID do funcionário: ");
             Funcionario funcionario = funcService.getById(idFuncionario);
-            if (funcionario == null) { System.out.println("✗ Funcionário não encontrado."); return; }
+            if (funcionario == null) {
+                System.out.println("✗ Funcionário não encontrado.");
+                return;
+            }
 
             Venda venda = new Venda();
             venda.setCliente(cliente);
@@ -106,19 +110,24 @@ public class MenuVendas extends Menu {
                     .filter(v -> !v.isFlPago())
                     .toList();
 
-            if (abertas.isEmpty()) { System.out.println("⚠  Nenhuma venda em aberto."); return; }
+            if (abertas.isEmpty()) {
+                System.out.println("⚠  Nenhuma venda em aberto.");
+                return;
+            }
 
             System.out.println("\n── Vendas em aberto ──");
             abertas.forEach(v -> System.out.printf(
                     "[%d] Cliente: %s | Funcionário: %s%n",
                     v.getIdVenda(),
                     v.getCliente().getNmCliente(),
-                    v.getFuncionario().getNmFuncionario()
-            ));
+                    v.getFuncionario().getNmFuncionario()));
 
             int idVenda = lerInt("\nID da venda: ");
             Venda venda = getVendaService(em).getById(idVenda);
-            if (venda == null || venda.isFlPago()) { System.out.println("✗ Venda inválida."); return; }
+            if (venda == null || venda.isFlPago()) {
+                System.out.println("✗ Venda inválida.");
+                return;
+            }
 
             boolean continuar = true;
             while (continuar) {
@@ -132,8 +141,7 @@ public class MenuVendas extends Menu {
                             pv.getIdProdutoVenda(),
                             pv.getProduto().getNmProduto(),
                             pv.getNrQuantidade(),
-                            pv.getVlSaldo()
-                    ));
+                            pv.getVlSaldo()));
                 }
 
                 System.out.println("\n[1] Adicionar item");
@@ -164,7 +172,10 @@ public class MenuVendas extends Menu {
                 .filter(pe -> pe.getNrQuantidade() > 0)
                 .toList();
 
-        if (estoque.isEmpty()) { System.out.println("⚠  Nenhum produto em estoque."); return; }
+        if (estoque.isEmpty()) {
+            System.out.println("⚠  Nenhum produto em estoque.");
+            return;
+        }
 
         System.out.println("\n── Produtos em estoque ──");
         estoque.forEach(pe -> System.out.printf(
@@ -173,12 +184,14 @@ public class MenuVendas extends Menu {
                 pe.getProduto().getNmProduto(),
                 pe.getEstoque().getNmEstoque(),
                 pe.getNrQuantidade(),
-                pe.getProduto().getVlProduto()
-        ));
+                pe.getProduto().getVlProduto()));
 
-        int idPe   = lerInt("\nID do item (ProdutoEstoque): ");
+        int idPe = lerInt("\nID do item (ProdutoEstoque): ");
         ProdutosEstoques pe = getPeService(em).findById(idPe);
-        if (pe == null) { System.out.println("✗ Item não encontrado."); return; }
+        if (pe == null) {
+            System.out.println("✗ Item não encontrado.");
+            return;
+        }
 
         int qtde = lerInt("Quantidade: ");
         if (qtde <= 0 || qtde > pe.getNrQuantidade()) {
@@ -197,7 +210,10 @@ public class MenuVendas extends Menu {
 
     private void removerItemCarrinho(EntityManager em, Venda venda) {
         List<ProdutosVendas> itens = getPvService(em).findByVenda(venda);
-        if (itens.isEmpty()) { System.out.println("⚠  Carrinho vazio."); return; }
+        if (itens.isEmpty()) {
+            System.out.println("⚠  Carrinho vazio.");
+            return;
+        }
 
         System.out.println("\n── Itens do carrinho ──");
         itens.forEach(pv -> System.out.printf(
@@ -205,8 +221,7 @@ public class MenuVendas extends Menu {
                 pv.getIdProdutoVenda(),
                 pv.getProduto().getNmProduto(),
                 pv.getNrQuantidade(),
-                pv.getVlSaldo()
-        ));
+                pv.getVlSaldo()));
 
         int idPv = lerInt("\nID do item a remover: ");
         ProdutosVendas pv = getPvService(em).findById(idPv);
@@ -228,22 +243,30 @@ public class MenuVendas extends Menu {
                     .filter(v -> !v.isFlPago())
                     .toList();
 
-            if (abertas.isEmpty()) { System.out.println("⚠  Nenhuma venda em aberto."); return; }
+            if (abertas.isEmpty()) {
+                System.out.println("⚠  Nenhuma venda em aberto.");
+                return;
+            }
 
             System.out.println("\n── Vendas em aberto ──");
             abertas.forEach(v -> System.out.printf(
                     "[%d] Cliente: %s | Funcionário: %s%n",
                     v.getIdVenda(),
                     v.getCliente().getNmCliente(),
-                    v.getFuncionario().getNmFuncionario()
-            ));
+                    v.getFuncionario().getNmFuncionario()));
 
             int idVenda = lerInt("\nID da venda: ");
             Venda venda = getVendaService(em).getById(idVenda);
-            if (venda == null || venda.isFlPago()) { System.out.println("✗ Venda inválida."); return; }
+            if (venda == null || venda.isFlPago()) {
+                System.out.println("✗ Venda inválida.");
+                return;
+            }
 
             List<ProdutosVendas> itens = getPvService(em).findByVenda(venda);
-            if (itens.isEmpty()) { System.out.println("⚠  Carrinho vazio. Adicione itens antes de fechar."); return; }
+            if (itens.isEmpty()) {
+                System.out.println("⚠  Carrinho vazio. Adicione itens antes de fechar.");
+                return;
+            }
 
             BigDecimal subtotal = itens.stream()
                     .map(ProdutosVendas::getVlSaldo)
@@ -254,8 +277,7 @@ public class MenuVendas extends Menu {
                     "  %s | Qtde: %d | Valor: %.2f%n",
                     pv.getProduto().getNmProduto(),
                     pv.getNrQuantidade(),
-                    pv.getVlSaldo()
-            ));
+                    pv.getVlSaldo()));
             System.out.printf("%n  TOTAL: R$ %.2f%n", subtotal);
 
             boolean confirmar = lerBoolean("\nConfirmar pagamento?");
@@ -270,10 +292,8 @@ public class MenuVendas extends Menu {
             ProdutosEstoquesService peService = getPeService(em);
             for (ProdutosVendas pv : itens) {
                 peService.findAll().stream()
-                        .filter(pe ->
-                                pe.getProduto().getIdProduto() == pv.getProduto().getIdProduto()
-                                        && pe.getNrQuantidade() >= pv.getNrQuantidade()
-                        )
+                        .filter(pe -> pe.getProduto().getIdProduto() == pv.getProduto().getIdProduto()
+                                && pe.getNrQuantidade() >= pv.getNrQuantidade())
                         .findFirst()
                         .ifPresentOrElse(pe -> {
                             pe.setNrQuantidade(pe.getNrQuantidade() - pv.getNrQuantidade());
@@ -284,8 +304,7 @@ public class MenuVendas extends Menu {
                             }
                         }, () -> System.out.printf(
                                 "⚠  Estoque insuficiente para '%s' — item não baixado.%n",
-                                pv.getProduto().getNmProduto()
-                        ));
+                                pv.getProduto().getNmProduto()));
             }
 
             venda.setVlVenda(subtotal);
@@ -317,7 +336,10 @@ public class MenuVendas extends Menu {
 
             int id = lerInt("\nID do cliente: ");
             Cliente c = lista.stream().filter(x -> x.getIdCliente() == id).findFirst().orElse(null);
-            if (c == null) { System.out.println("✗ Cliente inválido."); return null; }
+            if (c == null) {
+                System.out.println("✗ Cliente inválido.");
+                return null;
+            }
             return c;
         }
 
