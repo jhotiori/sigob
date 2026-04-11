@@ -7,10 +7,12 @@ import java.util.Scanner;
 public final class Inputter {
     private static final Scanner SC = new Scanner(System.in);
 
-    private Inputter() {}
+    private Inputter() {
+    }
 
     /**
      * Lê um inteiro do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return valor inteiro válido
      */
@@ -27,6 +29,7 @@ public final class Inputter {
 
     /**
      * Lê um float do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return float - Valor float valido
      */
@@ -43,6 +46,7 @@ public final class Inputter {
 
     /**
      * Lê um double do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return double - Valor double valido
      */
@@ -59,6 +63,7 @@ public final class Inputter {
 
     /**
      * Lê um booleano do usuário (true/false).
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return boolean - Valor boolean valido
      */
@@ -85,6 +90,7 @@ public final class Inputter {
 
     /**
      * Lê uma string do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return String - Valor string valido
      */
@@ -95,6 +101,7 @@ public final class Inputter {
 
     /**
      * Lê um BigInteger do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return BigInteger - Valor BigInteger valido
      */
@@ -111,6 +118,7 @@ public final class Inputter {
 
     /**
      * Lê um BigDecimal do usuário.
+     *
      * @param prompt mensagem exibida antes da leitura
      * @return BigDecimal - Valor BigDecimal valido
      */
@@ -127,6 +135,7 @@ public final class Inputter {
 
     /**
      * Exibe mensagem padrão de erro para entrada inválida.
+     *
      * @param tipo tipo de dado inválido
      */
     private static void erro(String tipo) {
