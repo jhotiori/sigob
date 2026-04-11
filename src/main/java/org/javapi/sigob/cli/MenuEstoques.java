@@ -4,6 +4,7 @@ import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.entity.Produto;
 import org.javapi.sigob.entity.ProdutosEstoques;
+import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.repository.EstoqueRepository;
 import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
@@ -89,7 +90,11 @@ public class MenuEstoques extends Menu {
             }
 
             ProdutosEstoques pe = new ProdutosEstoques(0, qtde, obs, p, e);
-            getService(em).save(pe);
+            try {
+                getService(em).save(pe);
+            } catch (ProdutosEstoquesException ex) {
+                throw new RuntimeException(ex);
+            }
             System.out.println("✔ Item adicionado ao estoque!");
         } finally {
             em.close();
@@ -110,7 +115,12 @@ public class MenuEstoques extends Menu {
                     pe.getEstoque().getNmEstoque()));
 
             int idItem = Inputter.lerInt("\nID do item a transferir : ");
-            ProdutosEstoques origem = getService(em).findById(idItem);
+            ProdutosEstoques origem = null;
+            try {
+                origem = getService(em).findById(idItem);
+            } catch (ProdutosEstoquesException e) {
+                throw new RuntimeException(e);
+            }
             if (origem == null) {
                 System.out.println("✗ Item não encontrado.");
                 return;
@@ -143,14 +153,22 @@ public class MenuEstoques extends Menu {
                 getService(em).delete(origem);
                 System.out.println("ℹ  Item removido do estoque de origem (quantidade zerada).");
             } else {
-                getService(em).update(origem);
+                try {
+                    getService(em).update(origem);
+                } catch (ProdutosEstoquesException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             // Cria/adiciona no destino
             ProdutosEstoques novoDestino = new ProdutosEstoques(
                     0, qtdeTransferir, "Transferido de: " + origem.getEstoque().getNmEstoque(),
                     origem.getProduto(), destino);
-            getService(em).save(novoDestino);
+            try {
+                getService(em).save(novoDestino);
+            } catch (ProdutosEstoquesException e) {
+                throw new RuntimeException(e);
+            }
 
             System.out.printf("✔ %d unidade(s) de '%s' transferida(s) para '%s'!%n",
                     qtdeTransferir,

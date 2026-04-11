@@ -32,7 +32,7 @@ public class MenuCategoria extends Menu {
             String nm = Inputter.lerString("Nome     : ");
 
             Categoria cat = new Categoria(0, cd, nm);
-            getService(em).save(cat, em);
+            getService(em).save(cat);
             System.out.println("✔ Categoria cadastrada!");
         } finally {
             em.close();

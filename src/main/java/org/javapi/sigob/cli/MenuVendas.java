@@ -13,6 +13,7 @@ import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.entity.ProdutosEstoques;
 import org.javapi.sigob.entity.ProdutosVendas;
 import org.javapi.sigob.entity.Venda;
+import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.repository.ClienteRepository;
 import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
@@ -189,7 +190,12 @@ public class MenuVendas extends Menu {
                 pe.getProduto().getVlProduto()));
 
         int idPe = Inputter.lerInt("\nID do item (ProdutoEstoque): ");
-        ProdutosEstoques pe = getPeService(em).findById(idPe);
+        ProdutosEstoques pe = null;
+        try {
+            pe = getPeService(em).findById(idPe);
+        } catch (ProdutosEstoquesException e) {
+            throw new RuntimeException(e);
+        }
         if (pe == null) {
             System.out.println("✗ Item não encontrado.");
             return;
@@ -302,7 +308,11 @@ public class MenuVendas extends Menu {
                             if (pe.getNrQuantidade() == 0) {
                                 peService.delete(pe);
                             } else {
-                                peService.update(pe);
+                                try {
+                                    peService.update(pe);
+                                } catch (ProdutosEstoquesException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }, () -> System.out.printf(
                                 "⚠  Estoque insuficiente para '%s' — item não baixado.%n",
