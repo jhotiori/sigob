@@ -12,6 +12,8 @@ import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
 
 import jakarta.persistence.EntityManager;
+import org.javapi.sigob.util.Inputter;
+
 import java.util.List;
 
 public class MenuEstoques extends Menu {
@@ -35,7 +37,7 @@ public class MenuEstoques extends Menu {
                     .findAll()
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
-            int idEstoque = lerInt("\nID do estoque: ");
+            int idEstoque = Inputter.lerInt("\nID do estoque: ");
 
             List<ProdutosEstoques> itens = getService(em).findAll()
                     .stream()
@@ -63,16 +65,16 @@ public class MenuEstoques extends Menu {
                     .findAll()
                     .forEach(p -> System.out.printf("[%d] %s%n", p.getIdProduto(), p.getNmProduto()));
 
-            int idProduto = lerInt("\nID do produto  : ");
+            int idProduto = Inputter.lerInt("\nID do produto  : ");
 
             System.out.println("\n── Estoques disponíveis ──");
             new EstoqueService(new EstoqueRepository(em))
                     .findAll()
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
-            int idEstoque = lerInt("\nID do estoque  : ");
-            int qtde = lerInt("Quantidade     : ");
-            String obs = lerString("Observação     : ");
+            int idEstoque = Inputter.lerInt("\nID do estoque  : ");
+            int qtde = Inputter.lerInt("Quantidade     : ");
+            String obs = Inputter.lerString("Observação     : ");
 
             Produto p = new ProdutoService(new ProdutoRepository(em)).findById(idProduto);
             if (p == null) {
@@ -107,7 +109,7 @@ public class MenuEstoques extends Menu {
                     pe.getNrQuantidade(),
                     pe.getEstoque().getNmEstoque()));
 
-            int idItem = lerInt("\nID do item a transferir : ");
+            int idItem = Inputter.lerInt("\nID do item a transferir : ");
             ProdutosEstoques origem = getService(em).findById(idItem);
             if (origem == null) {
                 System.out.println("✗ Item não encontrado.");
@@ -121,8 +123,8 @@ public class MenuEstoques extends Menu {
                     .filter(e -> e.getIdEstoque() != origem.getEstoque().getIdEstoque()) // exclui origem
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
-            int idEstoqueDestino = lerInt("\nID do estoque destino: ");
-            int qtdeTransferir = lerInt("Quantidade a transferir: ");
+            int idEstoqueDestino = Inputter.lerInt("\nID do estoque destino: ");
+            int qtdeTransferir = Inputter.lerInt("Quantidade a transferir: ");
 
             if (qtdeTransferir <= 0 || qtdeTransferir > origem.getNrQuantidade()) {
                 System.out.println("✗ Quantidade inválida. Disponível: " + origem.getNrQuantidade());

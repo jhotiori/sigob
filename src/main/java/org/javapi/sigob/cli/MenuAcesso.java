@@ -6,6 +6,7 @@ import org.javapi.sigob.repository.AcessoRepository;
 import org.javapi.sigob.service.AcessoService;
 
 import jakarta.persistence.EntityManager;
+import org.javapi.sigob.util.Inputter;
 
 public class MenuAcesso extends Menu {
 
@@ -27,12 +28,12 @@ public class MenuAcesso extends Menu {
     private void cadastrar() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            String nm = lerString("Nome do acesso : ");
-            String cd = lerString("Código         : ");
-            String ds = lerString("Descrição      : ");
+            String nm = Inputter.lerString("Nome do acesso : ");
+            String cd = Inputter.lerString("Código         : ");
+            String ds = Inputter.lerString("Descrição      : ");
 
             Acesso acesso = new Acesso(0, nm, cd, ds);
-            getService(em).save(acesso, em);
+            getService(em).save(acesso);
             System.out.println("✔ Acesso cadastrado com sucesso!");
         } finally {
             em.close();
@@ -42,10 +43,10 @@ public class MenuAcesso extends Menu {
     private void atualizar() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            int id    = lerInt("ID do acesso   : ");
-            String nm = lerString("Novo nome      : ");
-            String cd = lerString("Novo código    : ");
-            String ds = lerString("Nova descrição : ");
+            int id    = Inputter.lerInt("ID do acesso   : ");
+            String nm = Inputter.lerString("Novo nome      : ");
+            String cd = Inputter.lerString("Novo código    : ");
+            String ds = Inputter.lerString("Nova descrição : ");
 
             Acesso acesso = new Acesso(id, nm, cd, ds);
             getService(em).update(acesso);
@@ -58,7 +59,7 @@ public class MenuAcesso extends Menu {
     private void buscarPorId() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            int id = lerInt("ID do acesso: ");
+            int id = Inputter.lerInt("ID do acesso: ");
             Acesso a = getService(em).findById(id);
             System.out.println(a != null ? a : "✗ Não encontrado.");
         } finally {
@@ -69,7 +70,7 @@ public class MenuAcesso extends Menu {
     private void buscarPorNome() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            String nm = lerString("Nome (prefixo): ");
+            String nm = Inputter.lerString("Nome (prefixo): ");
             getService(em).findByNome(nm).forEach(System.out::println);
         } finally {
             em.close();
@@ -79,7 +80,7 @@ public class MenuAcesso extends Menu {
     private void buscarPorCodigo() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            String cd = lerString("Código: ");
+            String cd = Inputter.lerString("Código: ");
             Acesso a = getService(em).findByCodigo(cd);
             System.out.println(a != null ? a : "✗ Não encontrado.");
         } finally {
@@ -99,7 +100,7 @@ public class MenuAcesso extends Menu {
     private void excluir() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            int id = lerInt("ID do acesso a excluir: ");
+            int id = Inputter.lerInt("ID do acesso a excluir: ");
             Acesso a = getService(em).findById(id);
             if (a == null) { System.out.println("✗ Não encontrado."); return; }
             getService(em).delete(a);
