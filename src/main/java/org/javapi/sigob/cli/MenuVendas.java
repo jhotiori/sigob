@@ -48,7 +48,7 @@ public class MenuVendas extends Menu {
     private void listarVendas() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            List<Venda> vendas = getVendaService(em).getAll();
+            List<Venda> vendas = getVendaService(em).findAll();
 
             if (vendas.isEmpty()) {
                 System.out.println("⚠  Nenhuma venda encontrada.");
@@ -80,11 +80,11 @@ public class MenuVendas extends Menu {
                 return;
 
             System.out.println("\n── Funcionários disponíveis ──");
-            funcService.getAll()
+            funcService.findAll()
                     .forEach(f -> System.out.printf("[%d] %s%n", f.getIdFuncionario(), f.getNmFuncionario()));
 
             int idFuncionario = lerInt("\nID do funcionário: ");
-            Funcionario funcionario = funcService.getById(idFuncionario);
+            Funcionario funcionario = funcService.findById(idFuncionario);
             if (funcionario == null) {
                 System.out.println("✗ Funcionário não encontrado.");
                 return;
@@ -105,7 +105,7 @@ public class MenuVendas extends Menu {
     private void editarCarrinho() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            List<Venda> abertas = getVendaService(em).getAll()
+            List<Venda> abertas = getVendaService(em).findAll()
                     .stream()
                     .filter(v -> !v.isFlPago())
                     .toList();
@@ -123,7 +123,7 @@ public class MenuVendas extends Menu {
                     v.getFuncionario().getNmFuncionario()));
 
             int idVenda = lerInt("\nID da venda: ");
-            Venda venda = getVendaService(em).getById(idVenda);
+            Venda venda = getVendaService(em).findById(idVenda);
             if (venda == null || venda.isFlPago()) {
                 System.out.println("✗ Venda inválida.");
                 return;
@@ -131,7 +131,7 @@ public class MenuVendas extends Menu {
 
             boolean continuar = true;
             while (continuar) {
-                List<ProdutosVendas> itens = getPvService(em).findByVenda(venda);
+                List<ProdutosVendas> itens = getPvService(em).findByVendaId(venda);
                 System.out.println("\n── Carrinho — Venda #" + idVenda + " ──");
                 if (itens.isEmpty()) {
                     System.out.println("  (vazio)");
@@ -209,7 +209,7 @@ public class MenuVendas extends Menu {
     }
 
     private void removerItemCarrinho(EntityManager em, Venda venda) {
-        List<ProdutosVendas> itens = getPvService(em).findByVenda(venda);
+        List<ProdutosVendas> itens = getPvService(em).findByVendaId(venda);
         if (itens.isEmpty()) {
             System.out.println("⚠  Carrinho vazio.");
             return;
@@ -238,7 +238,7 @@ public class MenuVendas extends Menu {
     private void fecharVenda() {
         EntityManager em = JPAConfig.getEntityManager();
         try {
-            List<Venda> abertas = getVendaService(em).getAll()
+            List<Venda> abertas = getVendaService(em).findAll()
                     .stream()
                     .filter(v -> !v.isFlPago())
                     .toList();
@@ -256,13 +256,13 @@ public class MenuVendas extends Menu {
                     v.getFuncionario().getNmFuncionario()));
 
             int idVenda = lerInt("\nID da venda: ");
-            Venda venda = getVendaService(em).getById(idVenda);
+            Venda venda = getVendaService(em).findById(idVenda);
             if (venda == null || venda.isFlPago()) {
                 System.out.println("✗ Venda inválida.");
                 return;
             }
 
-            List<ProdutosVendas> itens = getPvService(em).findByVenda(venda);
+            List<ProdutosVendas> itens = getPvService(em).findByVendaId(venda);
             if (itens.isEmpty()) {
                 System.out.println("⚠  Carrinho vazio. Adicione itens antes de fechar.");
                 return;
@@ -285,7 +285,7 @@ public class MenuVendas extends Menu {
                 System.out.println("✗ Venda cancelada.");
 
                 itens.forEach(pv -> getPvService(em).delete(pv));
-                getVendaService(em).Delete(venda);
+                getVendaService(em).delete(venda);
                 return;
             }
 
@@ -320,7 +320,7 @@ public class MenuVendas extends Menu {
 
     private Cliente resolverCliente(ClienteService clienteService) {
         String nmCliente = lerString("\nNome do cliente: ");
-        List<Cliente> lista = clienteService.getByNome(nmCliente);
+        List<Cliente> lista = clienteService.findByNome(nmCliente);
 
         if (lista != null && !lista.isEmpty()) {
             if (lista.size() == 1) {
@@ -350,7 +350,7 @@ public class MenuVendas extends Menu {
 
             while (true) {
                 String doc = lerString("Documento: ");
-                if (clienteService.getByDoc(doc) != null) {
+                if (clienteService.findByDocumento(doc) != null) {
                     System.out.println("⚠  Documento já cadastrado. Tente outro.");
                 } else {
                     novo.setNrDocumento(doc);
@@ -363,7 +363,7 @@ public class MenuVendas extends Menu {
             return novo;
         }
 
-        Cliente padrao = clienteService.getAll().stream()
+        Cliente padrao = clienteService.findAll().stream()
                 .filter(c -> c.getNmCliente().equalsIgnoreCase("Cliente não informado"))
                 .findFirst()
                 .orElse(null);
