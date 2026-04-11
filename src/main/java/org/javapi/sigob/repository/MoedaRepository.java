@@ -36,17 +36,17 @@ public class MoedaRepository {
     }
 
     public List<Moeda> findAll(){
-        return em.createQuery("select m from moedas m", Moeda.class).getResultList();
+        return em.createQuery("select m from m.moedas m", Moeda.class).getResultList();
     }
 
     public List<Moeda> findByNome(String name){
-        return em.createQuery("select m from moedas m where nmMoeda like :str", Moeda.class)
+        return em.createQuery("select m from moedas m where m.nmMoeda like :str", Moeda.class)
                 .setParameter("str", name + "%")
                 .getResultList();
     }
 
     public Moeda findByCodigo(String codigo){
-        return em.createQuery("select m from moedas m where cdMoeda like :str", Moeda.class)
+        return em.createQuery("select m from moedas m where m.dsSigla like :str", Moeda.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
     }

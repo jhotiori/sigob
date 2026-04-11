@@ -132,7 +132,7 @@ public class ProdutosVendasRepository {
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
     public List<ProdutosVendas> findByVendaId(int idVenda) {
-        return em.createQuery("select pv from produtosVendas pv where pv.produto.idProduto = :id")
+        return em.createQuery("select pv from produtosVendas pv where pv.venda.idVenda = :id")
                 .setParameter("id", idVenda)
                 .getResultList();
     }

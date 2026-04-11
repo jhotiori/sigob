@@ -131,7 +131,9 @@ public class ClienteRepository {
      * @param documento O Documento do Cliente
      * @return Cliente - O Cliente buscado
      */
-    public Cliente findByDocumento(String documento) {
-        return em.find(Cliente.class, documento);
+    public List<Cliente> findByDocumento(String documento) {
+        return em.createQuery("select c from clientes c where nrDocumento like :str", Cliente.class)
+                .setParameter("str", documento + "%")
+                .getResultList();
     }
 }
