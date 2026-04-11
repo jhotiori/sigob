@@ -16,7 +16,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return valor inteiro válido
      */
-    public static int readInt(String prompt) {
+    public static int lerInt(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -33,7 +33,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return float - Valor float valido
      */
-    public static float readFloat(String prompt) {
+    public static float lerFloat(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -50,7 +50,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return double - Valor double valido
      */
-    public static double readDouble(String prompt) {
+    public static double lerDouble(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -67,7 +67,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return boolean - Valor boolean valido
      */
-    public static boolean readBoolean(String prompt) {
+    public static boolean lerBoolean(String prompt) {
         while (true) {
             System.out.print(prompt);
             String input = SC.nextLine().trim().toLowerCase();
@@ -94,7 +94,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return String - Valor string valido
      */
-    public static String readString(String prompt) {
+    public static String lerString(String prompt) {
         System.out.print(prompt);
         return SC.nextLine();
     }
@@ -105,7 +105,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return BigInteger - Valor BigInteger valido
      */
-    public static BigInteger readBigInt(String prompt) {
+    public static BigInteger lerBigInt(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
@@ -122,7 +122,7 @@ public final class Inputter {
      * @param prompt mensagem exibida antes da leitura
      * @return BigDecimal - Valor BigDecimal valido
      */
-    public static BigDecimal readBigDecimal(String prompt) {
+    public static BigDecimal lerBigDecimal(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
