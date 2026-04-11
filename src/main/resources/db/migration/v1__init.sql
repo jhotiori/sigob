@@ -1,17 +1,17 @@
-create table categorias (
+create table if not exists categorias (
 	idCategoria serial not null primary key,
 	cdCategoria varchar(50) not null unique,
 	nmCategoria varchar(100) not null
 );
 
-create table moedas (
+create table if not exists moedas (
 	idMoeda serial not null primary key,
 	nmMoeda varchar(100) not null,
 	dsCifrao varchar(50) not null,
 	dsSigla varchar(50) not null
 );
 
-create table produtos (
+create table if not exists produtos (
 	idProduto serial not null primary key,
 	cdProduto varchar(50) not null unique,
 	nmProduto varchar(100) not null,
@@ -25,7 +25,7 @@ create table produtos (
 );
 
 
-create table estoques (
+create table if not exists estoques (
 	idEstoque serial not null primary key,
 	cdEstoque varchar(50) not null unique,
 	nmEstoque varchar(100) not null,
@@ -35,7 +35,7 @@ create table estoques (
 
 );
 
-create table produtosEstoques (
+create table if not exists produtosEstoques (
 	idProdutoEstoque serial not null primary key,
 	nrQuantidade bigint not null,
 	dsObservacao varchar(200),
@@ -46,20 +46,20 @@ create table produtosEstoques (
 
 );
 
-create table clientes (
+create table if not exists clientes (
 	idCliente serial not null primary key,
 	nmCliente varchar(100) not null,
 	nrDocumento varchar(50)
 );
 
-create table acessos (
+create table if not exists acessos (
 	idAcesso serial not null primary key,
 	nmAcesso varchar(100) not null,
 	cdAcesso varchar(50) not null unique,
 	dsAcesso varchar(200)
 );
 
-create table funcionarios (
+create table if not exists funcionarios (
 	idFuncionario serial not null primary key,
 	nmFuncionario varchar(100) not null,
 	cdFuncionario varchar(50) not null unique,
@@ -67,7 +67,7 @@ create table funcionarios (
 	foreign key (fk_idAcesso) references acessos(idAcesso)
 );
 
-create table vendas (
+create table if not exists vendas (
 	idVenda serial not null primary key,
 	dtVenda timestamptz not null,
 	vlVenda decimal(15,2) not null,
@@ -78,7 +78,7 @@ create table vendas (
 	foreign key (fk_idFuncionario) references funcionarios(idFuncionario)
 );
 
-create table produtosVendas (
+create table if not exists produtosVendas (
 	idProdutoVenda serial not null primary key,
 	nrQuantidade bigint not null check(nrQuantidade > 0),
 	vlSaldo decimal(15,2) not null,

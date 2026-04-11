@@ -8,7 +8,7 @@ public class FlywayConfig {
             "jdbc:postgresql://localhost:5432/sigob",
             "postgres",
             "postgres"
-        ).load();
+        ).baselineOnMigrate(true).load();
         flyway.migrate();
     }
 }
