@@ -27,6 +27,10 @@ public abstract class Menu {
     protected void adicionarEntrada(String nome, Runnable callback) {
         this.entradas.add(new Entry(nome, callback));
     }
+    
+    protected void limparEntradas() {
+        this.entradas.clear();
+    }
 
     public void exibir() {
         while (true) {

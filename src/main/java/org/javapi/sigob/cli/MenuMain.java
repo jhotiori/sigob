@@ -12,14 +12,25 @@ public class MenuMain extends Menu {
 
     public MenuMain() {
         super("SIGOB - Seja bem-vindo(a)!");
-        adicionarEntrada("Módulo de Administração", this::buildMenuAdmin);
-        adicionarEntrada("Módulo de Estoque", this::buildMenuEstoque);
-        adicionarEntrada("Módulo de Vendas", this::buildMenuVendas);
     }
 
     @Override
     public void exibir() {
         Funcionario funcionario = logar();
+        String cdAcesso = funcionario.getAcesso().getCdAcesso();
+
+        limparEntradas(); // evita duplicar entradas a cada login
+
+        switch (cdAcesso.toUpperCase()) {
+            case "ADMIN"   -> buildMenuAdmin();
+            case "ESTOQUE" -> buildMenuEstoque();
+            case "VENDAS"  -> buildMenuVendas();
+            default -> {
+                System.out.println("✗ Nível de acesso não reconhecido: " + cdAcesso);
+                return;
+            }
+        }
+
         this.setTitulo("SIGOB - Olá, %s!".formatted(funcionario.getNmFuncionario()));
         super.exibir();
     }
@@ -33,13 +44,9 @@ public class MenuMain extends Menu {
                 String senha = Inputter.lerString("Insira a Senha: ");
                 EntityManager em = JPAConfig.getEntityManager();
 
-                if(login == "admin" && senha == "admin"){
-                    em.close();
-                }
-
                 try {
                     FuncionarioService service = new FuncionarioService(new FuncionarioRepository(em));
-                    Funcionario funcionario = service.findByCodigo(senha); // cdFuncionario = senha
+                    Funcionario funcionario = service.findByCodigo(senha);
 
                     if (funcionario != null && funcionario.getNmFuncionario().equalsIgnoreCase(login)) {
                         System.out.println("[✓] Login efetuado com sucesso - logado como %s!"
@@ -59,8 +66,8 @@ public class MenuMain extends Menu {
 
     private void buildMenuAdmin() {
         adicionarEntrada("Cadastros", () -> new MenuCadastros().exibir());
-        adicionarEntrada("Estoques", () -> new MenuEstoques().exibir());
-        adicionarEntrada("Vendas", () -> new MenuVendas().exibir());
+        adicionarEntrada("Estoques",  () -> new MenuEstoques().exibir());
+        adicionarEntrada("Vendas",    () -> new MenuVendas().exibir());
     }
 
     private void buildMenuEstoque() {
