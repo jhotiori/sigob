@@ -15,12 +15,11 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 public class MenuEstoques extends Menu {
-
     public MenuEstoques() {
-        this.title = "Operações de Estoque";
-        addEntry("Listar itens por estoque",       this::listarPorEstoque);
-        addEntry("Adicionar item ao estoque",       this::adicionarItem);
-        addEntry("Transferir entre estoques",       this::transferir);
+        super("Estoque");
+        adicionarEntrada("Listar itens por Estoque", this::listarPorEstoque);
+        adicionarEntrada("Adicionar item ao Estoque", this::adicionarItem);
+        adicionarEntrada("Transferir entre Estoques", this::transferir);
     }
 
     private ProdutosEstoquesService getService(EntityManager em) {
@@ -71,15 +70,21 @@ public class MenuEstoques extends Menu {
                     .findAll()
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
-            int    idEstoque = lerInt("\nID do estoque  : ");
-            int    qtde      = lerInt("Quantidade     : ");
-            String obs       = lerString("Observação     : ");
+            int idEstoque = lerInt("\nID do estoque  : ");
+            int qtde = lerInt("Quantidade     : ");
+            String obs = lerString("Observação     : ");
 
             Produto p = new ProdutoService(new ProdutoRepository(em)).findById(idProduto);
-            if (p == null) { System.out.println("✗ Produto não encontrado."); return; }
+            if (p == null) {
+                System.out.println("✗ Produto não encontrado.");
+                return;
+            }
 
             Estoque e = new EstoqueService(new EstoqueRepository(em)).findById(idEstoque);
-            if (e == null) { System.out.println("✗ Estoque não encontrado."); return; }
+            if (e == null) {
+                System.out.println("✗ Estoque não encontrado.");
+                return;
+            }
 
             ProdutosEstoques pe = new ProdutosEstoques(0, qtde, obs, p, e);
             getService(em).save(pe);
@@ -100,12 +105,14 @@ public class MenuEstoques extends Menu {
                     pe.getIdProdutosEstoque(),
                     pe.getProduto().getNmProduto(),
                     pe.getNrQuantidade(),
-                    pe.getEstoque().getNmEstoque()
-            ));
+                    pe.getEstoque().getNmEstoque()));
 
             int idItem = lerInt("\nID do item a transferir : ");
             ProdutosEstoques origem = getService(em).findById(idItem);
-            if (origem == null) { System.out.println("✗ Item não encontrado."); return; }
+            if (origem == null) {
+                System.out.println("✗ Item não encontrado.");
+                return;
+            }
 
             System.out.println("\n── Estoques destino ──");
             new EstoqueService(new EstoqueRepository(em))
@@ -115,7 +122,7 @@ public class MenuEstoques extends Menu {
                     .forEach(e -> System.out.printf("[%d] %s%n", e.getIdEstoque(), e.getNmEstoque()));
 
             int idEstoqueDestino = lerInt("\nID do estoque destino: ");
-            int qtdeTransferir   = lerInt("Quantidade a transferir: ");
+            int qtdeTransferir = lerInt("Quantidade a transferir: ");
 
             if (qtdeTransferir <= 0 || qtdeTransferir > origem.getNrQuantidade()) {
                 System.out.println("✗ Quantidade inválida. Disponível: " + origem.getNrQuantidade());
@@ -123,7 +130,10 @@ public class MenuEstoques extends Menu {
             }
 
             Estoque destino = new EstoqueService(new EstoqueRepository(em)).findById(idEstoqueDestino);
-            if (destino == null) { System.out.println("✗ Estoque destino não encontrado."); return; }
+            if (destino == null) {
+                System.out.println("✗ Estoque destino não encontrado.");
+                return;
+            }
 
             // Deduz da origem
             origem.setNrQuantidade(origem.getNrQuantidade() - qtdeTransferir);
@@ -137,15 +147,13 @@ public class MenuEstoques extends Menu {
             // Cria/adiciona no destino
             ProdutosEstoques novoDestino = new ProdutosEstoques(
                     0, qtdeTransferir, "Transferido de: " + origem.getEstoque().getNmEstoque(),
-                    origem.getProduto(), destino
-            );
+                    origem.getProduto(), destino);
             getService(em).save(novoDestino);
 
             System.out.printf("✔ %d unidade(s) de '%s' transferida(s) para '%s'!%n",
                     qtdeTransferir,
                     origem.getProduto().getNmProduto(),
-                    destino.getNmEstoque()
-            );
+                    destino.getNmEstoque());
         } finally {
             em.close();
         }

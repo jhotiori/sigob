@@ -3,13 +3,13 @@ package org.javapi.sigob.cli;
 public class MenuCadastros extends Menu {
 
     public MenuCadastros() {
-        this.title = "Cadastros";
-        addEntry("Acessos",      () -> new MenuAcesso().show());
-        addEntry("Categorias",   () -> new MenuCategoria().show());
-        addEntry("Clientes",     () -> new MenuCliente().show());
-        addEntry("Funcionários", () -> new MenuFuncionario().show());
-        addEntry("Moedas",       () -> new MenuMoeda().show());
-        addEntry("Produtos",     () -> new MenuProduto().show());
-        addEntry("Estoques",     () -> new MenuEstoque().show());
+        super("Operações de Cadastro");
+        /*adicionarEntrada("Acessos", () -> new MenuAcesso().show());
+        adicionarEntrada("Categorias", () -> new MenuCategoria().show());
+        adicionarEntrada("Clientes", () -> new MenuCliente().show());
+        adicionarEntrada("Funcionários", () -> new MenuFuncionario().show());
+        adicionarEntrada("Moedas", () -> new MenuMoeda().show());
+        adicionarEntrada("Produtos", () -> new MenuProduto().show());
+        adicionarEntrada("Estoques", () -> new MenuEstoque().show());*/
     }
 }
