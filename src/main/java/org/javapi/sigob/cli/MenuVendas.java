@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.EntityManager;
 
+import org.hibernate.query.sqm.mutation.internal.inline.InPredicateRestrictionProducer;
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
@@ -22,6 +23,7 @@ import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.ProdutosVendasService;
 import org.javapi.sigob.service.VendaService;
+import org.javapi.sigob.util.Inputter;
 
 public class MenuVendas extends Menu {
 
@@ -83,7 +85,7 @@ public class MenuVendas extends Menu {
             funcService.findAll()
                     .forEach(f -> System.out.printf("[%d] %s%n", f.getIdFuncionario(), f.getNmFuncionario()));
 
-            int idFuncionario = lerInt("\nID do funcionário: ");
+            int idFuncionario = Inputter.lerInt("\nID do funcionário: ");
             Funcionario funcionario = funcService.findById(idFuncionario);
             if (funcionario == null) {
                 System.out.println("✗ Funcionário não encontrado.");
@@ -122,7 +124,7 @@ public class MenuVendas extends Menu {
                     v.getCliente().getNmCliente(),
                     v.getFuncionario().getNmFuncionario()));
 
-            int idVenda = lerInt("\nID da venda: ");
+            int idVenda = Inputter.lerInt("\nID da venda: ");
             Venda venda = getVendaService(em).findById(idVenda);
             if (venda == null || venda.isFlPago()) {
                 System.out.println("✗ Venda inválida.");
@@ -186,14 +188,14 @@ public class MenuVendas extends Menu {
                 pe.getNrQuantidade(),
                 pe.getProduto().getVlProduto()));
 
-        int idPe = lerInt("\nID do item (ProdutoEstoque): ");
+        int idPe = Inputter.lerInt("\nID do item (ProdutoEstoque): ");
         ProdutosEstoques pe = getPeService(em).findById(idPe);
         if (pe == null) {
             System.out.println("✗ Item não encontrado.");
             return;
         }
 
-        int qtde = lerInt("Quantidade: ");
+        int qtde = Inputter.lerInt("Quantidade: ");
         if (qtde <= 0 || qtde > pe.getNrQuantidade()) {
             System.out.printf("✗ Quantidade inválida. Disponível: %d%n", pe.getNrQuantidade());
             return;
@@ -223,7 +225,7 @@ public class MenuVendas extends Menu {
                 pv.getNrQuantidade(),
                 pv.getVlSaldo()));
 
-        int idPv = lerInt("\nID do item a remover: ");
+        int idPv = Inputter.lerInt("\nID do item a remover: ");
         ProdutosVendas pv = getPvService(em).findById(idPv);
 
         if (pv == null || pv.getVenda().getIdVenda() != venda.getIdVenda()) {
@@ -255,7 +257,7 @@ public class MenuVendas extends Menu {
                     v.getCliente().getNmCliente(),
                     v.getFuncionario().getNmFuncionario()));
 
-            int idVenda = lerInt("\nID da venda: ");
+            int idVenda = Inputter.lerInt("\nID da venda: ");
             Venda venda = getVendaService(em).findById(idVenda);
             if (venda == null || venda.isFlPago()) {
                 System.out.println("✗ Venda inválida.");
@@ -280,7 +282,7 @@ public class MenuVendas extends Menu {
                     pv.getVlSaldo()));
             System.out.printf("%n  TOTAL: R$ %.2f%n", subtotal);
 
-            boolean confirmar = lerBoolean("\nConfirmar pagamento?");
+            boolean confirmar = Inputter.lerBoolean("\nConfirmar pagamento?");
             if (!confirmar) {
                 System.out.println("✗ Venda cancelada.");
 
@@ -319,7 +321,7 @@ public class MenuVendas extends Menu {
     }
 
     private Cliente resolverCliente(ClienteService clienteService) {
-        String nmCliente = lerString("\nNome do cliente: ");
+        String nmCliente = Inputter.lerString("\nNome do cliente: ");
         List<Cliente> lista = clienteService.findByNome(nmCliente);
 
         if (lista != null && !lista.isEmpty()) {
@@ -334,7 +336,7 @@ public class MenuVendas extends Menu {
             lista.forEach(c -> System.out.printf("[%d] %s | %s%n",
                     c.getIdCliente(), c.getNmCliente(), c.getNrDocumento()));
 
-            int id = lerInt("\nID do cliente: ");
+            int id = Inputter.lerInt("\nID do cliente: ");
             Cliente c = lista.stream().filter(x -> x.getIdCliente() == id).findFirst().orElse(null);
             if (c == null) {
                 System.out.println("✗ Cliente inválido.");
@@ -343,13 +345,13 @@ public class MenuVendas extends Menu {
             return c;
         }
 
-        int opcao = lerInt("Cliente não cadastrado. Deseja cadastrar? (1-Sim / 0-Não): ");
+        int opcao = Inputter.lerInt("Cliente não cadastrado. Deseja cadastrar? (1-Sim / 0-Não): ");
         if (opcao == 1) {
             Cliente novo = new Cliente();
-            novo.setNmCliente(lerString("Nome: "));
+            novo.setNmCliente(Inputter.lerString("Nome: "));
 
             while (true) {
-                String doc = lerString("Documento: ");
+                String doc = Inputter.lerString("Documento: ");
                 if (clienteService.findByDocumento(doc) != null) {
                     System.out.println("⚠  Documento já cadastrado. Tente outro.");
                 } else {
