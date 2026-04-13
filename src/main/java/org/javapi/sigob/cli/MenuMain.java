@@ -47,6 +47,8 @@ public class MenuMain extends Menu {
                 try {
                     FuncionarioService service = new FuncionarioService(new FuncionarioRepository(em));
                     Funcionario funcionario = service.findByCodigo(senha);
+                    System.out.println("Login: " + login + " | Senha: " + senha);
+                    System.out.println(funcionario);
 
                     if (funcionario != null && funcionario.getNmFuncionario().equalsIgnoreCase(login)) {
                         System.out.println("[✓] Login efetuado com sucesso - logado como %s!"

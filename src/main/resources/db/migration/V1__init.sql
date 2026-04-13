@@ -82,8 +82,8 @@ create table if not exists produtosVendas (
 	idProdutoVenda serial not null primary key,
 	nrQuantidade bigint not null check(nrQuantidade > 0),
 	vlSaldo decimal(15,2) not null,
-	fk_idProdutoEstoque int not null,
-	foreign key (fk_idProdutoEstoque) references produtosEstoques(idProdutoEstoque),
+	fk_idProduto int not null,
+	foreign key (fk_idProduto) references produtos(idProduto),
 	fk_idVenda int not null,
 	foreign key (fk_idVenda) references vendas(idVenda)
 );
