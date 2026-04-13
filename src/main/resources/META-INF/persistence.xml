@@ -23,9 +23,9 @@
         <properties>
             <!-- JDBC CONFIGURATION -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/sigob"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres/sigob"/>
             <property name="jakarta.persistence.jdbc.user" value="postgres"/>
-            <property name="jakarta.persistence.jdbc.password" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="Aravos013"/>
 
             <!-- HIBERNATE CONFIGURATION -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
