@@ -1,112 +1,163 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
+import java.util.List;
+
 import org.javapi.sigob.entity.Acesso;
-import org.javapi.sigob.repository.AcessoRepository;
 import org.javapi.sigob.service.AcessoService;
-
-import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pelas operações de acesso via CLI.
+ */
 public class MenuAcesso extends Menu {
 
+    /**
+     * Inicializa o menu de acessos e registra as entradas disponíveis.
+     */
     public MenuAcesso() {
         super("Acessos");
-        adicionarEntrada("Cadastrar acesso",  this::cadastrar);
-        adicionarEntrada("Atualizar acesso",  this::atualizar);
-        adicionarEntrada("Buscar por ID",     this::buscarPorId);
-        adicionarEntrada("Buscar por nome",   this::buscarPorNome);
-        adicionarEntrada("Buscar por código", this::buscarPorCodigo);
-        adicionarEntrada("Listar todos",      this::listarTodos);
-        adicionarEntrada("Excluir acesso",    this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Listar (ID)", this::buscarPorId);
+        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Listar (CODIGO)", this::buscarPorCodigo);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private AcessoService getService(EntityManager em) {
-        return new AcessoService(new AcessoRepository(em));
-    }
+    private final AcessoService service = new AcessoService();
 
+    /**
+     * Realiza o cadastro de um novo acesso.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            String nm = Inputter.lerString("Nome do acesso : ");
-            String cd = Inputter.lerString("Código         : ");
-            String ds = Inputter.lerString("Descrição      : ");
+        String nome = Inputter.lerString("Insira o Nome do Acesso: ");
+        String codigo = Inputter.lerString("Insira o Codigo do Acesso: ");
+        String descricao = Inputter.lerString("Insira a Descricao do Acesso: ");
 
-            Acesso acesso = new Acesso(0, nm, cd, ds);
-            getService(em).save(acesso);
-            System.out.println("✔ Acesso cadastrado com sucesso!");
-        } finally {
-            em.close();
+        try {
+            service.save(new Acesso(0, nome, codigo, descricao));
+            Logger.success("Acesso " + nome + " cadastrado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar acesso: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de um acesso existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            int id    = Inputter.lerInt("ID do acesso   : ");
-            String nm = Inputter.lerString("Novo nome      : ");
-            String cd = Inputter.lerString("Novo código    : ");
-            String ds = Inputter.lerString("Nova descrição : ");
+        int id = Inputter.lerInt("Insira o ID do Acesso: ");
 
-            Acesso acesso = new Acesso(id, nm, cd, ds);
-            getService(em).update(acesso);
-            System.out.println("✔ Acesso atualizado!");
-        } finally {
-            em.close();
+        while (service.findById(id) == null) {
+            Logger.warn("Acesso não encontrado!");
+            id = Inputter.lerInt("Insira o ID do Acesso: ");
+        }
+
+        String nome = Inputter.lerString("Insira o Novo nome do Acesso: ");
+        String codigo = Inputter.lerString("Insira o Novo Codigo do Acesso: ");
+        String descricao = Inputter.lerString("Insira a Nova Descricao do Acesso: ");
+
+        try {
+            service.update(new Acesso(id, nome, codigo, descricao));
+            Logger.success("Acesso " + id + " atualizado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar acesso: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um acesso pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Acesso: ");
+
         try {
-            int id = Inputter.lerInt("ID do acesso: ");
-            Acesso a = getService(em).findById(id);
-            System.out.println(a != null ? a : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Acesso acesso = service.findById(id);
+            if (acesso == null) {
+                Logger.warn("Acesso não encontrado!");
+            } else {
+                System.out.println(acesso);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar acesso: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca acessos pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Acesso: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Acesso> acessos = service.findByNome(nome);
+
+            if (acessos.isEmpty()) {
+                Logger.warn("Acesso não encontrado!");
+            } else {
+                for (Acesso a : acessos) {
+                    System.out.println(a);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar acesso: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um acesso pelo código.
+     */
     private void buscarPorCodigo() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira o Codigo do Acesso: ");
+
         try {
-            String cd = Inputter.lerString("Código: ");
-            Acesso a = getService(em).findByCodigo(cd);
-            System.out.println(a != null ? a : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Acesso acesso = service.findByCodigo(codigo);
+            if (acesso == null) {
+                Logger.warn("Acesso não encontrado!");
+            } else {
+                System.out.println(acesso);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar acesso: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os acessos cadastrados.
+     */
     private void listarTodos() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Acesso> acessos = service.findAll();
+            if (acessos.isEmpty()) {
+                Logger.warn("Nenhum acesso cadastrado!");
+            } else {
+                for (Acesso a : acessos) {
+                    System.out.println(a);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar acessos: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove um acesso pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Acesso: ");
         try {
-            int id = Inputter.lerInt("ID do acesso a excluir: ");
-            Acesso a = getService(em).findById(id);
-            if (a == null) { System.out.println("✗ Não encontrado."); return; }
-            getService(em).delete(a);
-            System.out.println("✔ Acesso excluído!");
-        } finally {
-            em.close();
+            Acesso acesso = service.findById(id);
+
+            if (acesso == null) {
+                Logger.warn("Acesso não encontrado!");
+            } else {
+                service.delete(acesso);
+                Logger.success("Acesso excluido com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir acesso: " + e.getMessage());
         }
     }
 }
