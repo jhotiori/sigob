@@ -2,10 +2,9 @@ package org.javapi.sigob.repository;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-
 import org.javapi.sigob.entity.ProdutosVendas;
+
+import jakarta.persistence.EntityManager;
 
 public class ProdutosVendasRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class ProdutosVendasRepository {
      * @param produtoVenda O ProdutosVendas para ser salvo
      */
     public void save(ProdutosVendas produtoVenda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(produtoVenda);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(produtoVenda);
     }
 
     /**
@@ -47,19 +34,7 @@ public class ProdutosVendasRepository {
      * @param produtoVenda O ProdutosVenda para ser atualizado
      */
     public void update(ProdutosVendas produtoVenda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(produtoVenda);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(produtoVenda);
     }
 
     /**
@@ -68,19 +43,7 @@ public class ProdutosVendasRepository {
      * @param produtoVenda O ProdutosVenda para ser deletado
      */
     public void delete(ProdutosVendas produtoVenda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(produtoVenda) ? produtoVenda : manager.merge(produtoVenda));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(produtoVenda) ? produtoVenda : em.merge(produtoVenda));
     }
 
     /**
@@ -90,7 +53,7 @@ public class ProdutosVendasRepository {
      * @return boolean - true se o ProdutosVenda existe, false se nao
      */
     public boolean contains(ProdutosVendas produtoVenda) {
-        return em.contains(produtoVenda);
+        return em.find(ProdutosVendas.class, produtoVenda.getIdProdutoVenda()) != null;
     }
 
     /**
