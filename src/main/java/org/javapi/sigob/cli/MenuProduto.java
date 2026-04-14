@@ -1,128 +1,184 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Moeda;
 import org.javapi.sigob.entity.Produto;
-import org.javapi.sigob.repository.CategoriaRepository;
-import org.javapi.sigob.repository.MoedaRepository;
-import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.service.CategoriaService;
 import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.service.ProdutoService;
-
-import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
-
-import java.math.BigDecimal;
+import org.javapi.sigob.util.Logger;
 
 public class MenuProduto extends Menu {
 
+    /**
+     * Inicializa o menu de produtos e registra as entradas disponíveis.
+     */
     public MenuProduto() {
         super("Produtos");
-        adicionarEntrada("Cadastrar produto",   this::cadastrar);
-        adicionarEntrada("Atualizar produto",   this::atualizar);
-        adicionarEntrada("Buscar por ID",       this::buscarPorId);
-        adicionarEntrada("Buscar por nome",     this::buscarPorNome);
-        adicionarEntrada("Listar todos",        this::listarTodos);
-        adicionarEntrada("Excluir produto",     this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Buscar (ID)", this::buscarPorId);
+        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private ProdutoService getService(EntityManager em) {
-        return new ProdutoService(new ProdutoRepository(em));
-    }
+    private final ProdutoService service = new ProdutoService();
+    private final CategoriaService categoriaService = new CategoriaService();
+    private final MoedaService moedaService = new MoedaService();
 
+    /**
+     * Realiza o cadastro de um novo produto.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira o Código do Produto: ");
+        String nome = Inputter.lerString("Insira o Nome do Produto: ");
+        String descricao = Inputter.lerString("Insira a Descrição: ");
+        BigDecimal custo = Inputter.lerBigDecimal("Insira o Custo: ");
+        BigDecimal venda = Inputter.lerBigDecimal("Insira o Preço de Venda: ");
+        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+        int idMoeda = Inputter.lerInt("Insira o ID da Moeda: ");
+
         try {
-            String cd      = Inputter.lerString("Código       : ");
-            String nm      = Inputter.lerString("Nome         : ");
-            String ds      = Inputter.lerString("Descrição    : ");
-            BigDecimal vlCusto  = Inputter.lerBigDecimal("Custo        : ");
-            BigDecimal vlVenda  = Inputter.lerBigDecimal("Preço venda  : ");
-            int idCategoria     = Inputter.lerInt("ID Categoria : ");
-            int idMoeda         = Inputter.lerInt("ID Moeda     : ");
+            Categoria categoria = categoriaService.findById(idCategoria);
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+                return;
+            }
 
-            Categoria cat = new CategoriaService(new CategoriaRepository(em)).findById(idCategoria);
-            if (cat == null) { System.out.println("✗ Categoria não encontrada."); return; }
+            Moeda moeda = moedaService.findById(idMoeda);
+            if (moeda == null) {
+                Logger.warn("Moeda não encontrada!");
+                return;
+            }
 
-            Moeda moe = new MoedaService(new MoedaRepository(em)).getById(idMoeda);
-            if (moe == null) { System.out.println("✗ Moeda não encontrada."); return; }
+            service.save(new Produto(0, codigo, nome, descricao, custo, venda, categoria, moeda));
+            Logger.success("Produto " + nome + " cadastrado com sucesso!");
 
-            Produto p = new Produto(0, cd, nm, ds, vlCusto, vlVenda, cat, moe);
-            getService(em).save(p);
-            System.out.println("✔ Produto cadastrado!");
-        } finally {
-            em.close();
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar produto: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de um produto existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Produto: ");
+
+        while (service.findById(id) == null) {
+            Logger.warn("Produto não encontrado!");
+            id = Inputter.lerInt("Insira o ID do Produto: ");
+        }
+
+        String codigo = Inputter.lerString("Insira o Novo Código: ");
+        String nome = Inputter.lerString("Insira o Novo Nome: ");
+        String descricao = Inputter.lerString("Insira a Nova Descrição: ");
+        BigDecimal custo = Inputter.lerBigDecimal("Insira o Novo Custo: ");
+        BigDecimal venda = Inputter.lerBigDecimal("Insira o Novo Preço: ");
+        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+        int idMoeda = Inputter.lerInt("Insira o ID da Moeda: ");
+
         try {
-            int    id      = Inputter.lerInt("ID do produto : ");
-            String cd      = Inputter.lerString("Novo código   : ");
-            String nm      = Inputter.lerString("Novo nome     : ");
-            String ds      = Inputter.lerString("Nova descrição: ");
-            BigDecimal vlCusto = Inputter.lerBigDecimal("Novo custo    : ");
-            BigDecimal vlVenda = Inputter.lerBigDecimal("Novo preço    : ");
-            int idCategoria    = Inputter.lerInt("ID Categoria  : ");
-            int idMoeda        = Inputter.lerInt("ID Moeda      : ");
+            Categoria categoria = categoriaService.findById(idCategoria);
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+                return;
+            }
 
-            Categoria cat = new CategoriaService(new CategoriaRepository(em)).findById(idCategoria);
-            if (cat == null) { System.out.println("✗ Categoria não encontrada."); return; }
+            Moeda moeda = moedaService.findById(idMoeda);
+            if (moeda == null) {
+                Logger.warn("Moeda não encontrada!");
+                return;
+            }
 
-            Moeda moe = new MoedaService(new MoedaRepository(em)).getById(idMoeda);
-            if (moe == null) { System.out.println("✗ Moeda não encontrada."); return; }
+            service.update(new Produto(id, codigo, nome, descricao, custo, venda, categoria, moeda));
+            Logger.success("Produto " + id + " atualizado com sucesso!");
 
-            Produto p = new Produto(id, cd, nm, ds, vlCusto, vlVenda, cat, moe);
-            getService(em).update(p);
-            System.out.println("✔ Produto atualizado!");
-        } finally {
-            em.close();
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar produto: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um produto pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Produto: ");
+
         try {
-            int id = Inputter.lerInt("ID do produto: ");
-            Produto p = getService(em).findById(id);
-            System.out.println(p != null ? p : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Produto produto = service.findById(id);
+            if (produto == null) {
+                Logger.warn("Produto não encontrado!");
+            } else {
+                System.out.println(produto);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar produto: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca produtos pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Produto: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Produto> produtos = service.findByNome(nome);
+
+            if (produtos.isEmpty()) {
+                Logger.warn("Produto não encontrado!");
+            } else {
+                for (Produto p : produtos) {
+                    System.out.println(p);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar produto: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os produtos cadastrados.
+     */
     private void listarTodos() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Produto> produtos = service.findAll();
+
+            if (produtos.isEmpty()) {
+                Logger.warn("Nenhum produto cadastrado!");
+            } else {
+                for (Produto p : produtos) {
+                    System.out.println(p);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar produtos: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove um produto pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Produto: ");
+
         try {
-            int id = Inputter.lerInt("ID do produto a excluir: ");
-            Produto p = getService(em).findById(id);
-            if (p == null) { System.out.println("✗ Não encontrado."); return; }
-            getService(em).delete(p);
-            System.out.println("✔ Produto excluído!");
-        } finally {
-            em.close();
+            Produto produto = service.findById(id);
+
+            if (produto == null) {
+                Logger.warn("Produto não encontrado!");
+            } else {
+                service.delete(produto);
+                Logger.success("Produto " + id + " excluído com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir produto: " + e.getMessage());
         }
     }
 }

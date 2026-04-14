@@ -1,110 +1,159 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
-import org.javapi.sigob.entity.Categoria;
-import org.javapi.sigob.repository.CategoriaRepository;
-import org.javapi.sigob.service.CategoriaService;
+import java.util.List;
 
-import jakarta.persistence.EntityManager;
+import org.javapi.sigob.entity.Categoria;
+import org.javapi.sigob.service.CategoriaService;
 import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
 
 public class MenuCategoria extends Menu {
-
+    /**
+     * Inicializa o menu de categorias e registra as entradas disponíveis.
+     */
     public MenuCategoria() {
         super("Categorias");
-        adicionarEntrada("Cadastrar categoria",  this::cadastrar);
-        adicionarEntrada("Atualizar categoria",  this::atualizar);
-        adicionarEntrada("Buscar por ID",        this::buscarPorId);
-        adicionarEntrada("Buscar por nome",      this::buscarPorNome);
-        adicionarEntrada("Buscar por código",    this::buscarPorCodigo);
-        adicionarEntrada("Listar todas",         this::listarTodas);
-        adicionarEntrada("Excluir categoria",    this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Listar (ID)", this::buscarPorId);
+        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Listar (CODIGO)", this::buscarPorCodigo);
+        adicionarEntrada("Listar (TODOS)", this::listarTodas);
     }
 
-    private CategoriaService getService(EntityManager em) {
-        return new CategoriaService(new CategoriaRepository(em));
-    }
+    private final CategoriaService service = new CategoriaService();
 
+    /**
+     * Realiza o cadastro de uma nova categoria.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            String cd = Inputter.lerString("Código   : ");
-            String nm = Inputter.lerString("Nome     : ");
+        String codigo = Inputter.lerString("Insira o Código da Categoria: ");
+        String nome = Inputter.lerString("Insira o Nome da Categoria: ");
 
-            Categoria cat = new Categoria(0, cd, nm);
-            getService(em).save(cat);
-            System.out.println("✔ Categoria cadastrada!");
-        } finally {
-            em.close();
+        try {
+            service.save(new Categoria(0, codigo, nome));
+            Logger.success("Categoria " + nome + " cadastrada com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar categoria: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de uma categoria existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            int    id = Inputter.lerInt("ID da categoria : ");
-            String cd = Inputter.lerString("Novo código     : ");
-            String nm = Inputter.lerString("Novo nome       : ");
+        int id = Inputter.lerInt("Insira o ID da Categoria: ");
 
-            Categoria cat = new Categoria(id, cd, nm);
-            getService(em).update(cat);
-            System.out.println("✔ Categoria atualizada!");
-        } finally {
-            em.close();
+        while (service.findById(id) == null) {
+            Logger.warn("Categoria não encontrada!");
+            id = Inputter.lerInt("Insira o ID da Categoria: ");
+        }
+
+        String codigo = Inputter.lerString("Insira o Novo Código da Categoria: ");
+        String nome = Inputter.lerString("Insira o Novo Nome da Categoria: ");
+
+        try {
+            service.update(new Categoria(id, codigo, nome));
+            Logger.success("Categoria " + id + " atualizada com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar categoria: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca uma categoria pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID da Categoria: ");
+
         try {
-            int id = Inputter.lerInt("ID da categoria: ");
-            Categoria c = getService(em).findById(id);
-            System.out.println(c != null ? c : "✗ Não encontrada.");
-        } finally {
-            em.close();
+            Categoria categoria = service.findById(id);
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+            } else {
+                System.out.println(categoria);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar categoria: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca categorias pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome da Categoria: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Categoria> categorias = service.findByNome(nome);
+
+            if (categorias.isEmpty()) {
+                Logger.warn("Categoria não encontrada!");
+            } else {
+                for (Categoria c : categorias) {
+                    System.out.println(c);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar categoria: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca uma categoria pelo código.
+     */
     private void buscarPorCodigo() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira o Código da Categoria: ");
+
         try {
-            String cd = Inputter.lerString("Código: ");
-            Categoria c = getService(em).findByCodigo(cd);
-            System.out.println(c != null ? c : "✗ Não encontrada.");
-        } finally {
-            em.close();
+            Categoria categoria = service.findByCodigo(codigo);
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+            } else {
+                System.out.println(categoria);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar categoria: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todas as categorias cadastradas.
+     */
     private void listarTodas() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Categoria> categorias = service.findAll();
+
+            if (categorias.isEmpty()) {
+                Logger.warn("Nenhuma categoria cadastrada!");
+            } else {
+                for (Categoria c : categorias) {
+                    System.out.println(c);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar categorias: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove uma categoria pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID da Categoria: ");
+
         try {
-            int id = Inputter.lerInt("ID da categoria a excluir: ");
-            Categoria c = getService(em).findById(id);
-            if (c == null) { System.out.println("✗ Não encontrada."); return; }
-            getService(em).delete(c);
-            System.out.println("✔ Categoria excluída!");
-        } finally {
-            em.close();
+            Categoria categoria = service.findById(id);
+
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+            } else {
+                service.delete(categoria);
+                Logger.success("Categoria " + id + " excluida com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir categoria: " + e.getMessage());
         }
     }
 }

@@ -1,112 +1,162 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
-import org.javapi.sigob.entity.Moeda;
-import org.javapi.sigob.repository.MoedaRepository;
-import org.javapi.sigob.service.MoedaService;
+import java.util.List;
 
-import jakarta.persistence.EntityManager;
+import org.javapi.sigob.entity.Moeda;
+import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
 
 public class MenuMoeda extends Menu {
 
+    /**
+     * Inicializa o menu de moedas e registra as entradas disponíveis.
+     */
     public MenuMoeda() {
         super("Moedas");
-        adicionarEntrada("Cadastrar moeda",   this::cadastrar);
-        adicionarEntrada("Atualizar moeda",   this::atualizar);
-        adicionarEntrada("Buscar por ID",     this::buscarPorId);
-        adicionarEntrada("Buscar por nome",   this::buscarPorNome);
-        adicionarEntrada("Buscar por código", this::buscarPorCodigo);
-        adicionarEntrada("Listar todas",      this::listarTodas);
-        adicionarEntrada("Excluir moeda",     this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Buscar (ID)", this::buscarPorId);
+        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Buscar (CODIGO)", this::buscarPorCodigo);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private MoedaService getService(EntityManager em) {
-        return new MoedaService(new MoedaRepository(em));
-    }
+    private final MoedaService service = new MoedaService();
 
+    /**
+     * Realiza o cadastro de uma nova moeda.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            String nm     = Inputter.lerString("Nome   : ");
-            String cifrao = Inputter.lerString("Símbolo (ex: R$) : ");
-            String sigla  = Inputter.lerString("Sigla   (ex: BRL): ");
+        String nome = Inputter.lerString("Insira o Nome da Moeda: ");
+        String simbolo = Inputter.lerString("Insira o Símbolo: ");
+        String sigla = Inputter.lerString("Insira a Sigla: ");
 
-            Moeda m = new Moeda(0, nm, cifrao, sigla);
-            getService(em).save(m, em);
-            System.out.println("✔ Moeda cadastrada!");
-        } finally {
-            em.close();
+        try {
+            service.save(new Moeda(0, nome, simbolo, sigla));
+            Logger.success("Moeda " + nome + " cadastrada com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar moeda: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de uma moeda existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            int    id     = Inputter.lerInt("ID da moeda : ");
-            String nm     = Inputter.lerString("Novo nome   : ");
-            String cifrao = Inputter.lerString("Novo símbolo: ");
-            String sigla  = Inputter.lerString("Nova sigla  : ");
+        int id = Inputter.lerInt("Insira o ID da Moeda: ");
 
-            Moeda m = new Moeda(id, nm, cifrao, sigla);
-            getService(em).update(m);
-            System.out.println("✔ Moeda atualizada!");
-        } finally {
-            em.close();
+        while (service.findById(id) == null) {
+            Logger.warn("Moeda não encontrada!");
+            id = Inputter.lerInt("Insira o ID da Moeda: ");
+        }
+
+        String nome = Inputter.lerString("Insira o Novo Nome da Moeda: ");
+        String simbolo = Inputter.lerString("Insira o Novo Símbolo: ");
+        String sigla = Inputter.lerString("Insira a Nova Sigla: ");
+
+        try {
+            service.update(new Moeda(id, nome, simbolo, sigla));
+            Logger.success("Moeda " + id + " atualizada com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar moeda: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca uma moeda pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID da Moeda: ");
+
         try {
-            int id = Inputter.lerInt("ID da moeda: ");
-            Moeda m = getService(em).getById(id);
-            System.out.println(m != null ? m : "✗ Não encontrada.");
-        } finally {
-            em.close();
+            Moeda moeda = service.findById(id);
+            if (moeda == null) {
+                Logger.warn("Moeda não encontrada!");
+            } else {
+                System.out.println(moeda);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar moeda: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca moedas pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome da Moeda: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).getByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Moeda> moedas = service.findByNome(nome);
+
+            if (moedas.isEmpty()) {
+                Logger.warn("Moeda não encontrada!");
+            } else {
+                for (Moeda m : moedas) {
+                    System.out.println(m);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar moeda: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca uma moeda pelo código.
+     */
     private void buscarPorCodigo() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira a Sigla da Moeda: ");
+
         try {
-            String cd = Inputter.lerString("Código: ");
-            Moeda m = getService(em).getByCodigo(cd);
-            System.out.println(m != null ? m : "✗ Não encontrada.");
-        } finally {
-            em.close();
+            Moeda moeda = service.findByCodigo(codigo);
+            if (moeda == null) {
+                Logger.warn("Moeda não encontrada!");
+            } else {
+                System.out.println(moeda);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar moeda: " + e.getMessage());
         }
     }
 
-    private void listarTodas() {
-        EntityManager em = JPAConfig.getEntityManager();
+    /**
+     * Lista todas as moedas cadastradas.
+     */
+    private void listarTodos() {
         try {
-            getService(em).getAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Moeda> moedas = service.findAll();
+
+            if (moedas.isEmpty()) {
+                Logger.warn("Nenhuma moeda cadastrada!");
+            } else {
+                for (Moeda m : moedas) {
+                    System.out.println(m);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar moedas: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove uma moeda pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID da Moeda: ");
+
         try {
-            int id = Inputter.lerInt("ID da moeda a excluir: ");
-            Moeda m = getService(em).getById(id);
-            if (m == null) { System.out.println("✗ Não encontrada."); return; }
-            getService(em).delete(m);
-            System.out.println("✔ Moeda excluída!");
-        } finally {
-            em.close();
+            Moeda moeda = service.findById(id);
+
+            if (moeda == null) {
+                Logger.warn("Moeda não encontrada!");
+            } else {
+                service.delete(moeda);
+                Logger.success("Moeda " + id + " excluída com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir moeda: " + e.getMessage());
         }
     }
 }

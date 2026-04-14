@@ -1,130 +1,191 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
+import java.util.List;
+
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.repository.AcessoRepository;
-import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.service.AcessoService;
 import org.javapi.sigob.service.FuncionarioService;
-
-import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
+
 
 public class MenuFuncionario extends Menu {
 
+    /**
+     * Inicializa o menu de funcionários e registra as entradas disponíveis.
+     */
     public MenuFuncionario() {
         super("Funcionários");
-        adicionarEntrada("Cadastrar funcionário",   this::cadastrar);
-        adicionarEntrada("Atualizar funcionário",   this::atualizar);
-        adicionarEntrada("Buscar por ID",           this::buscarPorId);
-        adicionarEntrada("Buscar por nome",         this::buscarPorNome);
-        adicionarEntrada("Buscar por código",       this::buscarPorCodigo);
-        adicionarEntrada("Listar todos",            this::listarTodos);
-        adicionarEntrada("Excluir funcionário",     this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Buscar (ID)", this::buscarPorId);
+        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Buscar (CODIGO)", this::buscarPorCodigo);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private FuncionarioService getService(EntityManager em) {
-        return new FuncionarioService(new FuncionarioRepository(em));
-    }
+    private final FuncionarioService service = new FuncionarioService();
+    private final AcessoService acessoService = new AcessoService();
 
+    /**
+     * Realiza o cadastro de um novo funcionário.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Funcionário: ");
+        String codigo = Inputter.lerString("Insira o Código do Funcionário: ");
+        int idAcesso = Inputter.lerInt("Insira o ID do Acesso: ");
+
         try {
-            String nm  = Inputter.lerString("Nome              : ");
-            String cd  = Inputter.lerString("Código            : ");
-            int idAcesso = Inputter.lerInt("ID do Acesso      : ");
+            Acesso acesso = acessoService.findById(idAcesso);
 
-            Acesso acesso = new AcessoService(new AcessoRepository(em)).findById(idAcesso);
-            if (acesso == null) { System.out.println("✗ Acesso não encontrado."); return; }
+            if (acesso == null) {
+                Logger.warn("Acesso não encontrado!");
+                return;
+            }
 
-            Funcionario f = new Funcionario();
-            f.setNmFuncionario(nm);
-            f.setCdFuncionario(cd);
-            f.setAcesso(acesso);
+            Funcionario funcionario = new Funcionario();
+            funcionario.setNmFuncionario(nome);
+            funcionario.setCdFuncionario(codigo);
+            funcionario.setAcesso(acesso);
 
-            getService(em).save(f);
-            System.out.println("✔ Funcionário cadastrado!");
-        } finally {
-            em.close();
+            service.save(funcionario);
+            Logger.success("Funcionário " + nome + " cadastrado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar funcionário: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de um funcionário existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
+
+        while (service.findById(id) == null) {
+            Logger.warn("Funcionário não encontrado!");
+            id = Inputter.lerInt("Insira o ID do Funcionário: ");
+        }
+
+        String nome = Inputter.lerString("Insira o Novo Nome do Funcionário: ");
+        String codigo = Inputter.lerString("Insira o Novo Código do Funcionário: ");
+        int idAcesso = Inputter.lerInt("Insira o ID do Acesso: ");
+
         try {
-            int    id      = Inputter.lerInt("ID do funcionário : ");
-            String nm      = Inputter.lerString("Novo nome         : ");
-            String cd      = Inputter.lerString("Novo código       : ");
-            int    idAcesso = Inputter.lerInt("ID do Acesso      : ");
+            Acesso acesso = acessoService.findById(idAcesso);
 
-            Acesso acesso = new AcessoService(new AcessoRepository(em)).findById(idAcesso);
-            if (acesso == null) { System.out.println("✗ Acesso não encontrado."); return; }
+            if (acesso == null) {
+                Logger.warn("Acesso não encontrado!");
+                return;
+            }
 
-            Funcionario f = new Funcionario();
-            f.setIdFuncionario(id);
-            f.setNmFuncionario(nm);
-            f.setCdFuncionario(cd);
-            f.setAcesso(acesso);
+            Funcionario funcionario = new Funcionario();
+            funcionario.setIdFuncionario(id);
+            funcionario.setNmFuncionario(nome);
+            funcionario.setCdFuncionario(codigo);
+            funcionario.setAcesso(acesso);
 
-            getService(em).update(f);
-            System.out.println("✔ Funcionário atualizado!");
-        } finally {
-            em.close();
+            service.update(funcionario);
+            Logger.success("Funcionário " + id + " atualizado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar funcionário: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um funcionário pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
+
         try {
-            int id = Inputter.lerInt("ID do funcionário: ");
-            Funcionario f = getService(em).findById(id);
-            System.out.println(f != null ? f : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Funcionario funcionario = service.findById(id);
+            if (funcionario == null) {
+                Logger.warn("Funcionário não encontrado!");
+            } else {
+                System.out.println(funcionario);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar funcionário: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca funcionários pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Funcionário: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Funcionario> funcionarios = service.findByNome(nome);
+
+            if (funcionarios.isEmpty()) {
+                Logger.warn("Funcionário não encontrado!");
+            } else {
+                for (Funcionario f : funcionarios) {
+                    System.out.println(f);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar funcionário: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um funcionário pelo código.
+     */
     private void buscarPorCodigo() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira o Código do Funcionário: ");
+
         try {
-            String cd = Inputter.lerString("Código: ");
-            Funcionario f = getService(em).findByCodigo(cd);
-            System.out.println(f != null ? f : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Funcionario funcionario = service.findByCodigo(codigo);
+            if (funcionario == null) {
+                Logger.warn("Funcionário não encontrado!");
+            } else {
+                System.out.println(funcionario);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar funcionário: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os funcionários cadastrados.
+     */
     private void listarTodos() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Funcionario> funcionarios = service.findAll();
+
+            if (funcionarios.isEmpty()) {
+                Logger.warn("Nenhum funcionário cadastrado!");
+            } else {
+                for (Funcionario f : funcionarios) {
+                    System.out.println(f);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar funcionários: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove um funcionário pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
+
         try {
-            int id = Inputter.lerInt("ID do funcionário a excluir: ");
-            Funcionario f = getService(em).findById(id);
-            if (f == null) { System.out.println("✗ Não encontrado."); return; }
-            getService(em).delete(f);
-            System.out.println("✔ Funcionário excluído!");
-        } finally {
-            em.close();
+            Funcionario funcionario = service.findById(id);
+
+            if (funcionario == null) {
+                Logger.warn("Funcionário não encontrado!");
+            } else {
+                service.delete(funcionario);
+                Logger.success("Funcionário " + id + " excluido com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir funcionário: " + e.getMessage());
         }
     }
 }

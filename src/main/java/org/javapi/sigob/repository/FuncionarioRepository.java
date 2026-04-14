@@ -94,8 +94,12 @@ public class FuncionarioRepository {
      * @return Funcionario - O funcionario
      */
     public Funcionario findByCodigo(String codigo) {
-        return em.createQuery("select f from funcionarios f where f.cdFuncionario like :str", Funcionario.class)
-                .setParameter("str", codigo + "%")
+        return em.createQuery("""
+                    SELECT f FROM funcionarios f
+                    JOIN FETCH f.acesso
+                    WHERE f.cdFuncionario = :codigo
+                """, Funcionario.class)
+                .setParameter("codigo", codigo)
                 .getSingleResultOrNull();
     }
 }
