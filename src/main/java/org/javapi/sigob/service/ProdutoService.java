@@ -79,7 +79,6 @@ public class ProdutoService {
      * @return Produto - O Produto encontrado
      */
     public Produto findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -98,17 +97,10 @@ public class ProdutoService {
         if (produto == null) {
             throw new ProdutoException("Produto não pode ser nulo");
         }
-        validateId(produto.getIdProduto());
         validateNome(produto.getNmProduto());
         validateCodigo(produto.getCdProduto());
         validateValorCusto(produto.getVlCusto());
         validateValorVenda(produto.getVlProduto());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new ProdutoException("Id do produto não pode ser menor ou igual a zero");
-        }
     }
 
     private void validateCodigo(String codigo) {

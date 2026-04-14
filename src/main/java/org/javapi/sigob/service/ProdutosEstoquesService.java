@@ -77,8 +77,7 @@ public class ProdutosEstoquesService {
      * @param id O ID do ProdutosEstoques
      * @return ProdutosEstoques - O ProdutosEstoques
      */
-    public ProdutosEstoques findById(int id) throws ProdutosEstoquesException {
-        validateId(id);
+    public ProdutosEstoques findById(int id) {
         return this.repository.findById(id);
     }
 
@@ -97,15 +96,8 @@ public class ProdutosEstoquesService {
         if (produtoEstoque == null) {
             throw new ProdutosEstoquesException("Produtos não pode ser nulo");
         }
-        validateId(produtoEstoque.getIdProdutosEstoque());
         validateObservacao(produtoEstoque.getDsObservacao());
         validateQuantidade(produtoEstoque.getNrQuantidade());
-    }
-
-    private void validateId(int id) throws ProdutosEstoquesException {
-        if (id < 0) {
-            throw new ProdutosEstoquesException("Id não pode ser negativo");
-        }
     }
 
     private void validateQuantidade(int quantidade) throws ProdutosEstoquesException {

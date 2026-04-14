@@ -79,7 +79,6 @@ public class FuncionarioService {
      * @return Funcionario - O funcionario
      */
     public Funcionario findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -109,16 +108,9 @@ public class FuncionarioService {
         if (funcionario == null) {
             throw new FuncionarioException("Funcionário não pode ser nulo");
         }
-        validateId(funcionario.getIdFuncionario());
         validateNome(funcionario.getNmFuncionario());
         validateCodigo(funcionario.getCdFuncionario());
         validateAcesso(funcionario.getAcesso());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new FuncionarioException("ID do funcionário deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {

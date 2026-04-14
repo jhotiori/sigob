@@ -1,5 +1,7 @@
 package org.javapi.sigob.cli;
 
+import java.util.List;
+
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.entity.Produto;
@@ -11,11 +13,9 @@ import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 import org.javapi.sigob.service.EstoqueService;
 import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
-
-import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
 
-import java.util.List;
+import jakarta.persistence.EntityManager;
 
 public class MenuEstoques extends Menu {
     public MenuEstoques() {
@@ -115,12 +115,8 @@ public class MenuEstoques extends Menu {
                     pe.getEstoque().getNmEstoque()));
 
             int idItem = Inputter.lerInt("\nID do item a transferir : ");
-            ProdutosEstoques origem = null;
-            try {
-                origem = getService(em).findById(idItem);
-            } catch (ProdutosEstoquesException e) {
-                throw new RuntimeException(e);
-            }
+            ProdutosEstoques origem = getService(em).findById(idItem);
+
             if (origem == null) {
                 System.out.println("✗ Item não encontrado.");
                 return;

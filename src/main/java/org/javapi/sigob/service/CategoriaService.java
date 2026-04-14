@@ -84,7 +84,6 @@ public class CategoriaService {
      * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
     public Categoria findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -114,15 +113,8 @@ public class CategoriaService {
         if (categoria == null) {
             throw new CategoriaException("Categoria não pode ser nula");
         }
-        validateId(categoria.getIdCategoria());
         validateNome(categoria.getNmCategoria());
         validateCodigo(categoria.getCdCategoria());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new CategoriaException("ID da categoria deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {

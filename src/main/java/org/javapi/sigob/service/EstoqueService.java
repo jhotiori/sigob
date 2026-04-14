@@ -95,15 +95,8 @@ public class EstoqueService {
         if (estoque == null) {
             throw new EstoqueException("Estoque não pode ser nulo");
         }
-        validateId(estoque.getIdEstoque());
         validateCodigo(estoque.getCdEstoque());
         validateNome(estoque.getNmEstoque());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new EstoqueException("Id do estoque não pode ser menor ou igual a zero");
-        }
     }
 
     private void validateCodigo(String codigo) {

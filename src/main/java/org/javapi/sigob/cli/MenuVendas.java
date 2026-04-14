@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-
-import org.hibernate.query.sqm.mutation.internal.inline.InPredicateRestrictionProducer;
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
@@ -25,6 +22,8 @@ import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.ProdutosVendasService;
 import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.util.Inputter;
+
+import jakarta.persistence.EntityManager;
 
 public class MenuVendas extends Menu {
 
@@ -183,19 +182,15 @@ public class MenuVendas extends Menu {
         System.out.println("\n── Produtos em estoque ──");
         estoque.forEach(pe -> System.out.printf(
                 "[%d] %s | Estoque: %s | Qtde disponível: %d | Preço: %.2f%n",
-                pe.getIdProdutosEstoque(),
+                pe.getProduto().getIdProduto(),
                 pe.getProduto().getNmProduto(),
                 pe.getEstoque().getNmEstoque(),
                 pe.getNrQuantidade(),
-                pe.getProduto().getVlProduto()));
+                pe.getProduto().getVlProduto())
+            );
 
         int idPe = Inputter.lerInt("\nID do item (ProdutoEstoque): ");
-        ProdutosEstoques pe = null;
-        try {
-            pe = getPeService(em).findById(idPe);
-        } catch (ProdutosEstoquesException e) {
-            throw new RuntimeException(e);
-        }
+        ProdutosEstoques pe = getPeService(em).findById(idPe);
         if (pe == null) {
             System.out.println("✗ Item não encontrado.");
             return;
@@ -210,7 +205,7 @@ public class MenuVendas extends Menu {
         BigDecimal vlTotal = pe.getProduto().getVlProduto().multiply(BigDecimal.valueOf(qtde));
 
         ProdutosVendas pv = new ProdutosVendas(0, qtde, vlTotal, pe.getProduto(), venda);
-        getPvService(em).save(pv);
+        ProdutosVendas pvFinal = getPvService(em).save(pv);
 
         System.out.printf("✔ %dx '%s' adicionado ao carrinho. Subtotal: %.2f%n",
                 qtde, pe.getProduto().getNmProduto(), vlTotal);
@@ -362,7 +357,7 @@ public class MenuVendas extends Menu {
 
             while (true) {
                 String doc = Inputter.lerString("Documento: ");
-                if (clienteService.findByDocumento(doc) != null) {
+                if (!clienteService.findByDocumento(doc).isEmpty()) {
                     System.out.println("⚠  Documento já cadastrado. Tente outro.");
                 } else {
                     novo.setNrDocumento(doc);

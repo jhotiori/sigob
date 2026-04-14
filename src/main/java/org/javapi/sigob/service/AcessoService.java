@@ -79,7 +79,6 @@ public class AcessoService {
      * @return Acesso - O Acesso buscado
      */
     public Acesso findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -109,15 +108,8 @@ public class AcessoService {
         if (acesso == null) {
             throw new AcessoException("Acesso não pode ser nulo");
         }
-        validateId(acesso.getIdAcesso());
         validateNome(acesso.getNmAcesso());
         validateCodigo(acesso.getCdAcesso());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new AcessoException("ID do acesso deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {
