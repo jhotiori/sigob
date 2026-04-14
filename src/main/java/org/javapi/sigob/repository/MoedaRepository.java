@@ -1,10 +1,10 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Funcionario;
+import java.util.List;
+
 import org.javapi.sigob.entity.Moeda;
 
-import java.util.List;
+import jakarta.persistence.EntityManager;
 
 public class MoedaRepository {
     private EntityManager em;
@@ -17,7 +17,7 @@ public class MoedaRepository {
         return em.find(Moeda.class, id);
     }
 
-    public void create(Moeda moeda){
+    public void save(Moeda moeda){
         em.getTransaction().begin();
         em.persist(moeda);
         em.getTransaction().commit();

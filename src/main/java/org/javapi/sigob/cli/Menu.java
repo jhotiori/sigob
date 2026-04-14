@@ -27,7 +27,7 @@ public abstract class Menu {
     protected void adicionarEntrada(String nome, Runnable callback) {
         this.entradas.add(new Entry(nome, callback));
     }
-    
+
     protected void limparEntradas() {
         this.entradas.clear();
     }
@@ -42,9 +42,10 @@ public abstract class Menu {
             for (int index = 0; index < this.entradas.size(); index++) {
                 System.out.println("[%d] - %s".formatted(index + 1, this.entradas.get(index).nome));
             }
+            System.out.println("[0] - Sair");
             System.out.println(footer);
 
-            int opcao = Inputter.lerInt("Insira uma opção: ");
+            int opcao = Inputter.lerInt(">> Insira uma opção: ");
 
             if (opcao == 0) {
                 break;

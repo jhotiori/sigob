@@ -34,7 +34,7 @@ public class ClienteService {
         String nome = cliente.getNmCliente();
         String documento = cliente.getNrDocumento();
 
-        if (findByDocumento(documento) != null) {
+        if (!findByDocumento(documento).isEmpty()) {
             throw new ClienteException("Cliente com o mesmo documento já cadastrado!");
         }
 
@@ -87,7 +87,6 @@ public class ClienteService {
      * @return Cliente - O Cliente buscado
      */
     public Cliente findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -117,15 +116,8 @@ public class ClienteService {
         if (cliente == null) {
             throw new ClienteException("Cliente não pode ser nulo");
         }
-        validateId(cliente.getIdCliente());
         validateNome(cliente.getNmCliente());
         validateDocumento(cliente.getNrDocumento());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new ClienteException("Id do cliente deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {

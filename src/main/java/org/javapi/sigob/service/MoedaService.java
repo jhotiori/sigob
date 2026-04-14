@@ -1,12 +1,12 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+
 import org.javapi.sigob.entity.Moeda;
 import org.javapi.sigob.exception.MoedaException;
 import org.javapi.sigob.repository.MoedaRepository;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import java.util.List;
 
 public class MoedaService {
     private final MoedaRepository repository;
@@ -17,29 +17,16 @@ public class MoedaService {
 
     public void save(Moeda moeda, EntityManager em) {
         validateMoeda(moeda);
-
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            int idMoeda = moeda.getIdMoeda();
-
-            if (idMoeda > 0) {
-                this.repository.update(moeda);
-            } else {
-                this.repository.create(moeda);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            throw e;
+        if (moeda.getIdMoeda() > 0) {
+            this.repository.update(moeda);
+        } else {
+            this.repository.save(moeda);
         }
     }
 
     public void create(Moeda moeda) {
         validateMoeda(moeda);
-        this.repository.create(moeda);
+        this.repository.save(moeda);
     }
 
     public void update(Moeda moeda) {

@@ -12,6 +12,8 @@ import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.repository.ProdutosVendasRepository;
 import org.javapi.sigob.repository.VendaRepository;
 
+import jakarta.persistence.EntityManager;
+
 public class ProdutosVendasService {
     private final ProdutosVendasRepository repository;
 
@@ -33,22 +35,12 @@ public class ProdutosVendasService {
      * @return ProdutosVendas - O ProdutosVendas salvo
      */
     public ProdutosVendas save(ProdutosVendas produtosVendas) {
-        validateProdutosVendas(produtosVendas);
+        validateProdutosVendas(produtosVendas); // TODO: passar EM
         int idProdutoVenda = produtosVendas.getIdProdutoVenda();
         Produto produto = produtosVendas.getProduto();
         Venda venda = produtosVendas.getVenda();
         int quantidade = produtosVendas.getNrQuantidade();
         BigDecimal saldo = produtosVendas.getVlSaldo();
-
-        ProdutoService produtoService = new ProdutoService(new ProdutoRepository(JPAConfig.getEntityManager()));
-        if (!produtoService.contains(produto)) {
-            throw new ProdutosVendasException("Produto não localizado!");
-        }
-
-        VendaService vendaService = new VendaService(new VendaRepository(JPAConfig.getEntityManager()));
-        if (!vendaService.exists(venda)) {
-            throw new ProdutosVendasException("Venda não localizada!");
-        }
 
         ProdutosVendas produtoFinal = new ProdutosVendas(idProdutoVenda, quantidade, saldo, produto, venda);
 
@@ -98,7 +90,6 @@ public class ProdutosVendasService {
      * @return ProdutosVendas - O ProdutosVendas
      */
     public ProdutosVendas findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -109,9 +100,8 @@ public class ProdutosVendasService {
      * @throws ProdutosVendasException Se o Produto for invalido
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
-    public List<ProdutosVendas> findByProdutoId(Produto produto) {
-        validateProduto(produto);
-        validateId(produto.getIdProduto());
+    public List<ProdutosVendas> findByProdutoId(Produto produto, EntityManager em) {
+        validateProduto(produto, em);
         return this.repository.findByProdutoId(produto.getIdProduto());
     }
 
@@ -123,25 +113,17 @@ public class ProdutosVendasService {
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
     public List<ProdutosVendas> findByVendaId(Venda venda) {
-        validateVenda(venda);
-        validateId(venda.getIdVenda());
         return this.repository.findByVendaId(venda.getIdVenda());
     }
 
-    private void validateProdutosVendas(ProdutosVendas produtoVendas) {
+    private void validateProdutosVendas(ProdutosVendas produtoVendas, EntityManager em) {
         if (produtoVendas == null) {
             throw new ProdutosVendasException("ProdutosVendas nao pode ser nulo!");
         }
         validateQuantidade(produtoVendas.getNrQuantidade());
         validateSaldo(produtoVendas.getVlSaldo());
-        validateProduto(produtoVendas.getProduto());
-        validateVenda(produtoVendas.getVenda());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new ProdutosVendasException("Id nao pode ser menor ou igual a zero!");
-        }
+        validateProduto(produtoVendas.getProduto(), em);
+        validateVenda(produtoVendas.getVenda(), em);
     }
 
     private void validateQuantidade(int quantidade) {
@@ -156,15 +138,17 @@ public class ProdutosVendasService {
         }
     }
 
-    private void validateProduto(Produto produto) {
-        if (produto == null) {
-            throw new ProdutosVendasException("Produto nao pode ser nulo!");
+    private void validateProduto(Produto produto, EntityManager em) {
+        ProdutoService produtoService = new ProdutoService(new ProdutoRepository(em));
+        if (!produtoService.contains(produto)) {
+            throw new ProdutosVendasException("Produto não localizado!");
         }
     }
 
-    private void validateVenda(Venda venda) {
-        if (venda == null) {
-            throw new ProdutosVendasException("Venda nao pode ser nulo!");
+    private void validateVenda(Venda venda, EntityManager em) {
+        VendaService vendaService = new VendaService(new VendaRepository(em));
+        if (!vendaService.exists(venda)) {
+            throw new ProdutosVendasException("Venda não localizada!");
         }
     }
 }

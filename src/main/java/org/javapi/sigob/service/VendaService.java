@@ -1,6 +1,5 @@
 package org.javapi.sigob.service;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -79,7 +78,6 @@ public class VendaService {
      * @return Venda - A venda
      */
     public Venda findById(int id) {
-        validateId(id);
         return this.repository.findById(id);
     }
 
@@ -99,28 +97,8 @@ public class VendaService {
             throw new VendaException("Venda nao pode ser nulo!");
         }
         validatePago(venda.isFlPago());
-        validateData(venda.getDtVenda());
-        validateValor(venda.getVlVenda());
         validateCliente(venda.getCliente());
         validateFuncionario(venda.getFuncionario());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new VendaException("Id nao pode ser menor ou igual a zero!");
-        }
-    }
-
-    private void validateData(ZonedDateTime data) {
-        if (data == null) {
-            throw new VendaException("Data nao pode ser nula!");
-        }
-    }
-
-    private void validateValor(BigDecimal valor) {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new VendaException("Valor da venda nao pode ser nulo ou menor ou igual a zero!");
-        }
     }
 
     private void validatePago(boolean pago) {
