@@ -12,10 +12,10 @@ public final class Logger {
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
 
-    private static final String INFO_SYMBOL = "ℹ";
-    private static final String SUCCESS_SYMBOL = "✔";
-    private static final String WARN_SYMBOL = "⚠";
-    private static final String ERROR_SYMBOL = "✖";
+    private static final String INFO_SYMBOL = "";
+    private static final String SUCCESS_SYMBOL = "";
+    private static final String WARN_SYMBOL = "";
+    private static final String ERROR_SYMBOL = "";
 
     /**
      * Exibe uma mensagem de informação no console.
