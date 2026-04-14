@@ -5,7 +5,6 @@ import java.util.List;
 import org.javapi.sigob.entity.Cliente;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class ClienteRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class ClienteRepository {
      * @param cliente O Cliente para ser salvo
      */
     public void save(Cliente cliente) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(cliente);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(cliente);
     }
 
     /**
@@ -47,19 +34,7 @@ public class ClienteRepository {
      * @param cliente O Cliente para ser atualizado
      */
     public void update(Cliente cliente) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(cliente);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(cliente);
     }
 
     /**
@@ -68,19 +43,7 @@ public class ClienteRepository {
      * @param cliente O Cliente para ser removido
      */
     public void remove(Cliente cliente) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(cliente) ? cliente : manager.merge(cliente));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(cliente) ? cliente : em.merge(cliente));
     }
 
     /**
@@ -90,7 +53,7 @@ public class ClienteRepository {
      * @return boolean - true se o Cliente existe, false se nao
      */
     public boolean contains(Cliente cliente) {
-        return em.contains(cliente);
+        return em.find(Cliente.class, cliente.getIdCliente()) != null;
     }
 
     /**
