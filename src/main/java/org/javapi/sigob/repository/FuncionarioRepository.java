@@ -5,7 +5,6 @@ import java.util.List;
 import org.javapi.sigob.entity.Funcionario;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class FuncionarioRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class FuncionarioRepository {
      * @param funcionario O Funcionario para salvar
      */
     public void save(Funcionario funcionario) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(funcionario);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(funcionario);
     }
 
     /**
@@ -47,19 +34,7 @@ public class FuncionarioRepository {
      * @param funcionario O funcionario para atualizar
      */
     public void update(Funcionario funcionario) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(funcionario);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(funcionario);
     }
 
     /**
@@ -68,19 +43,7 @@ public class FuncionarioRepository {
      * @param funcionario O funcionario para deletar
      */
     public void delete(Funcionario funcionario) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(funcionario) ? funcionario : manager.merge(funcionario));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(funcionario) ? funcionario : em.merge(funcionario));
     }
 
     /**
@@ -90,7 +53,7 @@ public class FuncionarioRepository {
      * @return boolean - true se o funcionario existe, false se nao
      */
     public boolean contains(Funcionario funcionario) {
-        return em.contains(funcionario);
+        return em.find(Funcionario.class, funcionario.getIdFuncionario()) != null;
     }
 
     /**
