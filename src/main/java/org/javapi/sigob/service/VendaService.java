@@ -151,7 +151,6 @@ public class VendaService {
         if (venda == null) {
             throw new VendaException("Venda nao pode ser nulo!");
         }
-        validatePago(venda.isFlPago());
         validateCliente(venda.getCliente());
         validateFuncionario(venda.getFuncionario());
     }
