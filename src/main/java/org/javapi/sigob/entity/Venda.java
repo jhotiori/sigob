@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,11 +26,11 @@ public class Venda {
     @Column(name = "flPago")
     private boolean flPago;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idCliente")
     private Cliente cliente;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idFuncionario")
     private Funcionario funcionario;
 

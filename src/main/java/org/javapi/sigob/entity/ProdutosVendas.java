@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,11 +22,11 @@ public class ProdutosVendas {
     @Column(name = "vlSaldo")
     private BigDecimal vlSaldo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idProduto")
     private Produto produto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idVenda")
     private Venda venda;
 

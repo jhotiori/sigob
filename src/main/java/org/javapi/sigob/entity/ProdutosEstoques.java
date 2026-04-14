@@ -2,7 +2,6 @@ package org.javapi.sigob.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,11 +20,11 @@ public class ProdutosEstoques {
     @Column(name = "dsObservacao")
     private String dsObservacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idProduto")
     private Produto produto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idEstoque")
     private Estoque estoque;
 
