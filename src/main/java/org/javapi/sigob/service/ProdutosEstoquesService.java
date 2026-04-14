@@ -2,21 +2,22 @@ package org.javapi.sigob.service;
 
 import java.util.List;
 
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.ProdutosEstoques;
 import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 public class ProdutosEstoquesService {
-    private final ProdutosEstoquesRepository repository;
 
     /**
      * Cria um novo ProdutosEstoquesService
      *
-     * @param repository O repositorio de ProdutosEstoques
      * @return ProdutosEstoquesService - O ProdutosEstoquesService
      */
-    public ProdutosEstoquesService(ProdutosEstoquesRepository repository) {
-        this.repository = repository;
+    public ProdutosEstoquesService() {
     }
 
     /**
@@ -27,7 +28,23 @@ public class ProdutosEstoquesService {
      */
     public void save(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
-        this.repository.save(produtoEstoque);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            transaction.begin();
+            repository.save(produtoEstoque);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -38,7 +55,23 @@ public class ProdutosEstoquesService {
      */
     public void update(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
-        this.repository.update(produtoEstoque);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            transaction.begin();
+            repository.update(produtoEstoque);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -47,8 +80,21 @@ public class ProdutosEstoquesService {
      * @param produtoEstoques O ProdutosEstoques
      */
     public void delete(ProdutosEstoques produtoEstoques) {
-        if (this.repository.contains(produtoEstoques)) {
-            this.repository.delete(produtoEstoques);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            transaction.begin();
+            repository.delete(produtoEstoques);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -59,7 +105,14 @@ public class ProdutosEstoquesService {
      * @return boolean - true se o ProdutosEstoques estiver contido, false se nao
      */
     public boolean contains(ProdutosEstoques produtoEstoque) {
-        return this.repository.contains(produtoEstoque);
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            return repository.contains(produtoEstoque);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -68,7 +121,14 @@ public class ProdutosEstoquesService {
      * @return List<ProdutosEstoques> - A lista de ProdutosEstoques
      */
     public List<ProdutosEstoques> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -78,7 +138,14 @@ public class ProdutosEstoquesService {
      * @return ProdutosEstoques - O ProdutosEstoques
      */
     public ProdutosEstoques findById(int id) {
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -89,7 +156,15 @@ public class ProdutosEstoquesService {
      */
     public List<ProdutosEstoques> findByNome(String nome) throws ProdutosEstoquesException {
         validateObservacao(nome);
-        return this.repository.findByNome(nome);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            return repository.findByNome(nome);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {

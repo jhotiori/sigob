@@ -2,21 +2,22 @@ package org.javapi.sigob.service;
 
 import java.util.List;
 
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.exception.AcessoException;
 import org.javapi.sigob.repository.AcessoRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 public class AcessoService {
-    private final AcessoRepository repository;
 
     /**
      * Cria um novo AcessoService
      *
-     * @param repository O repositorio de Acesso
      * @return AcessoService - O servico
      */
-    public AcessoService(AcessoRepository repository) {
-        this.repository = repository;
+    public AcessoService() {
     }
 
     /**
@@ -28,7 +29,23 @@ public class AcessoService {
     public void save(Acesso acesso) {
         validateNome(acesso.getNmAcesso());
         validateCodigo(acesso.getCdAcesso());
-        this.repository.save(acesso);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            transaction.begin();
+            repository.save(acesso);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -39,7 +56,23 @@ public class AcessoService {
      */
     public void update(Acesso acesso) {
         validateAcesso(acesso);
-        this.repository.update(acesso);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            transaction.begin();
+            repository.update(acesso);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -48,8 +81,21 @@ public class AcessoService {
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
-        if (this.repository.contains(acesso)) {
-            this.repository.delete(acesso);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            transaction.begin();
+            repository.delete(acesso);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -60,7 +106,14 @@ public class AcessoService {
      * @return boolean - true se o Acesso existe, false se nao existir
      */
     public boolean contains(Acesso acesso) {
-        return this.repository.contains(acesso);
+        EntityManager em = JPAConfig.getEntityManager();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            return repository.contains(acesso);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -69,7 +122,14 @@ public class AcessoService {
      * @return List<Acesso> - A lista de Acessos
      */
     public List<Acesso> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -79,7 +139,14 @@ public class AcessoService {
      * @return Acesso - O Acesso buscado
      */
     public Acesso findById(int id) {
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -90,7 +157,15 @@ public class AcessoService {
      */
     public List<Acesso> findByNome(String nome) {
         validateNome(nome);
-        return this.repository.findByNome(nome);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            return repository.findByNome(nome);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -101,7 +176,15 @@ public class AcessoService {
      */
     public Acesso findByCodigo(String codigo) {
         validateCodigo(codigo);
-        return this.repository.findByCodigo(codigo);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        AcessoRepository repository = new AcessoRepository(em);
+
+        try {
+            return repository.findByCodigo(codigo);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateAcesso(Acesso acesso) {

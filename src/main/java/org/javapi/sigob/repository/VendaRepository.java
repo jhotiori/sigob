@@ -6,7 +6,6 @@ import java.util.List;
 import org.javapi.sigob.entity.Venda;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class VendaRepository {
     private final EntityManager em;
@@ -26,20 +25,8 @@ public class VendaRepository {
      *
      * @param venda A Venda para ser salva
      */
-    public void create(Venda venda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(venda);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+    public void save(Venda venda) {
+        em.persist(venda);
     }
 
     /**
@@ -48,19 +35,7 @@ public class VendaRepository {
      * @param venda A Venda para ser atualizada
      */
     public void update(Venda venda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(venda);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(venda);
     }
 
     /**
@@ -69,19 +44,7 @@ public class VendaRepository {
      * @param venda A Venda para ser deletada
      */
     public void delete(Venda venda) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(venda) ? venda : manager.merge(venda));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(venda) ? venda : em.merge(venda));
     }
 
     /**
@@ -91,7 +54,7 @@ public class VendaRepository {
      * @return boolean - true se a venda existe, false se nao
      */
     public boolean contains(Venda venda) {
-        return em.contains(venda);
+        return em.find(Venda.class, venda.getIdVenda()) != null;
     }
 
     /**
