@@ -2,11 +2,9 @@ package org.javapi.sigob.repository;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-
 import org.javapi.sigob.entity.Acesso;
 
-import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.EntityManager;
 
 public class AcessoRepository {
     private final EntityManager em;
@@ -31,19 +29,7 @@ public class AcessoRepository {
             return;
         }
 
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(acesso);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(acesso);
     }
 
     /**
@@ -52,19 +38,7 @@ public class AcessoRepository {
      * @param acesso O acesso para ser atualizado
      */
     public void update(Acesso acesso) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(acesso);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(acesso);
     }
 
     /**
@@ -73,19 +47,7 @@ public class AcessoRepository {
      * @param acesso O acesso para ser deletado
      */
     public void delete(Acesso acesso) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(acesso) ? acesso : manager.merge(acesso));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(acesso) ? acesso : em.merge(acesso));
     }
 
     /**

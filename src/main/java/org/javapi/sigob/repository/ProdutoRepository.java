@@ -5,7 +5,6 @@ import java.util.List;
 import org.javapi.sigob.entity.Produto;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class ProdutoRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class ProdutoRepository {
      * @param produto O Produto
      */
     public void save(Produto produto) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(produto);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(produto);
     }
 
     /**
@@ -47,19 +34,7 @@ public class ProdutoRepository {
      * @param produto O Produto
      */
     public void update(Produto produto) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(produto);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(produto);
     }
 
     /**
@@ -68,19 +43,7 @@ public class ProdutoRepository {
      * @param produto O Produto
      */
     public void delete(Produto produto) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(produto) ? produto : manager.merge(produto));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(produto) ? produto : em.merge(produto));
     }
 
     /**
@@ -90,7 +53,7 @@ public class ProdutoRepository {
      * @return boolean - true se o Produto estiver salvo, false se nao
      */
     public boolean contains(Produto produto) {
-        return em.contains(produto);
+        return em.find(Produto.class, produto.getIdProduto()) != null;
     }
 
     /**

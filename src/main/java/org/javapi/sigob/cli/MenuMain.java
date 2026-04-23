@@ -1,73 +1,71 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.util.Inputter;
-
-import jakarta.persistence.EntityManager;
+import org.javapi.sigob.util.Logger;
 
 public class MenuMain extends Menu {
 
+    /**
+     * Inicializa o menu principal.
+     */
     public MenuMain() {
         super("SIGOB - Seja bem-vindo(a)!");
     }
+
+    private final FuncionarioService service = new FuncionarioService();
 
     @Override
     public void exibir() {
         Funcionario funcionario = logar();
         String cdAcesso = funcionario.getAcesso().getCdAcesso();
-
-        limparEntradas(); // evita duplicar entradas a cada login
+        limparEntradas();
 
         switch (cdAcesso.toUpperCase()) {
-            case "ADMIN"   -> buildMenuAdmin();
+            case "ADMIN" -> buildMenuAdmin();
             case "ESTOQUE" -> buildMenuEstoque();
-            case "VENDAS"  -> buildMenuVendas();
+            case "VENDAS" -> buildMenuVendas();
             default -> {
-                System.out.println("✗ Nível de acesso não reconhecido: " + cdAcesso);
+                Logger.warn("Nível de acesso não reconhecido: " + cdAcesso);
                 return;
             }
         }
 
-        this.setTitulo("SIGOB - Olá, %s!".formatted(funcionario.getNmFuncionario()));
+        setTitulo("SIGOB - Olá, " + funcionario.getNmFuncionario() + "!");
         super.exibir();
     }
 
+    /**
+     * Realiza o login do funcionário.
+     *
+     * @return funcionário autenticado
+     */
     private Funcionario logar() {
-        System.out.println("<< SIGOB - LOGIN SHELL >>");
+        Logger.info("<< SIGOB - LOGIN >>");
 
         while (true) {
             try {
-                String login = Inputter.lerString("Insira o Login (nome): ");
+                String login = Inputter.lerString("Insira o Login: ");
                 String senha = Inputter.lerString("Insira a Senha: ");
-                EntityManager em = JPAConfig.getEntityManager();
 
-                try {
-                    FuncionarioService service = new FuncionarioService(new FuncionarioRepository(em));
-                    Funcionario funcionario = service.findByCodigo(senha);
+                Funcionario funcionario = service.findByCodigo(senha);
 
-                    if (funcionario != null && funcionario.getNmFuncionario().equalsIgnoreCase(login)) {
-                        System.out.println("[✓] Login efetuado com sucesso - logado como %s!"
-                                .formatted(funcionario.getNmFuncionario()));
-                        return funcionario;
-                    }
-
-                    System.out.println("[✗] Login ou senha incorretos. Tente novamente.\n");
-                } finally {
-                    em.close();
+                if (funcionario != null && funcionario.getNmFuncionario().equalsIgnoreCase(login)) {
+                    Logger.success("Login efetuado com sucesso!");
+                    return funcionario;
                 }
+                Logger.warn("Login ou senha incorretos!");
             } catch (Exception e) {
-                System.out.println("[✗] Erro: " + e.getMessage() + "\n");
+                Logger.error("Erro no login: " + e.getMessage());
             }
         }
     }
 
     private void buildMenuAdmin() {
         adicionarEntrada("Cadastros", () -> new MenuCadastros().exibir());
-        adicionarEntrada("Estoques",  () -> new MenuEstoques().exibir());
-        adicionarEntrada("Vendas",    () -> new MenuVendas().exibir());
+        adicionarEntrada("Estoques", () -> new MenuEstoques().exibir());
+        adicionarEntrada("Vendas", () -> new MenuVendas().exibir());
     }
 
     private void buildMenuEstoque() {

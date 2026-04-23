@@ -1,112 +1,162 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
-import org.javapi.sigob.entity.Cliente;
-import org.javapi.sigob.repository.ClienteRepository;
-import org.javapi.sigob.service.ClienteService;
-
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.util.Inputter;
-
 import java.util.List;
 
-public class MenuCliente extends Menu {
+import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.service.ClienteService;
+import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
 
+public class MenuCliente extends Menu {
+    /**
+     * Inicializa o menu de clientes e registra as entradas disponíveis.
+     */
     public MenuCliente() {
         super("Clientes");
-        adicionarEntrada("Cadastrar cliente",   this::cadastrar);
-        adicionarEntrada("Atualizar cliente",   this::atualizar);
-        adicionarEntrada("Buscar por ID",       this::buscarPorId);
-        adicionarEntrada("Buscar por nome",     this::buscarPorNome);
-        adicionarEntrada("Buscar por documento",this::buscarPorDoc);
-        adicionarEntrada("Listar todos",        this::listarTodos);
-        adicionarEntrada("Excluir cliente",     this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Listar (ID)", this::buscarPorId);
+        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Listar (DOCUMENTO)", this::buscarPorDoc);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private ClienteService getService(EntityManager em) {
-        return new ClienteService(new ClienteRepository(em));
-    }
+    private final ClienteService service = new ClienteService();
 
+    /**
+     * Realiza o cadastro de um novo cliente.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            String nm  = Inputter.lerString("Nome      : ");
-            String doc = Inputter.lerString("Documento : ");
+        String nome = Inputter.lerString("Insira o Nome do Cliente: ");
+        String documento = Inputter.lerString("Insira o Documento do Cliente: ");
 
-            Cliente c = new Cliente(0, nm, doc);
-            getService(em).save(c);
-            System.out.println("✔ Cliente cadastrado!");
-        } finally {
-            em.close();
+        try {
+            service.save(new Cliente(0, nome, documento));
+            Logger.success("Cliente " + nome + " cadastrado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar cliente: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de um cliente existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
-        try {
-            int    id  = Inputter.lerInt("ID do cliente  : ");
-            String nm  = Inputter.lerString("Novo nome      : ");
-            String doc = Inputter.lerString("Novo documento : ");
+        int id = Inputter.lerInt("Insira o ID do Cliente: ");
 
-            Cliente c = new Cliente(id, nm, doc);
-            getService(em).save(c);
-            System.out.println("✔ Cliente atualizado!");
-        } finally {
-            em.close();
+        while (service.findById(id) == null) {
+            Logger.warn("Cliente não encontrado!");
+            id = Inputter.lerInt("Insira o ID do Cliente: ");
+        }
+
+        String nome = Inputter.lerString("Insira o Novo Nome do Cliente: ");
+        String documento = Inputter.lerString("Insira o Novo Documento do Cliente: ");
+
+        try {
+            service.save(new Cliente(id, nome, documento));
+            Logger.success("Cliente " + id + " atualizado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar cliente: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um cliente pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Cliente: ");
+
         try {
-            int id = Inputter.lerInt("ID do cliente: ");
-            Cliente c = getService(em).findById(id);
-            System.out.println(c != null ? c : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Cliente cliente = service.findById(id);
+            if (cliente == null) {
+                Logger.warn("Cliente não encontrado!");
+            } else {
+                System.out.println(cliente);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar cliente: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca clientes pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Cliente: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Cliente> clientes = service.findByNome(nome);
+
+            if (clientes.isEmpty()) {
+                Logger.warn("Cliente não encontrado!");
+            } else {
+                for (Cliente c : clientes) {
+                    System.out.println(c);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar cliente: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca clientes pelo documento.
+     */
     private void buscarPorDoc() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String documento = Inputter.lerString("Insira o Documento do Cliente: ");
+
         try {
-            String doc = Inputter.lerString("Documento: ");
-            List<Cliente> c = getService(em).findByDocumento(doc);
-            System.out.println(c != null ? c : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            List<Cliente> clientes = service.findByDocumento(documento);
+
+            if (clientes.isEmpty()) {
+                Logger.warn("Cliente não encontrado!");
+            } else {
+                for (Cliente c : clientes) {
+                    System.out.println(c);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar cliente: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os clientes cadastrados.
+     */
     private void listarTodos() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Cliente> clientes = service.findAll();
+
+            if (clientes.isEmpty()) {
+                Logger.warn("Nenhum cliente cadastrado!");
+            } else {
+                for (Cliente c : clientes) {
+                    System.out.println(c);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar clientes: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove um cliente pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Cliente: ");
+
         try {
-            int id = Inputter.lerInt("ID do cliente a excluir: ");
-            Cliente c = getService(em).findById(id);
-            if (c == null) { System.out.println("✗ Não encontrado."); return; }
-            getService(em).delete(c);
-            System.out.println("✔ Cliente excluído!");
-        } finally {
-            em.close();
+            Cliente cliente = service.findById(id);
+
+            if (cliente == null) {
+                Logger.warn("Cliente não encontrado!");
+            } else {
+                service.delete(cliente);
+                Logger.success("Cliente " + id + " excluido com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir cliente: " + e.getMessage());
         }
     }
 }

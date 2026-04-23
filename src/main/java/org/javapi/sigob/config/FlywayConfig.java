@@ -9,6 +9,7 @@ public class FlywayConfig {
             "postgres",
             "postgres"
         ).baselineOnMigrate(true).load();
+        flyway.repair();
         flyway.migrate();
     }
 }

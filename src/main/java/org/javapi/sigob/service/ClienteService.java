@@ -2,21 +2,22 @@ package org.javapi.sigob.service;
 
 import java.util.List;
 
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.exception.ClienteException;
 import org.javapi.sigob.repository.ClienteRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 public class ClienteService {
-    private final ClienteRepository repository;
 
     /**
      * Cria um novo ClienteService
      *
-     * @param repository O repositorio
      * @return ClienteService - O servico
      */
-    public ClienteService(ClienteRepository repository) {
-        this.repository = repository;
+    public ClienteService() {
     }
 
     /**
@@ -34,18 +35,34 @@ public class ClienteService {
         String nome = cliente.getNmCliente();
         String documento = cliente.getNrDocumento();
 
-        if (findByDocumento(documento) != null) {
+        if (!findByDocumento(documento).isEmpty()) {
             throw new ClienteException("Cliente com o mesmo documento já cadastrado!");
         }
 
-        var novoCliente = new Cliente(id, nome, documento);
-        if (id > 0) {
-            this.repository.update(novoCliente);
-        } else {
-            this.repository.save(novoCliente);
-        }
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ClienteRepository repository = new ClienteRepository(em);
 
-        return novoCliente;
+        try {
+            transaction.begin();
+
+            var novoCliente = new Cliente(id, nome, documento);
+            if (id > 0) {
+                repository.update(novoCliente);
+            } else {
+                repository.save(novoCliente);
+            }
+
+            transaction.commit();
+            return novoCliente;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -56,7 +73,14 @@ public class ClienteService {
      * @return boolean - true se o Cliente existe, false se nao
      */
     public boolean contains(Cliente cliente) {
-        return this.repository.contains(cliente);
+        EntityManager em = JPAConfig.getEntityManager();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            return repository.contains(cliente);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -66,8 +90,21 @@ public class ClienteService {
      * @throws ClienteException Se o cliente for invalido
      */
     public void delete(Cliente cliente) {
-        if (this.repository.contains(cliente)) {
-            this.repository.remove(cliente);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            transaction.begin();
+            repository.remove(cliente);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -77,7 +114,14 @@ public class ClienteService {
      * @return List<Cliente> - A lista de clientes
      */
     public List<Cliente> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -87,8 +131,14 @@ public class ClienteService {
      * @return Cliente - O Cliente buscado
      */
     public Cliente findById(int id) {
-        validateId(id);
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -99,7 +149,15 @@ public class ClienteService {
      */
     public List<Cliente> findByNome(String nome) {
         validateNome(nome);
-        return this.repository.findByNome(nome);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            return repository.findByNome(nome);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -110,22 +168,23 @@ public class ClienteService {
      */
     public List<Cliente> findByDocumento(String documento) {
         validateDocumento(documento);
-        return this.repository.findByDocumento(documento);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        ClienteRepository repository = new ClienteRepository(em);
+
+        try {
+            return repository.findByDocumento(documento);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateCliente(Cliente cliente) {
         if (cliente == null) {
             throw new ClienteException("Cliente não pode ser nulo");
         }
-        validateId(cliente.getIdCliente());
         validateNome(cliente.getNmCliente());
         validateDocumento(cliente.getNrDocumento());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new ClienteException("Id do cliente deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {

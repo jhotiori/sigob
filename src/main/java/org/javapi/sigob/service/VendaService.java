@@ -1,26 +1,24 @@
 package org.javapi.sigob.service;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.entity.Venda;
 import org.javapi.sigob.exception.VendaException;
 import org.javapi.sigob.repository.VendaRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 public class VendaService {
-    private final VendaRepository repository;
 
     /**
      * Cria um novo VendaService
-     *
-     * @param repository O repositório de vendas
-     * @return VendaService - O VendaService
      */
-    public VendaService(VendaRepository repository) {
-        this.repository = repository;
+    public VendaService() {
     }
 
     /**
@@ -31,15 +29,30 @@ public class VendaService {
      * @return Venda - A Venda salvada
      */
     public Venda save(Venda venda) {
-        validateVenda(venda);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
 
-        if (venda.getIdVenda() > 0) {
-            this.repository.update(venda);
-        } else {
-            this.repository.create(venda);
+        try {
+            validateVenda(venda);
+            VendaRepository repository = new VendaRepository(em);
+            transaction.begin();
+
+            if (venda.getIdVenda() > 0) {
+                repository.update(venda);
+            } else {
+                repository.save(venda);
+            }
+
+            transaction.commit();
+            return venda;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
-
-        return venda;
     }
 
     /**
@@ -48,8 +61,21 @@ public class VendaService {
      * @param venda A Venda para ser deletada
      */
     public void delete(Venda venda) {
-        if (this.repository.contains(venda)) {
-            this.repository.delete(venda);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+
+        try {
+            VendaRepository repository = new VendaRepository(em);
+            transaction.begin();
+            repository.delete(venda);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -59,8 +85,15 @@ public class VendaService {
      * @param venda A Venda para conferir
      * @return boolean - true se a venda existe, false se nao
      */
-    public boolean exists(Venda venda) {
-        return this.repository.contains(venda);
+    public boolean contains(Venda venda) {
+        EntityManager em = JPAConfig.getEntityManager();
+
+        try {
+            VendaRepository repository = new VendaRepository(em);
+            return repository.contains(venda);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -69,7 +102,14 @@ public class VendaService {
      * @return List<Venda> - A lista de vendas
      */
     public List<Venda> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+
+        try {
+            VendaRepository repository = new VendaRepository(em);
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -79,8 +119,14 @@ public class VendaService {
      * @return Venda - A venda
      */
     public Venda findById(int id) {
-        validateId(id);
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+
+        try {
+            VendaRepository repository = new VendaRepository(em);
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -91,36 +137,22 @@ public class VendaService {
      * @return List<Venda> - A lista de vendas
      */
     public List<Venda> findByDataVenda(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        return this.repository.findByDataVenda(dataInicio, dataFim);
+        EntityManager em = JPAConfig.getEntityManager();
+
+        try {
+            VendaRepository repository = new VendaRepository(em);
+            return repository.findByDataVenda(dataInicio, dataFim);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateVenda(Venda venda) {
         if (venda == null) {
             throw new VendaException("Venda nao pode ser nulo!");
         }
-        validatePago(venda.isFlPago());
-        validateData(venda.getDtVenda());
-        validateValor(venda.getVlVenda());
         validateCliente(venda.getCliente());
         validateFuncionario(venda.getFuncionario());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new VendaException("Id nao pode ser menor ou igual a zero!");
-        }
-    }
-
-    private void validateData(ZonedDateTime data) {
-        if (data == null) {
-            throw new VendaException("Data nao pode ser nula!");
-        }
-    }
-
-    private void validateValor(BigDecimal valor) {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new VendaException("Valor da venda nao pode ser nulo ou menor ou igual a zero!");
-        }
     }
 
     private void validatePago(boolean pago) {

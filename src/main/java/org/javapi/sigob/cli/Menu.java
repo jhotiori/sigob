@@ -3,85 +3,62 @@ package org.javapi.sigob.cli;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.javapi.sigob.config.MenuConfig;
 import org.javapi.sigob.util.Inputter;
 
 public abstract class Menu {
-    static class Entry {
-        final String nome;
-        final Runnable callback;
-
-        Entry(String nome, Runnable callback) {
-            this.nome = nome;
-            this.callback = callback;
-        }
-    }
-
+    public record Entry(String nome, Runnable callback) {}
+    private final List<Entry> entradas = new ArrayList<>();
     private String titulo;
-    private final List<Entry> entradas;
 
-    public Menu(String titulo) {
+    protected Menu(String titulo) {
         this.titulo = titulo;
-        this.entradas = new ArrayList<>();
     }
 
     protected void adicionarEntrada(String nome, Runnable callback) {
-        this.entradas.add(new Entry(nome, callback));
-    }
-    
-    protected void limparEntradas() {
-        this.entradas.clear();
+        entradas.add(new Entry(nome, callback));
     }
 
-    public void exibir() {
-        while (true) {
-            String divisores = "─".repeat(25);
-            String banner = "%s %s %s".formatted(divisores, this.getTitulo(), divisores);
-            String footer = "─".repeat(banner.length());
-
-            System.out.println(banner);
-            for (int index = 0; index < this.entradas.size(); index++) {
-                System.out.println("[%d] - %s".formatted(index + 1, this.entradas.get(index).nome));
+    protected void removerEntrada(String nome) {
+        for (int index = 0; index < entradas.size(); index++) {
+            if (entradas.get(index).nome().equals(nome)) {
+                entradas.remove(index);
+                return;
             }
-            System.out.println(footer);
-
-            int opcao = Inputter.lerInt("Insira uma opção: ");
-
-            if (opcao == 0) {
-                break;
-            }
-
-            this.rodar(opcao);
         }
+    }
+
+    protected void limparEntradas() {
+        entradas.clear();
     }
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
-    public String getTitulo() {
-        return this.titulo;
+    public void exibir() {
+        while (true) {
+            render();
+            int opcao = Inputter.lerInt(MenuConfig.LABEL_PROMPT);
+            if (opcao == 0) break;
+            executar(opcao);
+        }
     }
 
-    public static void exibirCustom(String tituloCustom, List<Entry> entradasCustom) {
-        String divisores = "─".repeat(25);
-        String banner = "%s %s %s".formatted(divisores, tituloCustom, divisores);
-        String footer = "─".repeat(banner.length());
-
+    private void render() {
+        String banner = MenuConfig.banner(titulo);
         System.out.println(banner);
-        for (int index = 0; index < entradasCustom.size(); index++) {
-            System.out.println("[%d] - %s".formatted(index + 1, entradasCustom.get(index).nome));
+
+        for (int index = 0; index < entradas.size(); index++) {
+            System.out.printf("[%d] - %s%n", index + 1, entradas.get(index).nome());
         }
-        System.out.println(footer);
+
+        System.out.println(MenuConfig.exitOption());
+        System.out.println(MenuConfig.footer(banner));
     }
 
-    public static void limparTela() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
-
-    protected void rodar(int index) {
-        if (index > 0 && index <= this.entradas.size()) {
-            this.entradas.get(index - 1).callback.run();
-        }
+    private void executar(int opcao) {
+        if (opcao < 1 || opcao > entradas.size()) return;
+        entradas.get(opcao - 1).callback().run();
     }
 }

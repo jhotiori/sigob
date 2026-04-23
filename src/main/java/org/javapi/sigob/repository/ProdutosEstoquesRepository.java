@@ -5,7 +5,6 @@ import java.util.List;
 import org.javapi.sigob.entity.ProdutosEstoques;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class ProdutosEstoquesRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class ProdutosEstoquesRepository {
      * @param produtoEstoque O ProdutosEstoques
      */
     public void save(ProdutosEstoques produtoEstoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(produtoEstoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(produtoEstoque);
     }
 
     /**
@@ -47,19 +34,7 @@ public class ProdutosEstoquesRepository {
      * @param produtoEstoque O ProdutosEstoques
      */
     public void update(ProdutosEstoques produtoEstoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(produtoEstoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(produtoEstoque);
     }
 
     /**
@@ -68,19 +43,7 @@ public class ProdutosEstoquesRepository {
      * @param produtoEstoque O ProdutosEstoques
      */
     public void delete(ProdutosEstoques produtoEstoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(produtoEstoque) ? produtoEstoque : manager.merge(produtoEstoque));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(produtoEstoque) ? produtoEstoque : em.merge(produtoEstoque));
     }
 
     /**
@@ -90,7 +53,7 @@ public class ProdutosEstoquesRepository {
      * @return boolean - true se o ProdutosEstoques estiver contido, false se nao
      */
     public boolean contains(ProdutosEstoques produtoEstoque) {
-        return em.contains(produtoEstoque);
+        return em.find(ProdutosEstoques.class, produtoEstoque.getIdProdutosEstoque()) != null;
     }
 
     /**

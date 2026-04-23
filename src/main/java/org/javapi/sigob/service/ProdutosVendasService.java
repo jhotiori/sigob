@@ -8,21 +8,19 @@ import org.javapi.sigob.entity.Produto;
 import org.javapi.sigob.entity.ProdutosVendas;
 import org.javapi.sigob.entity.Venda;
 import org.javapi.sigob.exception.ProdutosVendasException;
-import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.repository.ProdutosVendasRepository;
-import org.javapi.sigob.repository.VendaRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 public class ProdutosVendasService {
-    private final ProdutosVendasRepository repository;
 
     /**
      * Cria um novo ProdutosVendasService
      *
-     * @param repository O repositorio de ProdutosVendas
      * @return ProdutosVendasService - O ProdutosVendasService criado
      */
-    public ProdutosVendasService(ProdutosVendasRepository repository) {
-        this.repository = repository;
+    public ProdutosVendasService() {
     }
 
     /**
@@ -33,32 +31,38 @@ public class ProdutosVendasService {
      * @return ProdutosVendas - O ProdutosVendas salvo
      */
     public ProdutosVendas save(ProdutosVendas produtosVendas) {
-        validateProdutosVendas(produtosVendas);
-        int idProdutoVenda = produtosVendas.getIdProdutoVenda();
-        Produto produto = produtosVendas.getProduto();
-        Venda venda = produtosVendas.getVenda();
-        int quantidade = produtosVendas.getNrQuantidade();
-        BigDecimal saldo = produtosVendas.getVlSaldo();
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
 
-        ProdutoService produtoService = new ProdutoService(new ProdutoRepository(JPAConfig.getEntityManager()));
-        if (!produtoService.contains(produto)) {
-            throw new ProdutosVendasException("Produto não localizado!");
+        try {
+            transaction.begin();
+            validateProdutosVendas(produtosVendas);
+
+            int idProdutoVenda = produtosVendas.getIdProdutoVenda();
+            Produto produto = produtosVendas.getProduto();
+            Venda venda = produtosVendas.getVenda();
+            int quantidade = produtosVendas.getNrQuantidade();
+            BigDecimal saldo = produtosVendas.getVlSaldo();
+
+            ProdutosVendas produtoFinal = new ProdutosVendas(idProdutoVenda, quantidade, saldo, produto, venda);
+
+            if (idProdutoVenda > 0) {
+                repository.update(produtoFinal);
+            } else {
+                repository.save(produtoFinal);
+            }
+
+            transaction.commit();
+            return produtoFinal;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
-
-        VendaService vendaService = new VendaService(new VendaRepository(JPAConfig.getEntityManager()));
-        if (!vendaService.exists(venda)) {
-            throw new ProdutosVendasException("Venda não localizada!");
-        }
-
-        ProdutosVendas produtoFinal = new ProdutosVendas(idProdutoVenda, quantidade, saldo, produto, venda);
-
-        if (idProdutoVenda > 0) {
-            this.repository.update(produtoFinal);
-        } else {
-            this.repository.save(produtoFinal);
-        }
-
-        return produtoFinal;
     }
 
     /**
@@ -67,8 +71,21 @@ public class ProdutosVendasService {
      * @param produtosVendas O ProdutosVendas
      */
     public void delete(ProdutosVendas produtosVendas) {
-        if (this.repository.contains(produtosVendas)) {
-            this.repository.delete(produtosVendas);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            transaction.begin();
+            repository.delete(produtosVendas);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -79,7 +96,14 @@ public class ProdutosVendasService {
      * @return boolean - true se o ProdutosVendas existe, false se nao
      */
     public boolean contains(ProdutosVendas produtosVendas) {
-        return this.repository.contains(produtosVendas);
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            return repository.contains(produtosVendas);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -88,7 +112,14 @@ public class ProdutosVendasService {
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
     public List<ProdutosVendas> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -98,8 +129,14 @@ public class ProdutosVendasService {
      * @return ProdutosVendas - O ProdutosVendas
      */
     public ProdutosVendas findById(int id) {
-        validateId(id);
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -110,9 +147,15 @@ public class ProdutosVendasService {
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
     public List<ProdutosVendas> findByProdutoId(Produto produto) {
-        validateProduto(produto);
-        validateId(produto.getIdProduto());
-        return this.repository.findByProdutoId(produto.getIdProduto());
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            validateProduto(produto);
+            return repository.findByProdutoId(produto.getIdProduto());
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -123,9 +166,14 @@ public class ProdutosVendasService {
      * @return List<ProdutosVendas> - A lista de ProdutosVendas
      */
     public List<ProdutosVendas> findByVendaId(Venda venda) {
-        validateVenda(venda);
-        validateId(venda.getIdVenda());
-        return this.repository.findByVendaId(venda.getIdVenda());
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
+
+        try {
+            return repository.findByVendaId(venda.getIdVenda());
+        } finally {
+            em.close();
+        }
     }
 
     private void validateProdutosVendas(ProdutosVendas produtoVendas) {
@@ -136,12 +184,6 @@ public class ProdutosVendasService {
         validateSaldo(produtoVendas.getVlSaldo());
         validateProduto(produtoVendas.getProduto());
         validateVenda(produtoVendas.getVenda());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new ProdutosVendasException("Id nao pode ser menor ou igual a zero!");
-        }
     }
 
     private void validateQuantidade(int quantidade) {

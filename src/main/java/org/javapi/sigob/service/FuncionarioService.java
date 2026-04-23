@@ -2,22 +2,23 @@ package org.javapi.sigob.service;
 
 import java.util.List;
 
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.exception.FuncionarioException;
 import org.javapi.sigob.repository.FuncionarioRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 public class FuncionarioService {
-    private final FuncionarioRepository repository;
 
     /**
      * Cria uma novo FuncionarioService
      *
-     * @param repository O repositorio de funcionarios
      * @return FuncionarioService - O servico de funcionarios
      */
-    public FuncionarioService(FuncionarioRepository repository) {
-        this.repository = repository;
+    public FuncionarioService() {
     }
 
     /**
@@ -27,7 +28,23 @@ public class FuncionarioService {
      */
     public void save(Funcionario funcionario) {
         validateFuncionario(funcionario);
-        this.repository.save(funcionario);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            transaction.begin();
+            repository.save(funcionario);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -39,7 +56,23 @@ public class FuncionarioService {
         validateNome(funcionario.getNmFuncionario());
         validateCodigo(funcionario.getCdFuncionario());
         validateAcesso(funcionario.getAcesso());
-        this.repository.update(funcionario);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            transaction.begin();
+            repository.update(funcionario);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -48,8 +81,21 @@ public class FuncionarioService {
      * @param funcionario O funcionario para deletar
      */
     public void delete(Funcionario funcionario) {
-        if (this.repository.contains(funcionario)) {
-            this.repository.delete(funcionario);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            transaction.begin();
+            repository.delete(funcionario);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
@@ -60,7 +106,14 @@ public class FuncionarioService {
      * @return boolean - true se o funcionario existe, false se nao
      */
     public boolean contains(Funcionario funcionario) {
-        return this.repository.contains(funcionario);
+        EntityManager em = JPAConfig.getEntityManager();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            return repository.contains(funcionario);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -69,7 +122,14 @@ public class FuncionarioService {
      * @return List<Funcionario> - A lista de funcionarios
      */
     public List<Funcionario> findAll() {
-        return this.repository.findAll();
+        EntityManager em = JPAConfig.getEntityManager();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -79,8 +139,14 @@ public class FuncionarioService {
      * @return Funcionario - O funcionario
      */
     public Funcionario findById(int id) {
-        validateId(id);
-        return this.repository.findById(id);
+        EntityManager em = JPAConfig.getEntityManager();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -91,7 +157,15 @@ public class FuncionarioService {
      */
     public List<Funcionario> findByNome(String nome) {
         validateNome(nome);
-        return this.repository.findByNome(nome);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            return repository.findByNome(nome);
+        } finally {
+            em.close();
+        }
     }
 
     /**
@@ -102,23 +176,24 @@ public class FuncionarioService {
      */
     public Funcionario findByCodigo(String codigo) {
         validateCodigo(codigo);
-        return this.repository.findByCodigo(codigo);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        FuncionarioRepository repository = new FuncionarioRepository(em);
+
+        try {
+            return repository.findByCodigo(codigo);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateFuncionario(Funcionario funcionario) {
         if (funcionario == null) {
             throw new FuncionarioException("Funcionário não pode ser nulo");
         }
-        validateId(funcionario.getIdFuncionario());
         validateNome(funcionario.getNmFuncionario());
         validateCodigo(funcionario.getCdFuncionario());
         validateAcesso(funcionario.getAcesso());
-    }
-
-    private void validateId(int id) {
-        if (id <= 0) {
-            throw new FuncionarioException("ID do funcionário deve ser maior que zero");
-        }
     }
 
     private void validateNome(String nome) {

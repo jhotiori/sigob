@@ -1,111 +1,161 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.config.JPAConfig;
+import java.util.List;
+
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Estoque;
-import org.javapi.sigob.repository.CategoriaRepository;
-import org.javapi.sigob.repository.EstoqueRepository;
 import org.javapi.sigob.service.CategoriaService;
 import org.javapi.sigob.service.EstoqueService;
-
-import jakarta.persistence.EntityManager;
 import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
 
 public class MenuEstoque extends Menu {
-
+    /**
+     * Inicializa o menu de estoques e registra as entradas disponíveis.
+     */
     public MenuEstoque() {
         super("Estoques");
-        adicionarEntrada("Cadastrar estoque",  this::cadastrar);
-        adicionarEntrada("Atualizar estoque",  this::atualizar);
-        adicionarEntrada("Buscar por ID",      this::buscarPorId);
-        adicionarEntrada("Buscar por nome",    this::buscarPorNome);
-        adicionarEntrada("Listar todos",       this::listarTodos);
-        adicionarEntrada("Excluir estoque",    this::excluir);
+        adicionarEntrada("Cadastrar", this::cadastrar);
+        adicionarEntrada("Atualizar", this::atualizar);
+        adicionarEntrada("Excluir", this::excluir);
+        adicionarEntrada("Listar (ID)", this::buscarPorId);
+        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
+        adicionarEntrada("Listar (TODOS)", this::listarTodos);
     }
 
-    private EstoqueService getService(EntityManager em) {
-        return new EstoqueService(new EstoqueRepository(em));
-    }
+    private final EstoqueService service = new EstoqueService();
+    private final CategoriaService categoriaService = new CategoriaService();
 
+    /**
+     * Realiza o cadastro de um novo estoque.
+     */
     private void cadastrar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String codigo = Inputter.lerString("Insira o Código do Estoque: ");
+        String nome = Inputter.lerString("Insira o Nome do Estoque: ");
+        String descricao = Inputter.lerString("Insira a Descrição do Estoque: ");
+        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+
         try {
-            String cd = Inputter.lerString("Código         : ");
-            String nm = Inputter.lerString("Nome           : ");
-            String ds = Inputter.lerString("Descrição      : ");
-            int idCat = Inputter.lerInt("ID Categoria   : ");
+            Categoria categoria = categoriaService.findById(idCategoria);
 
-            Categoria cat = new CategoriaService(new CategoriaRepository(em)).findById(idCat);
-            if (cat == null) { System.out.println("✗ Categoria não encontrada."); return; }
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+                return;
+            }
 
-            Estoque e = new Estoque(0, cd, nm, ds, cat);
-            getService(em).save(e);
-            System.out.println("✔ Estoque cadastrado!");
-        } finally {
-            em.close();
+            service.save(new Estoque(0, codigo, nome, descricao, categoria));
+            Logger.success("Estoque " + nome + " cadastrado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao cadastrar estoque: " + e.getMessage());
         }
     }
 
+    /**
+     * Atualiza os dados de um estoque existente.
+     */
     private void atualizar() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+
+        while (service.findById(id) == null) {
+            Logger.warn("Estoque não encontrado!");
+            id = Inputter.lerInt("Insira o ID do Estoque: ");
+        }
+
+        String codigo = Inputter.lerString("Insira o Novo Código do Estoque: ");
+        String nome = Inputter.lerString("Insira o Novo Nome do Estoque: ");
+        String descricao = Inputter.lerString("Insira a Nova Descrição do Estoque: ");
+        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+
         try {
-            int    id = Inputter.lerInt("ID do estoque  : ");
-            String cd = Inputter.lerString("Novo código    : ");
-            String nm = Inputter.lerString("Novo nome      : ");
-            String ds = Inputter.lerString("Nova descrição : ");
-            int idCat = Inputter.lerInt("ID Categoria   : ");
+            Categoria categoria = categoriaService.findById(idCategoria);
 
-            Categoria cat = new CategoriaService(new CategoriaRepository(em)).findById(idCat);
-            if (cat == null) { System.out.println("✗ Categoria não encontrada."); return; }
+            if (categoria == null) {
+                Logger.warn("Categoria não encontrada!");
+                return;
+            }
 
-            Estoque e = new Estoque(id, cd, nm, ds, cat);
-            getService(em).update(e);
-            System.out.println("✔ Estoque atualizado!");
-        } finally {
-            em.close();
+            service.update(new Estoque(id, codigo, nome, descricao, categoria));
+            Logger.success("Estoque " + id + " atualizado com sucesso!");
+        } catch (Exception e) {
+            Logger.error("Erro ao atualizar estoque: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca um estoque pelo ID.
+     */
     private void buscarPorId() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+
         try {
-            int id = Inputter.lerInt("ID do estoque: ");
-            Estoque e = getService(em).findById(id);
-            System.out.println(e != null ? e : "✗ Não encontrado.");
-        } finally {
-            em.close();
+            Estoque estoque = service.findById(id);
+            if (estoque == null) {
+                Logger.warn("Estoque não encontrado!");
+            } else {
+                System.out.println(estoque);
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar estoque: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca estoques pelo nome.
+     */
     private void buscarPorNome() {
-        EntityManager em = JPAConfig.getEntityManager();
+        String nome = Inputter.lerString("Insira o Nome do Estoque: ");
+
         try {
-            String nm = Inputter.lerString("Nome (prefixo): ");
-            getService(em).findByNome(nm).forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Estoque> estoques = service.findByNome(nome);
+
+            if (estoques.isEmpty()) {
+                Logger.warn("Estoque não encontrado!");
+            } else {
+                for (Estoque e : estoques) {
+                    System.out.println(e);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao buscar estoque: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os estoques cadastrados.
+     */
     private void listarTodos() {
-        EntityManager em = JPAConfig.getEntityManager();
         try {
-            getService(em).findAll().forEach(System.out::println);
-        } finally {
-            em.close();
+            List<Estoque> estoques = service.findAll();
+
+            if (estoques.isEmpty()) {
+                Logger.warn("Nenhum estoque cadastrado!");
+            } else {
+                for (Estoque e : estoques) {
+                    System.out.println(e);
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao listar estoques: " + e.getMessage());
         }
     }
 
+    /**
+     * Remove um estoque pelo ID.
+     */
     private void excluir() {
-        EntityManager em = JPAConfig.getEntityManager();
+        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+
         try {
-            int id = Inputter.lerInt("ID do estoque a excluir: ");
-            Estoque e = getService(em).findById(id);
-            if (e == null) { System.out.println("✗ Não encontrado."); return; }
-            getService(em).delete(e);
-            System.out.println("✔ Estoque excluído!");
-        } finally {
-            em.close();
+            Estoque estoque = service.findById(id);
+
+            if (estoque == null) {
+                Logger.warn("Estoque não encontrado!");
+            } else {
+                service.delete(estoque);
+                Logger.success("Estoque " + id + " excluido com sucesso!");
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir estoque: " + e.getMessage());
         }
     }
 }

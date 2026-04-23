@@ -5,7 +5,6 @@ import java.util.List;
 import org.javapi.sigob.entity.Estoque;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class EstoqueRepository {
     private final EntityManager em;
@@ -26,19 +25,7 @@ public class EstoqueRepository {
      * @param estoque O estoque para ser salvo
      */
     public void save(Estoque estoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.persist(estoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.persist(estoque);
     }
 
     /**
@@ -47,19 +34,7 @@ public class EstoqueRepository {
      * @param estoque O estoque para ser atualizado
      */
     public void update(Estoque estoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.merge(estoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.merge(estoque);
     }
 
     /**
@@ -69,7 +44,7 @@ public class EstoqueRepository {
      * @return boolean - true se o estoque existe, false se nao
      */
     public boolean contains(Estoque estoque) {
-        return em.contains(estoque);
+        return em.find(Estoque.class, estoque.getIdEstoque()) != null;
     }
 
     /**
@@ -78,19 +53,7 @@ public class EstoqueRepository {
      * @param estoque O estoque para ser deletado
      */
     public void delete(Estoque estoque) {
-        EntityManager manager = this.em;
-        EntityTransaction transaction = manager.getTransaction();
-
-        try {
-            transaction.begin();
-            manager.remove(manager.contains(estoque) ? estoque : manager.merge(estoque));
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        }
+        em.remove(em.contains(estoque) ? estoque : em.merge(estoque));
     }
 
     /**

@@ -2,10 +2,15 @@ package org.javapi.sigob.entity;
 
 import java.math.BigDecimal;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
-@Entity
-@Table(name = "produtosVendas")
+@Entity(name = "produtosVendas")
 public class ProdutosVendas {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,11 +22,11 @@ public class ProdutosVendas {
     @Column(name = "vlSaldo")
     private BigDecimal vlSaldo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idProduto")
     private Produto produto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(/* fetch = FetchType.LAZY */)
     @JoinColumn(name = "fk_idVenda")
     private Venda venda;
 
