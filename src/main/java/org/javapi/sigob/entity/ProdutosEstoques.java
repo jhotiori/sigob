@@ -12,142 +12,117 @@ import jakarta.persistence.ManyToOne;
 public class ProdutosEstoques {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idProdutosEstoque;
+    private int id;
 
-    @Column(name = "nrQuantidade")
-    private int nrQuantidade;
+    @Column(name = "quantidade", nullable = false)
+    private int quantidade;
 
-    @Column(name = "dsObservacao")
-    private String dsObservacao;
-
-    @ManyToOne(/* fetch = FetchType.LAZY */)
-    @JoinColumn(name = "fk_idProduto")
+    @ManyToOne
+    @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
-    @ManyToOne(/* fetch = FetchType.LAZY */)
-    @JoinColumn(name = "fk_idEstoque")
+    @ManyToOne
+    @JoinColumn(name = "estoque_id", nullable = false)
     private Estoque estoque;
 
     /**
-     * Construtor para criar ProdutosEstoques
-     *
-     * @return ProdutosEstoques - O ProdutosEstoques que foi criado
+     * Construtor padrão JPA
      */
     public ProdutosEstoques() {
     }
 
     /**
-     * Construtor para criar ProdutosEstoques
+     * Construtor completo para criar um novo ProdutoEstoque
      *
-     * @param id           O ID do ProdutosEstoques
-     * @param nrQuantidade A quantidade do ProdutosEstoques
-     * @param dsObservacao A observacao do ProdutosEstoques
-     * @param produto      O Produto do ProdutosEstoques
-     * @param estoque      O Estoque do ProdutosEstoques
-     * @return ProdutosEstoques - O ProdutosEstoques que foi criado
+     * @param id         O ID do ProdutoEstoque
+     * @param quantidade A Quantidade do ProdutoEstoque
+     * @param produto    O Produto do ProdutoEstoque
+     * @param estoque    O Estoque do ProdutoEstoque
      */
-    public ProdutosEstoques(int id, int nrQuantidade, String dsObservacao, Produto produto, Estoque estoque) {
-        this.idProdutosEstoque = id;
-        this.nrQuantidade = nrQuantidade;
-        this.dsObservacao = dsObservacao;
+    public ProdutosEstoques(int id, int quantidade, Produto produto, Estoque estoque) {
+        this.id = id;
+        this.quantidade = quantidade;
         this.produto = produto;
         this.estoque = estoque;
     }
 
     /**
-     * Atribui o ID de ProdutosEstoques
+     * Atribui o ID do ProdutoEstoque
      *
-     * @param idProdutosEstoque O ID de ProdutosEstoques
+     * @param id O ID do ProdutoEstoque
      */
-    public void setIdProdutosEstoque(int idProdutosEstoque) {
-        this.idProdutosEstoque = idProdutosEstoque;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
-     * Atribui a quantidade de ProdutosEstoques
+     * Atribui a Quantidade do ProdutoEstoque
      *
-     * @param nrQuantidade A quantidade de ProdutosEstoques
+     * @param quantidade A Quantidade do ProdutoEstoque
      */
-    public void setNrQuantidade(int nrQuantidade) {
-        this.nrQuantidade = nrQuantidade;
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
     }
 
     /**
-     * Atribui a observacao de ProdutosEstoques
+     * Atribui o Produto do ProdutoEstoque
      *
-     * @param dsObservacao A observacao de ProdutosEstoques
-     */
-    public void setDsObservacao(String dsObservacao) {
-        this.dsObservacao = dsObservacao;
-    }
-
-    /**
-     * Atribui o Produto de ProdutosEstoques
-     *
-     * @param produto O Produto de ProdutosEstoques
+     * @param produto O Produto do ProdutoEstoque
      */
     public void setProduto(Produto produto) {
         this.produto = produto;
     }
 
     /**
-     * Atribui o Estoque de ProdutosEstoques
+     * Atribui o Estoque do ProdutoEstoque
      *
-     * @param estoque O Estoque de ProdutosEstoques
+     * @param estoque O Estoque do ProdutoEstoque
      */
     public void setEstoque(Estoque estoque) {
         this.estoque = estoque;
     }
 
     /**
-     * Retorna o ID de ProdutosEstoque
+     * Retorna o ID do ProdutoEstoque
      *
-     * @return idProdutosEstoque - o ID de ProdutosEstoque
+     * @return id - O ID do ProdutoEstoque
      */
-    public int getIdProdutosEstoque() {
-        return this.idProdutosEstoque;
+    public int getId() {
+        return id;
     }
 
     /**
-     * Retorna a quantidade de ProdutosEstoque
+     * Retorna a Quantidade do ProdutoEstoque
      *
-     * @return nrQuantidade - a quantidade de ProdutosEstoque
+     * @return quantidade - A Quantidade do ProdutoEstoque
      */
-    public int getNrQuantidade() {
-        return this.nrQuantidade;
+    public int getQuantidade() {
+        return quantidade;
     }
 
     /**
-     * Retorna a observacao de ProdutosEstoque
+     * Retorna o Produto do ProdutoEstoque
      *
-     * @return dsObservacao - a observacao de ProdutosEstoque
-     */
-    public String getDsObservacao() {
-        return this.dsObservacao;
-    }
-
-    /**
-     * Retorna o Produto de ProdutosEstoque
-     *
-     * @return produto - o Produto de ProdutosEstoque
+     * @return produto - O Produto do ProdutoEstoque
      */
     public Produto getProduto() {
-        return this.produto;
+        return produto;
     }
 
     /**
-     * Retorna o Estoque de ProdutosEstoque
+     * Retorna o Estoque do ProdutoEstoque
      *
-     * @return estoque - o Estoque de ProdutosEstoque
+     * @return estoque - O Estoque do ProdutoEstoque
      */
     public Estoque getEstoque() {
-        return this.estoque;
+        return estoque;
     }
 
     @Override
     public String toString() {
-        return "ProdutosEstoques(Id = %d, Quantidade = %d, Observacao = %s, Produto = %s, Estoque = %s)"
-                .formatted(this.getIdProdutosEstoque(), this.getNrQuantidade(), this.getDsObservacao(),
-                        this.getProduto().toString(), this.getEstoque().toString());
+        return "ProdutoEstoque{id=%d, quantidade=%d, produto=%s, estoque=%s}"
+                .formatted(id, quantidade,
+                        produto != null ? produto.getId() : "null",
+                        estoque != null ? estoque.getId() : "null");
     }
 }

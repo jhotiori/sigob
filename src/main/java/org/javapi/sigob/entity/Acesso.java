@@ -10,116 +10,113 @@ import jakarta.persistence.Id;
 public class Acesso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idAcesso;
+    private int id;
 
-    @Column(name = "nmAcesso")
-    private String nmAcesso;
+    @Column(name = "codigo")
+    private String codigo;
 
-    @Column(name = "cdAcesso")
-    private String cdAcesso;
+    @Column(name = "nome", nullable = false, unique = true)
+    private String nome;
 
-    @Column(name = "dsAcesso")
-    private String dsAcesso;
+    @Column(name = "descricao")
+    private String descricao;
 
     /**
-     * Construtor para criar um novo acesso
-     *
-     * @return Acesso - O acesso criado
+     * Construtor padrão JPA
      */
     public Acesso() {
     }
 
     /**
-     * Construtor para criar um novo acesso
+     * Construtor completo para criar um novo Acesso
      *
-     * @param idAcesso O ID do acesso
-     * @param nmAcesso O nome do acesso
-     * @param cdAcesso O código do acesso
-     * @param dsAcesso A descrição do acesso
-     * @return Acesso - O acesso criado
+     * @param id       O ID do Acesso
+     * @param codigo   O Código do Acesso (opcional)
+     * @param nome     O Nome do Acesso
+     * @param descricao A Descrição do Acesso
      */
-    public Acesso(int idAcesso, String nmAcesso, String cdAcesso, String dsAcesso) {
-        this.idAcesso = idAcesso;
-        this.nmAcesso = nmAcesso;
-        this.cdAcesso = cdAcesso;
-        this.dsAcesso = dsAcesso;
+    public Acesso(int id, String codigo, String nome, String descricao) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
+        this.descricao = descricao;
     }
 
     /**
-     * Atribui o ID do acesso
+     * Atribui o ID do Acesso
      *
-     * @param idAcesso O ID do acesso
+     * @param id O ID do Acesso
      */
-    public void setIdAcesso(int idAcesso) {
-        this.idAcesso = idAcesso;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
-     * Atribui o nome do acesso
+     * Atribui o Código do Acesso
      *
-     * @param nmAcesso O nome do acesso
+     * @param codigo O Código do Acesso
      */
-    public void setNmAcesso(String nmAcesso) {
-        this.nmAcesso = nmAcesso;
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     /**
-     * Atribui o código do acesso
+     * Atribui o Nome do Acesso
      *
-     * @param cdAcesso O código do acesso
+     * @param nome O Nome do Acesso
      */
-    public void setCdAcesso(String cdAcesso) {
-        this.cdAcesso = cdAcesso;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     /**
-     * Atribui a descrição do acesso
+     * Atribui a Descrição do Acesso
      *
-     * @param dsAcesso
+     * @param descricao A Descrição do Acesso
      */
-    public void setDsAcesso(String dsAcesso) {
-        this.dsAcesso = dsAcesso;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     /**
-     * Retorna o ID do acesso
+     * Retorna o ID do Acesso
      *
-     * @return idAcesso - O ID do acesso
+     * @return id - O ID do Acesso
      */
-    public int getIdAcesso() {
-        return this.idAcesso;
+    public int getId() {
+        return id;
     }
 
     /**
-     * Retorna o nome do acesso
+     * Retorna o Código do Acesso
      *
-     * @return nmAcesso - O nome do acesso
+     * @return codigo - O Código do Acesso
      */
-    public String getNmAcesso() {
-        return this.nmAcesso;
+    public String getCodigo() {
+        return codigo;
     }
 
     /**
-     * Retorna o código do acesso
+     * Retorna o Nome do Acesso
      *
-     * @return cdAcesso - O código do acesso
+     * @return nome - O Nome do Acesso
      */
-    public String getCdAcesso() {
-        return this.cdAcesso;
+    public String getNome() {
+        return nome;
     }
 
     /**
-     * Retorna a descrição do acesso
+     * Retorna a Descrição do Acesso
      *
-     * @return dsAcesso - A descrição do acesso
+     * @return descricao - A Descrição do Acesso
      */
-    public String getDsAcesso() {
-        return this.dsAcesso;
+    public String getDescricao() {
+        return descricao;
     }
 
     @Override
     public String toString() {
-        return "Acesso(Id = %d, Nome = %s, Codigo = %s, Descricao = %s)"
-                .formatted(this.getIdAcesso(), this.getNmAcesso(), this.getCdAcesso(), this.getDsAcesso());
+        return "Acesso{id=%d, codigo='%s', nome='%s', descricao='%s'}"
+                .formatted(id, codigo, nome, descricao);
     }
 }

@@ -12,117 +12,140 @@ import jakarta.persistence.ManyToOne;
 public class Funcionario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idFuncionario;
+    private int id;
 
-    @Column(name = "nmFuncionario")
-    private String nmFuncionario;
+    @Column(name = "nome", nullable = false)
+    private String nome;
 
-    @Column(name = "cdFuncionario")
-    private String cdFuncionario;
+    @Column(name = "codigo", nullable = false, unique = true)
+    private String codigo;
 
-    @ManyToOne(/*fetch = FetchType.LAZY*/)
-    @JoinColumn(name = "fk_idAcesso")
+    @ManyToOne
+    @JoinColumn(name = "acesso_id", nullable = false)
     private Acesso acesso;
 
+    @ManyToOne
+    @JoinColumn(name = "documento_id", nullable = false)
+    private Documento documento;
+
     /**
-     * Construtor para criar um novo Funcionario
-     *
-     * @return Funcionario - O funcionario que foi criado
+     * Construtor padrão JPA
      */
     public Funcionario() {
     }
 
     /**
-     * Construtor para criar um novo Funcionario
+     * Construtor completo para criar um novo Funcionario
      *
-     * @param idFuncionario O ID do funcionario
-     * @param nmFuncionario O Nome do funcionario
-     * @param cdFuncionario O Codigo do funcionario
-     * @return Funcionario - O funcionario que foi criado
+     * @param id        O ID do Funcionario
+     * @param nome      O Nome do Funcionario
+     * @param codigo    O Código do Funcionario
+     * @param acesso    O Acesso do Funcionario
+     * @param documento O Documento do Funcionario
      */
-    public Funcionario(int idFuncionario, String nmFuncionario, String cdFuncionario) {
-        this.idFuncionario = idFuncionario;
-        this.nmFuncionario = nmFuncionario;
-        this.cdFuncionario = cdFuncionario;
-        this.acesso = new Acesso();
+    public Funcionario(int id, String nome, String codigo, Acesso acesso, Documento documento) {
+        this.id = id;
+        this.nome = nome;
+        this.codigo = codigo;
+        this.acesso = acesso;
+        this.documento = documento;
     }
 
     /**
      * Atribui o ID do Funcionario
      *
-     * @param idFuncionario - O ID do funcionario
+     * @param id O ID do Funcionario
      */
-    public void setIdFuncionario(int idFuncionario) {
-        this.idFuncionario = idFuncionario;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
      * Atribui o Nome do Funcionario
      *
-     * @param nmFuncionario - O Nome do funcionario
+     * @param nome O Nome do Funcionario
      */
-    public void setNmFuncionario(String nmFuncionario) {
-        this.nmFuncionario = nmFuncionario;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     /**
-     * Atribui o Codigo do Funcionario
+     * Atribui o Código do Funcionario
      *
-     * @param cdFuncionario - O Codigo do funcionario
+     * @param codigo O Código do Funcionario
      */
-    public void setCdFuncionario(String cdFuncionario) {
-        this.cdFuncionario = cdFuncionario;
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     /**
      * Atribui o Acesso do Funcionario
      *
-     * @param acesso - O Acesso do funcionario
+     * @param acesso O Acesso do Funcionario
      */
     public void setAcesso(Acesso acesso) {
         this.acesso = acesso;
     }
 
     /**
+     * Atribui o Documento do Funcionario
+     *
+     * @param documento O Documento do Funcionario
+     */
+    public void setDocumento(Documento documento) {
+        this.documento = documento;
+    }
+
+    /**
      * Retorna o ID do Funcionario
      *
-     * @return idFuncionario - O ID do funcionario
+     * @return id - O ID do Funcionario
      */
-    public int getIdFuncionario() {
-        return this.idFuncionario;
+    public int getId() {
+        return id;
     }
 
     /**
      * Retorna o Nome do Funcionario
      *
-     * @return nmFuncionario - O Nome do funcionario
+     * @return nome - O Nome do Funcionario
      */
-    public String getNmFuncionario() {
-        return this.nmFuncionario;
+    public String getNome() {
+        return nome;
     }
 
     /**
-     * Retorna o Codigo do Funcionario
+     * Retorna o Código do Funcionario
      *
-     * @return cdFuncionario - O Codigo do funcionario
+     * @return codigo - O Código do Funcionario
      */
-    public String getCdFuncionario() {
-        return this.cdFuncionario;
+    public String getCodigo() {
+        return codigo;
     }
 
     /**
      * Retorna o Acesso do Funcionario
      *
-     * @return acesso - O Acesso do funcionario
+     * @return acesso - O Acesso do Funcionario
      */
     public Acesso getAcesso() {
-        return this.acesso;
+        return acesso;
+    }
+
+    /**
+     * Retorna o Documento do Funcionario
+     *
+     * @return documento - O Documento do Funcionario
+     */
+    public Documento getDocumento() {
+        return documento;
     }
 
     @Override
     public String toString() {
-        return "Funcionario(Id = %d, Nome = %s, Codigo = %s, Acesso = %s)"
-                .formatted(this.getIdFuncionario(), this.getNmFuncionario(), this.getCdFuncionario(),
-                        this.getAcesso().toString());
+        return "Funcionario{id=%d, nome='%s', codigo='%s', acesso=%s, documento=%s}"
+                .formatted(id, nome, codigo,
+                        acesso != null ? acesso.getId() : "null",
+                        documento != null ? documento.getId() : "null");
     }
 }
