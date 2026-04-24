@@ -1,89 +1,95 @@
-create table if not exists categorias (
-	idCategoria serial not null primary key,
-	cdCategoria varchar(50) not null unique,
-	nmCategoria varchar(100) not null
-);
+--one to many
+CREATE TABLE IF NOT EXISTS categorias (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(64) NOT NULL UNIQUE
+    );
 
-create table if not exists moedas (
-	idMoeda serial not null primary key,
-	nmMoeda varchar(100) not null,
-	dsCifrao varchar(50) not null,
-	dsSigla varchar(50) not null
-);
+CREATE TABLE IF NOT EXISTS moedas (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(32) NOT NULL,
+    cifrao VARCHAR(8) NOT NULL,
+    sigla VARCHAR(8) NOT NULL
+    );
 
-create table if not exists produtos (
-	idProduto serial not null primary key,
-	cdProduto varchar(50) not null unique,
-	nmProduto varchar(100) not null,
-	dsProduto varchar(200),
-	vlCusto decimal(15,2),
-	vlProduto decimal(15,2),
-	fk_idCategoria int not null,
-	foreign key (fk_idCategoria) references categorias(idCategoria),
-	fk_idMoeda int not null,
-	foreign key (fk_idMoeda) references moedas(idMoeda)
-);
+CREATE TABLE IF NOT EXISTS clientes (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(64) NOT NULL,
+    data_nascimento DATE,
+    documento_id INT,
+    FOREIGN KEY (documento_id) REFERENCES documentos(id)
+    );
 
+-- one to one
+CREATE TABLE IF NOT EXISTS documentos {
+    id SERIAL PRIMARY KEY,
+    documento varchar(64) NOT NULL UNIQUE,
+    tipo varchar(32) NOT NULL
+    }
 
-create table if not exists estoques (
-	idEstoque serial not null primary key,
-	cdEstoque varchar(50) not null unique,
-	nmEstoque varchar(100) not null,
-	dsEstoque varchar(200),
-	fk_idCategoria int not null,
-	foreign key (fk_idCategoria) references categorias(idCategoria)
+-- one to many
+CREATE TABLE IF NOT EXISTS acessos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(32) UNIQUE NOT NULL,
+    descricao TEXT DEFAULT 'Nenhuma descrição foi providenciada'
+    );
 
-);
+CREATE TABLE IF NOT EXISTS estoques (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(32) UNIQUE NOT NULL,
+    nome VARCHAR(128) NOT NULL
+    );
 
-create table if not exists produtosEstoques (
-	idProdutoEstoque serial not null primary key,
-	nrQuantidade bigint not null,
-	dsObservacao varchar(200),
-	fk_idProduto int not null,
-	foreign key (fk_idProduto) references produtos(idProduto),
-	fk_idEstoque int not null,
-	foreign key (fk_idEstoque) references estoques(idEstoque)
+CREATE TABLE IF NOT EXISTS produtos (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(64) UNIQUE NOT NULL,
+    nome VARCHAR(128) NOT NULL,
+    valor_compra DECIMAL(10,2) NOT NULL,
+    valor_venda DECIMAL(10,2) NOT NULL,
+    categoria_id INT NOT NULL,
+    moeda_id INT NOT NULL,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+    FOREIGN KEY (moeda_id) REFERENCES moedas(id)
+    );
 
-);
+CREATE TABLE IF NOT EXISTS funcionarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(64) NOT NULL,
+    codigo VARCHAR(16) UNIQUE NOT NULL,
+    acesso_id INT NOT NULL,
+    documento_id INT NOT NULL,
+    FOREIGN KEY (documento_id) REFERENCES documentos(id)
+    FOREIGN KEY (acesso_id) REFERENCES acessos(id)
+    );
 
-create table if not exists clientes (
-	idCliente serial not null primary key,
-	nmCliente varchar(100) not null,
-	nrDocumento varchar(50)
-);
+CREATE TABLE IF NOT EXISTS vendas (
+    id SERIAL PRIMARY KEY,
+    status VARCHAR(16) NOT NULL, --aberta/finalizada
+    data_abertura TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    data_finalizada TIMESTAMPTZ,
+    valor_total DECIMAL(15,2) NOT NULL,
+    cliente_id INT NOT NULL,
+    funcionario_id INT NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
+    );
 
-create table if not exists acessos (
-	idAcesso serial not null primary key,
-	nmAcesso varchar(100) not null,
-	cdAcesso varchar(50) not null unique,
-	dsAcesso varchar(200)
-);
+CREATE TABLE IF NOT EXISTS produtos_estoques (
+    id SERIAL PRIMARY KEY,
+    quantidade INT NOT NULL,
+    produto_id INT NOT NULL,
+    estoque_id INT NOT NULL,
+    UNIQUE (produto_id, estoque_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id),
+    FOREIGN KEY (estoque_id) REFERENCES estoques(id)
+    );
 
-create table if not exists funcionarios (
-	idFuncionario serial not null primary key,
-	nmFuncionario varchar(100) not null,
-	cdFuncionario varchar(50) not null unique,
-	fk_idAcesso int not null,
-	foreign key (fk_idAcesso) references acessos(idAcesso)
-);
-
-create table if not exists vendas (
-	idVenda serial not null primary key,
-	dtVenda timestamptz not null,
-	vlVenda decimal(15,2) not null,
-	flPago bool not null,
-	fk_idCliente int not null,
-	foreign key (fk_idCliente) references clientes(idCliente),
-	fk_idFuncionario int not null,
-	foreign key (fk_idFuncionario) references funcionarios(idFuncionario)
-);
-
-create table if not exists produtosVendas (
-	idProdutoVenda serial not null primary key,
-	nrQuantidade bigint not null check(nrQuantidade > 0),
-	vlSaldo decimal(15,2) not null,
-	fk_idProduto int not null,
-	foreign key (fk_idProduto) references produtos(idProduto),
-	fk_idVenda int not null,
-	foreign key (fk_idVenda) references vendas(idVenda)
-);
+CREATE TABLE IF NOT EXISTS item_vendas (
+    id SERIAL PRIMARY KEY,
+    quantidade INT NOT NULL,
+    valor unitário DECIMAL(10,2) NOT NULL,
+    produtoEstoque_id INT NOT NULL,
+    venda_id INT NOT NULL,
+    UNIQUE (venda_id, produtoEstoque_id),
+    FOREIGN KEY (produtoEstoque_id) REFERENCES produtos_estoques(id),
+    FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE CASCADE
+    );
