@@ -6,83 +6,45 @@ import org.javapi.sigob.entity.Estoque;
 
 import jakarta.persistence.EntityManager;
 
-public class EstoqueRepository {
-    private final EntityManager em;
+public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
 
     /**
      * Cria um novo EstoqueRepository
      *
      * @param em O EntityManager
-     * @return EstoqueRepository - Um novo EstoqueRepository
      */
     public EstoqueRepository(EntityManager em) {
-        this.em = em;
+        super(em, Estoque.class);
     }
 
     /**
-     * Salva um estoque
+     * Verifica se um Estoque está gerenciado pelo EntityManager
      *
-     * @param estoque O estoque para ser salvo
-     */
-    public void save(Estoque estoque) {
-        em.persist(estoque);
-    }
-
-    /**
-     * Atualiza um estoque
-     *
-     * @param estoque O estoque para ser atualizado
-     */
-    public void update(Estoque estoque) {
-        em.merge(estoque);
-    }
-
-    /**
-     * Confere se um estoque existe
-     *
-     * @param estoque O estoque para conferir
-     * @return boolean - true se o estoque existe, false se nao
+     * @param estoque O Estoque para verificar
+     * @return boolean - true se gerenciado, false caso contrário
      */
     public boolean contains(Estoque estoque) {
-        return em.find(Estoque.class, estoque.getIdEstoque()) != null;
+        return em.contains(estoque);
     }
 
     /**
-     * Deleta um estoque
+     * Busca todos os Estoques disponíveis
      *
-     * @param estoque O estoque para ser deletado
-     */
-    public void delete(Estoque estoque) {
-        em.remove(em.contains(estoque) ? estoque : em.merge(estoque));
-    }
-
-    /**
-     * Retorna uma lista com todos os estoques
-     *
-     * @return List<Estoque> - A lista de estoques
+     * @return List<Estoque> - Todos os Estoques
      */
     public List<Estoque> findAll() {
-        return em.createQuery("select e from estoques e", Estoque.class).getResultList();
+        return em.createQuery("select e from estoques e", Estoque.class)
+                .getResultList();
     }
 
     /**
-     * Busca um estoque pelo id
+     * Busca Estoques cujo nome inicia com o valor informado
      *
-     * @param id O id do estoque
-     * @return Estoque - O estoque encontrado
-     */
-    public Estoque findById(int id) {
-        return em.find(Estoque.class, id);
-    }
-
-    /**
-     * Busca estoques pelo prefixo
-     *
-     * @param nome O prefixo do estoque
-     * @return List<Estoque> - A lista de estoques encontrados
+     * @param nome O prefixo do nome
+     * @return List<Estoque> - Os Estoques encontrados
      */
     public List<Estoque> findByNome(String nome) {
-        return em.createQuery("select e from estoques e where e.nmEstoque like :prefix", Estoque.class)
+        return em.createQuery("select e from estoques e where e.nome like :prefix", Estoque.class)
                 .setParameter("prefix", nome + "%")
                 .getResultList();
     }

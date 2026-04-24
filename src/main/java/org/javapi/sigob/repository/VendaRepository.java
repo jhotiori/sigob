@@ -1,94 +1,58 @@
 package org.javapi.sigob.repository;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-
+import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.Venda;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 
-public class VendaRepository {
-    private final EntityManager em;
+public class VendaRepository extends BaseRepository <Venda, Integer>{
 
     /**
      * Cria um novo VendaRepository
      *
      * @param em O EntityManager
-     * @return VendaRepository - O VendaRepository novo
      */
     public VendaRepository(EntityManager em) {
-        this.em = em;
+        super(em, Venda.class);
     }
 
     /**
-     * Salva uma nova Venda
+     * Verifica se um Venda está gerenciado pelo EntityManager
      *
-     * @param venda A Venda para ser salva
-     */
-    public void save(Venda venda) {
-        em.persist(venda);
-    }
-
-    /**
-     * Atualiza uma Venda
-     *
-     * @param venda A Venda para ser atualizada
-     */
-    public void update(Venda venda) {
-        em.merge(venda);
-    }
-
-    /**
-     * Deleta uma Venda
-     *
-     * @param venda A Venda para ser deletada
-     */
-    public void delete(Venda venda) {
-        em.remove(em.contains(venda) ? venda : em.merge(venda));
-    }
-
-    /**
-     * Verifica se uma venda existe
-     *
-     * @param venda A Venda para conferir
-     * @return boolean - true se a venda existe, false se nao
+     * @param venda O Venda para verificar
+     * @return boolean - true se gerenciado, false caso contrário
      */
     public boolean contains(Venda venda) {
-        return em.find(Venda.class, venda.getIdVenda()) != null;
+        return em.contains(venda);
     }
 
     /**
-     * Retorna uma lista de todas as vendas
+     * Busca todos os Venda disponíveis
      *
-     * @return List<Venda> - A lista de vendas
+     * @return List<Venda> - Todos os Venda
      */
     public List<Venda> findAll() {
-        return em.createQuery("select v from vendas v", Venda.class).getResultList();
+        return em.createQuery("select v from vendas v", Venda.class)
+                .getResultList();
     }
 
     /**
-     * Retorna uma venda pelo ID
+     * Busca Venda que tenham status 'ABERTA'
      *
-     * @param id O ID da venda
-     * @return Venda - A venda
+     * @return List<Venda> - Os Venda encontrados
      */
-    public Venda findById(int id) {
-        return em.find(Venda.class, id);
+    public List<Venda> findAbertas( ) {
+        return em.createQuery("select v from vendas v where v.status = 'ABERTA'", Venda.class)
+                .getResultList();
     }
 
     /**
-     * Retorna uma lista de vendas pelo intervalo de datas
+     * Busca Venda que tenham status 'FINALIZADA'
      *
-     * @param dataInicio A data inicial
-     * @param dataFim    A data final
-     * @return List<Venda> - A lista de vendas
+     * @return List<Venda> - Os Venda encontrados
      */
-    public List<Venda> findByDataVenda(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
-        return em
-                .createQuery("select v from vendas v where v.dtVenda >= :dtInicial and v.dtVenda <= :dtFinal",
-                        Venda.class)
-                .setParameter("dtInicial", dataInicio)
-                .setParameter("dtFinal", dataFim)
+    public List<Venda> findFinalizadas( ) {
+        return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
                 .getResultList();
     }
 }

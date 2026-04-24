@@ -6,60 +6,31 @@ import org.javapi.sigob.entity.Cliente;
 
 import jakarta.persistence.EntityManager;
 
-public class ClienteRepository {
-    private final EntityManager em;
+public class ClienteRepository extends BaseRepository<Cliente, Integer> {
 
     /**
      * Cria um novo ClienteRepository
      *
      * @param em O EntityManager
-     * @return ClienteRepository - O repositorio
      */
     public ClienteRepository(EntityManager em) {
-        this.em = em;
+        super(em, Cliente.class);
     }
 
     /**
-     * Salva um novo Cliente
+     * Verifica se um Cliente está gerenciado pelo EntityManager
      *
-     * @param cliente O Cliente para ser salvo
-     */
-    public void save(Cliente cliente) {
-        em.persist(cliente);
-    }
-
-    /**
-     * Atualiza um Cliente
-     *
-     * @param cliente O Cliente para ser atualizado
-     */
-    public void update(Cliente cliente) {
-        em.merge(cliente);
-    }
-
-    /**
-     * Remove um Cliente
-     *
-     * @param cliente O Cliente para ser removido
-     */
-    public void remove(Cliente cliente) {
-        em.remove(em.contains(cliente) ? cliente : em.merge(cliente));
-    }
-
-    /**
-     * Confere se um Cliente existe
-     *
-     * @param cliente O Cliente
-     * @return boolean - true se o Cliente existe, false se nao
+     * @param cliente O Cliente para verificar
+     * @return boolean - true se gerenciado, false caso contrário
      */
     public boolean contains(Cliente cliente) {
-        return em.find(Cliente.class, cliente.getIdCliente()) != null;
+        return em.contains(cliente);
     }
 
     /**
-     * Retorna uma lista com todos os Clientes
+     * Busca todos os Clientes disponíveis
      *
-     * @return List<Cliente> - A lista de clientes
+     * @return List<Cliente> - Todos os Clientes
      */
     public List<Cliente> findAll() {
         return em.createQuery("select c from clientes c", Cliente.class)
@@ -67,35 +38,25 @@ public class ClienteRepository {
     }
 
     /**
-     * Retorna um Cliente pelo seu ID
-     *
-     * @param id O ID do Cliente
-     * @return Cliente - O Cliente buscado
-     */
-    public Cliente findById(int id) {
-        return em.find(Cliente.class, id);
-    }
-
-    /**
-     * Retorna uma lista com todos os Clientes com o nome informado
+     * Busca Clientes cujo nome inicia com o valor informado
      *
      * @param nome O Nome do Cliente
-     * @return List<Cliente> - A lista de clientes
+     * @return List<Cliente> - Os Clientes encontrados
      */
     public List<Cliente> findByNome(String nome) {
-        return em.createQuery("select c from clientes c where nmCliente like :str", Cliente.class)
+        return em.createQuery("select c from clientes c where c.nome like :str", Cliente.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
 
     /**
-     * Retorna um Cliente pelo seu documento
+     * Busca Clientes pelo documento vinculado
      *
-     * @param documento O Documento do Cliente
-     * @return Cliente - O Cliente buscado
+     * @param documento O número do Documento
+     * @return List<Cliente> - Os Clientes encontrados
      */
     public List<Cliente> findByDocumento(String documento) {
-        return em.createQuery("select c from clientes c where nrDocumento like :str", Cliente.class)
+        return em.createQuery("select c from clientes c where c.documento.documento like :str", Cliente.class)
                 .setParameter("str", documento + "%")
                 .getResultList();
     }

@@ -6,84 +6,70 @@ import org.javapi.sigob.entity.Produto;
 
 import jakarta.persistence.EntityManager;
 
-public class ProdutoRepository {
-    private final EntityManager em;
+public class ProdutoRepository extends BaseRepository<Produto, Integer> {
 
     /**
      * Cria um novo ProdutoRepository
      *
      * @param em O EntityManager
-     * @return ProdutoRepository - O novo ProdutoRepository
      */
     public ProdutoRepository(EntityManager em) {
-        this.em = em;
+        super(em, Produto.class);
     }
 
     /**
-     * Salva um novo Produto
+     * Verifica se um Produto está gerenciado pelo EntityManager
      *
-     * @param produto O Produto
-     */
-    public void save(Produto produto) {
-        em.persist(produto);
-    }
-
-    /**
-     * Atualiza um Produto
-     *
-     * @param produto O Produto
-     */
-    public void update(Produto produto) {
-        em.merge(produto);
-    }
-
-    /**
-     * Deleta um Produto
-     *
-     * @param produto O Produto
-     */
-    public void delete(Produto produto) {
-        em.remove(em.contains(produto) ? produto : em.merge(produto));
-    }
-
-    /**
-     * Verifica se um Produto está salvo
-     *
-     * @param produto O Produto
-     * @return boolean - true se o Produto estiver salvo, false se nao
+     * @param produto O Produto para verificar
+     * @return boolean - true se gerenciado, false caso contrário
      */
     public boolean contains(Produto produto) {
-        return em.find(Produto.class, produto.getIdProduto()) != null;
+        return em.contains(produto);
     }
 
     /**
-     * Retorna uma lista de todos os Produtos
+     * Busca todos os Produtos disponíveis
      *
-     * @return List<Produto> - A lista de Produtos
+     * @return List<Produto> - Todos os Produtos
      */
     public List<Produto> findAll() {
-        return em.createQuery("select p from produtos p", Produto.class).getResultList();
+        return em.createQuery("select p from produtos p", Produto.class)
+                .getResultList();
     }
 
     /**
-     * Busca um Produto pelo id
+     * Busca Produtos cujo nome inicia com o valor informado
      *
-     * @param id O id do Produto
-     * @return Produto - O Produto encontrado
-     */
-    public Produto findById(int id) {
-        return em.find(Produto.class, id);
-    }
-
-    /**
-     * Busca pelos Produtos que contem o nome
-     *
-     * @param nome O nome
-     * @return List<Produto> - A lista de Produtos encontrados
+     * @param nome O Nome para buscar
+     * @return List<Produto> - Os Produtos encontrados
      */
     public List<Produto> findByNome(String nome) {
-        return em.createQuery("select p from produtos p where p.nmProduto like :str", Produto.class)
+        return em.createQuery("select p from produtos p where p.nome like :str", Produto.class)
                 .setParameter("str", nome + "%")
+                .getResultList();
+    }
+
+    /**
+     * Busca um Produto pelo codigo
+     *
+     * @param codigo O Codigo do Produto
+     * @return Produto - O Produto encontrado (pode ser null)
+     */
+    public Produto findByCodigo(String codigo) {
+        return em.createQuery("select p from produtos p where p.codigo = :codigo", Produto.class)
+                .setParameter("codigo", codigo)
+                .getSingleResultOrNull();
+    }
+
+    /**
+     * Busca todos os Produtos de uma Categoria
+     *
+     * @param categoriaId O ID da Categoria
+     * @return List<Produto> - Os Produtos encontrados
+     */
+    public List<Produto> findByCategoria(int categoriaId) {
+        return em.createQuery("select p from produtos p where p.categoria.id = :categoriaId", Produto.class)
+                .setParameter("categoriaId", categoriaId)
                 .getResultList();
     }
 }
