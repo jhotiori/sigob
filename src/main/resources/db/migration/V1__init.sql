@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS clientes (
     );
 
 -- one to one
-CREATE TABLE IF NOT EXISTS documentos {
+CREATE TABLE IF NOT EXISTS documentos (
     id SERIAL PRIMARY KEY,
     documento varchar(64) NOT NULL UNIQUE,
     tipo varchar(32) NOT NULL
-    }
+    );
 
 -- one to many
 CREATE TABLE IF NOT EXISTS acessos (
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     codigo VARCHAR(16) UNIQUE NOT NULL,
     acesso_id INT NOT NULL,
     documento_id INT NOT NULL,
-    FOREIGN KEY (documento_id) REFERENCES documentos(id)
+    FOREIGN KEY (documento_id) REFERENCES documentos(id),
     FOREIGN KEY (acesso_id) REFERENCES acessos(id)
     );
 
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS produtos_estoques (
 CREATE TABLE IF NOT EXISTS item_vendas (
     id SERIAL PRIMARY KEY,
     quantidade INT NOT NULL,
-    valor unitário DECIMAL(10,2) NOT NULL,
+    valor_saldo DECIMAL(10,2) NOT NULL,
     produtoEstoque_id INT NOT NULL,
     venda_id INT NOT NULL,
     UNIQUE (venda_id, produtoEstoque_id),
