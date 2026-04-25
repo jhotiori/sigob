@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 
 @Entity(name = "produtos")
 public class Produto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -45,16 +46,16 @@ public class Produto {
     /**
      * Construtor completo para criar um novo Produto
      *
-     * @param id          O ID do Produto
-     * @param codigo      O Código do Produto
-     * @param nome        O Nome do Produto
+     * @param id O ID do Produto
+     * @param codigo O Código do Produto
+     * @param nome O Nome do Produto
      * @param valorCompra O Valor de Compra do Produto
-     * @param valorVenda  O Valor de Venda do Produto
-     * @param categoria   A Categoria do Produto
-     * @param moeda       A Moeda do Produto (opcional)
+     * @param valorVenda O Valor de Venda do Produto
+     * @param categoria A Categoria do Produto
+     * @param moeda A Moeda do Produto (opcional)
      */
     public Produto(int id, String codigo, String nome, BigDecimal valorCompra, BigDecimal valorVenda,
-                   Categoria categoria, Moeda moeda) {
+            Categoria categoria, Moeda moeda) {
         this.id = id;
         this.codigo = codigo;
         this.nome = nome;
@@ -192,9 +193,7 @@ public class Produto {
 
     @Override
     public String toString() {
-        return "Produto{id=%d, codigo='%s', nome='%s', valorCompra=%s, valorVenda=%s, categoria=%s, moeda=%s}"
-                .formatted(id, codigo, nome, valorCompra, valorVenda,
-                        categoria != null ? categoria.getId() : "null",
-                        moeda != null ? moeda.getId() : "null");
+        return "Produto(Id = %d, Codigo = %s, Nome = %s, ValorCompra = %s, ValorVenda = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getValorCompra(), this.getValorVenda());
     }
 }

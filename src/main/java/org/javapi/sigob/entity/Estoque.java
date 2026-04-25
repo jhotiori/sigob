@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 
 @Entity(name = "estoques")
 public class Estoque {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -27,9 +28,9 @@ public class Estoque {
     /**
      * Construtor completo para criar um novo Estoque
      *
-     * @param id     O ID do Estoque
+     * @param id O ID do Estoque
      * @param codigo O Código do Estoque
-     * @param nome   O Nome do Estoque
+     * @param nome O Nome do Estoque
      */
     public Estoque(int id, String codigo, String nome) {
         this.id = id;
@@ -93,7 +94,7 @@ public class Estoque {
 
     @Override
     public String toString() {
-        return "Estoque{id=%d, codigo='%s', nome='%s'}"
-                .formatted(id, codigo, nome);
+        return "Estoque(Id = %d, Codigo = %s, Nome = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome());
     }
 }

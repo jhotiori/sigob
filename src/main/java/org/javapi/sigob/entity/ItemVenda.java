@@ -14,9 +14,10 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "item_vendas", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "venda_id", "produtoEstoque_id" })
+    @UniqueConstraint(columnNames = {"venda_id", "produtoEstoque_id"})
 })
 public class ItemVenda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -44,11 +45,11 @@ public class ItemVenda {
     /**
      * Construtor completo para criar um novo ItemVenda
      *
-     * @param id             O ID do ItemVenda
-     * @param quantidade     A Quantidade do ItemVenda
-     * @param valorUnitario  O Valor Unitário do ItemVenda
+     * @param id O ID do ItemVenda
+     * @param quantidade A Quantidade do ItemVenda
+     * @param valorUnitario O Valor Unitário do ItemVenda
      * @param produtoEstoque O ProdutoEstoque do ItemVenda
-     * @param venda          A Venda do ItemVenda
+     * @param venda A Venda do ItemVenda
      */
     public ItemVenda(int id, int quantidade, BigDecimal valorUnitario, ProdutosEstoques produtoEstoque, Venda venda) {
         this.id = id;
@@ -150,9 +151,7 @@ public class ItemVenda {
 
     @Override
     public String toString() {
-        return "ItemVenda{id=%d, quantidade=%d, valorUnitario=%s, produtoEstoque=%s, venda=%s}"
-                .formatted(id, quantidade, valorUnitario,
-                        produtoEstoque != null ? produtoEstoque.getId() : "null",
-                        venda != null ? venda.getId() : "null");
+        return "ItemVenda(Id = %d, Quantidade = %d, ValorUnitario = %s)"
+                .formatted(this.getId(), this.getQuantidade(), this.getValorUnitario());
     }
 }

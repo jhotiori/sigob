@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 
 @Entity(name = "vendas")
 public class Venda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -46,16 +47,16 @@ public class Venda {
     /**
      * Construtor completo para criar uma nova Venda
      *
-     * @param id             O ID da Venda
-     * @param status         O Status da Venda (aberta/finalizada)
-     * @param dataAbertura   A Data de Abertura da Venda
+     * @param id O ID da Venda
+     * @param status O Status da Venda (aberta/finalizada)
+     * @param dataAbertura A Data de Abertura da Venda
      * @param dataFinalizada A Data de Finalização da Venda (opcional)
-     * @param valorTotal     O Valor Total da Venda
-     * @param cliente        O Cliente da Venda
-     * @param funcionario    O Funcionario da Venda
+     * @param valorTotal O Valor Total da Venda
+     * @param cliente O Cliente da Venda
+     * @param funcionario O Funcionario da Venda
      */
     public Venda(int id, String status, OffsetDateTime dataAbertura, OffsetDateTime dataFinalizada,
-                 BigDecimal valorTotal, Cliente cliente, Funcionario funcionario) {
+            BigDecimal valorTotal, Cliente cliente, Funcionario funcionario) {
         this.id = id;
         this.status = status;
         this.dataAbertura = dataAbertura;
@@ -193,10 +194,7 @@ public class Venda {
 
     @Override
     public String toString() {
-        return "Venda{id=%d, status='%s', dataAbertura=%s, dataFinalizada=%s, valorTotal=%s, cliente=%s, funcionario=%s}"
-                .formatted(id, status, dataAbertura, dataFinalizada,
-                        valorTotal,
-                        cliente != null ? cliente.getId() : "null",
-                        funcionario != null ? funcionario.getId() : "null");
+        return "Venda(Id = %d, Status = %s, DataAbertura = %s, DataFinalizada = %s, ValorTotal = %s)"
+                .formatted(this.getId(), this.getStatus(), this.getDataAbertura(), this.getDataFinalizada(), this.getValorTotal());
     }
 }

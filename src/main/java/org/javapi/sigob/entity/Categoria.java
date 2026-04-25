@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 
 @Entity(name = "categorias")
 public class Categoria {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -66,6 +67,7 @@ public class Categoria {
     public void setNome(String nome) {
         this.nome = nome;
     }
+
     /**
      * Retorna o ID da categoria
      *
@@ -74,6 +76,7 @@ public class Categoria {
     public int getId() {
         return id;
     }
+
     /**
      * Retorna o Codigo da categoria
      *
@@ -82,6 +85,7 @@ public class Categoria {
     public String getCodigo() {
         return codigo;
     }
+
     /**
      * Retorna o Nome da categoria
      *
@@ -93,6 +97,7 @@ public class Categoria {
 
     @Override
     public String toString() {
-        return "Categoria{id=%d, codigo='%s', nome='%s'}".formatted(id, codigo, nome);
+        return "Categoria(Id = %d, Codigo = %s, Nome = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome());
     }
 }

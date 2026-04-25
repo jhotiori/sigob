@@ -1,11 +1,18 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity(name = "clientes")
 public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -26,7 +33,9 @@ public class Cliente {
      * @return Cliente - O Cliente criado
      */
     public Cliente() {
-    };
+    }
+
+    ;
 
     /**
      * Construtor completo para criar um novo Cliente
@@ -117,7 +126,7 @@ public class Cliente {
 
     @Override
     public String toString() {
-        return "Cliente{id=%d, nome='%s', dataNascimento=%s, documento=%s}"
-                .formatted(id, nome, dataNascimento, documento != null ? documento.getId() : "null");
+        return "Cliente(Id = %d, Nome = %s, DataNascimento = %s)"
+                .formatted(this.getId(), this.getNome(), this.getDataNascimento());
     }
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 
 @Entity(name = "acessos")
 public class Acesso {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -30,9 +31,9 @@ public class Acesso {
     /**
      * Construtor completo para criar um novo Acesso
      *
-     * @param id       O ID do Acesso
-     * @param codigo   O Código do Acesso (opcional)
-     * @param nome     O Nome do Acesso
+     * @param id O ID do Acesso
+     * @param codigo O Código do Acesso (opcional)
+     * @param nome O Nome do Acesso
      * @param descricao A Descrição do Acesso
      */
     public Acesso(int id, String codigo, String nome, String descricao) {
@@ -116,7 +117,7 @@ public class Acesso {
 
     @Override
     public String toString() {
-        return "Acesso{id=%d, codigo='%s', nome='%s', descricao='%s'}"
-                .formatted(id, codigo, nome, descricao);
+        return "Acesso(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getDescricao());
     }
 }

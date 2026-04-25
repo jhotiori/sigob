@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 
 @Entity(name = "moedas")
 public class Moeda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -32,10 +33,10 @@ public class Moeda {
     /**
      * Construtor para criar uma nova Moeda
      *
-     * @param id     ID da moeda
-     * @param nome   Nome da moeda
+     * @param id ID da moeda
+     * @param nome Nome da moeda
      * @param cifrao Cifrao da moeda
-     * @param sigla  Sigla da moeda
+     * @param sigla Sigla da moeda
      * @return Moeda - A moeda que foi criada
      */
     public Moeda(Integer id, String nome, String cifrao, String sigla) {
@@ -53,6 +54,7 @@ public class Moeda {
     public void setId(Integer id) {
         this.id = id;
     }
+
     /**
      * Atribui o Nome da Moeda
      *
@@ -61,6 +63,7 @@ public class Moeda {
     public void setNome(String nome) {
         this.nome = nome;
     }
+
     /**
      * Atribui o Cifrao da Moeda
      *
@@ -78,6 +81,7 @@ public class Moeda {
     public void setSigla(String sigla) {
         this.sigla = sigla;
     }
+
     /**
      * Retorna o ID da Moeda
      *
@@ -95,6 +99,7 @@ public class Moeda {
     public String getNome() {
         return nome;
     }
+
     /**
      * Retorna o Cifrao da Moeda
      *
@@ -103,6 +108,7 @@ public class Moeda {
     public String getCifrao() {
         return cifrao;
     }
+
     /**
      * Retorna a Sigla da Moeda
      *
@@ -114,6 +120,7 @@ public class Moeda {
 
     @Override
     public String toString() {
-        return "Moeda{id=%d, nome='%s', cifrao='%s', sigla='%s'}".formatted(id, nome, cifrao, sigla);
+        return "Moeda(Id = %d, Nome = %s, Cifrao = %s, Sigla = %s)"
+                .formatted(this.getId(), this.getNome(), this.getCifrao(), this.getSigla());
     }
 }

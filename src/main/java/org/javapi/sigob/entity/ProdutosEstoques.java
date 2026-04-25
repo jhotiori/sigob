@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 
 @Entity(name = "produtosEstoques")
 public class ProdutosEstoques {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -34,10 +35,10 @@ public class ProdutosEstoques {
     /**
      * Construtor completo para criar um novo ProdutoEstoque
      *
-     * @param id         O ID do ProdutoEstoque
+     * @param id O ID do ProdutoEstoque
      * @param quantidade A Quantidade do ProdutoEstoque
-     * @param produto    O Produto do ProdutoEstoque
-     * @param estoque    O Estoque do ProdutoEstoque
+     * @param produto O Produto do ProdutoEstoque
+     * @param estoque O Estoque do ProdutoEstoque
      */
     public ProdutosEstoques(int id, int quantidade, Produto produto, Estoque estoque) {
         this.id = id;
@@ -120,9 +121,7 @@ public class ProdutosEstoques {
 
     @Override
     public String toString() {
-        return "ProdutoEstoque{id=%d, quantidade=%d, produto=%s, estoque=%s}"
-                .formatted(id, quantidade,
-                        produto != null ? produto.getId() : "null",
-                        estoque != null ? estoque.getId() : "null");
+        return "ProdutosEstoques(Id = %d, Quantidade = %d, Produto = %s)"
+                .formatted(this.getId(), this.getQuantidade(), this.getProduto().getNome());
     }
 }

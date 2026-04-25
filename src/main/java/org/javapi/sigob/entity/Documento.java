@@ -6,8 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity(name="documentos")
+@Entity(name = "documentos")
 public class Documento {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -27,9 +28,9 @@ public class Documento {
     /**
      * Construtor completo para criar um novo Documento
      *
-     * @param id       O ID do Documento
+     * @param id O ID do Documento
      * @param documento O Número/Código do Documento
-     * @param tipo     O Tipo do Documento (ex: CPF, CNPJ)
+     * @param tipo O Tipo do Documento (ex: CPF, CNPJ)
      */
     public Documento(int id, String documento, String tipo) {
         this.id = id;
@@ -93,7 +94,7 @@ public class Documento {
 
     @Override
     public String toString() {
-        return "Documento{id=%d, documento='%s', tipo='%s'}"
-                .formatted(id, documento, tipo);
+        return "Documento(Id = %d, Documento = %s, Tipo = %s)"
+                .formatted(this.getId(), this.getDocumento(), this.getTipo());
     }
 }
