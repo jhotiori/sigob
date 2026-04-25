@@ -1,11 +1,16 @@
 package org.javapi.sigob.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 
 @Entity(name = "funcionarios")
@@ -21,9 +26,13 @@ public class Funcionario {
     @Column(name = "codigo", nullable = false, unique = true)
     private String codigo;
 
-    @ManyToOne
-    @JoinColumn(name = "acesso_id", nullable = false)
-    private Acesso acesso;
+    @ManyToMany
+    @JoinTable(
+            name = "funcionarios_acessos",
+            joinColumns = @JoinColumn(name = "funcionario_id"),
+            inverseJoinColumns = @JoinColumn(name = "acesso_id")
+    )
+    private final Set<Acesso> acessos = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "documento_id", nullable = false)
@@ -44,11 +53,10 @@ public class Funcionario {
      * @param acesso O Acesso do Funcionario
      * @param documento O Documento do Funcionario
      */
-    public Funcionario(int id, String nome, String codigo, Acesso acesso, Documento documento) {
+    public Funcionario(int id, String nome, String codigo, Documento documento) {
         this.id = id;
         this.nome = nome;
         this.codigo = codigo;
-        this.acesso = acesso;
         this.documento = documento;
     }
 
@@ -77,15 +85,6 @@ public class Funcionario {
      */
     public void setCodigo(String codigo) {
         this.codigo = codigo;
-    }
-
-    /**
-     * Atribui o Acesso do Funcionario
-     *
-     * @param acesso O Acesso do Funcionario
-     */
-    public void setAcesso(Acesso acesso) {
-        this.acesso = acesso;
     }
 
     /**
@@ -125,21 +124,64 @@ public class Funcionario {
     }
 
     /**
-     * Retorna o Acesso do Funcionario
-     *
-     * @return acesso - O Acesso do Funcionario
-     */
-    public Acesso getAcesso() {
-        return acesso;
-    }
-
-    /**
      * Retorna o Documento do Funcionario
      *
      * @return documento - O Documento do Funcionario
      */
     public Documento getDocumento() {
         return documento;
+    }
+
+    /**
+     * Adiciona um acesso ao funcionário garantindo consistência bidirecional
+     *
+     * @param acesso O acesso a ser adicionado
+     * @return true se foi adicionado, false se já existia
+     */
+    public boolean addAcesso(Acesso acesso) {
+        if (acesso == null) {
+            return false;
+        }
+        boolean adicionado = this.acessos.add(acesso);
+        if (adicionado) {
+            acesso.getFuncionarios().add(this);
+        }
+        return adicionado;
+    }
+
+    /**
+     * Remove um acesso do funcionário garantindo consistência bidirecional
+     *
+     * @param acesso O acesso a ser removido
+     * @return true se foi removido, false se nao existia
+     */
+    public boolean removeAcesso(Acesso acesso) {
+        if (acesso == null) {
+            return false;
+        }
+        boolean removido = this.acessos.remove(acesso);
+        if (removido) {
+            acesso.getFuncionarios().remove(this);
+        }
+        return removido;
+    }
+
+    /**
+     * Verifica se o funcionário possui determinado acesso
+     *
+     * @param nome Nome do acesso
+     * @return true se possui, false caso contrário
+     */
+    public boolean hasAcesso(String nome) {
+        return this.acessos.stream()
+                .anyMatch(a -> a.getNome().equalsIgnoreCase(nome));
+    }
+
+    /**
+     * Retorna os acessos (imutável externamente)
+     */
+    public Set<Acesso> getAcessos() {
+        return Set.copyOf(acessos);
     }
 
     @Override

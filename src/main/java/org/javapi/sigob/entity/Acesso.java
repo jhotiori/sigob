@@ -1,10 +1,14 @@
 package org.javapi.sigob.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 
 @Entity(name = "acessos")
 public class Acesso {
@@ -21,6 +25,9 @@ public class Acesso {
 
     @Column(name = "descricao")
     private String descricao;
+
+    @ManyToMany(mappedBy = "acessos")
+    private final Set<Funcionario> funcionarios = new HashSet<>();
 
     /**
      * Construtor padrão JPA
@@ -113,6 +120,15 @@ public class Acesso {
      */
     public String getDescricao() {
         return descricao;
+    }
+
+    /**
+     * Retorna os Funcionários (imutável externamente)
+     *
+     * @return funcionarios - Os Funcionários
+     */
+    public Set<Funcionario> getFuncionarios() {
+        return Set.copyOf(funcionarios);
     }
 
     @Override
