@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(64) NOT NULL,
     codigo VARCHAR(16) UNIQUE NOT NULL,
-    acesso_id INT NOT NULL,
     documento_id INT NOT NULL,
     FOREIGN KEY (documento_id) REFERENCES documentos(id),
     FOREIGN KEY (acesso_id) REFERENCES acessos(id)
@@ -62,8 +61,8 @@ CREATE TABLE IF NOT EXISTS funcionarios_acessos (
     funcionario_id INT NOT NULL,
     acesso_id INT NOT NULL,
     PRIMARY KEY (funcionario_id, acesso_id),
-    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id),
-    FOREIGN KEY (acesso_id) REFERENCES acessos(id)
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (acesso_id) REFERENCES acessos(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS vendas (
