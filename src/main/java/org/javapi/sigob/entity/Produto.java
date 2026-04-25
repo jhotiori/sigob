@@ -12,64 +12,57 @@ import jakarta.persistence.ManyToOne;
 
 @Entity(name = "produtos")
 public class Produto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idProduto;
+    private int id;
 
-    @Column(name = "cdProduto")
-    private String cdProduto;
+    @Column(name = "codigo", nullable = false, unique = true)
+    private String codigo;
 
-    @Column(name = "nmProduto")
-    private String nmProduto;
+    @Column(name = "nome", nullable = false)
+    private String nome;
 
-    @Column(name = "dsProduto")
-    private String dsProduto;
+    @Column(name = "valor_compra", nullable = false)
+    private BigDecimal valorCompra;
 
-    @Column(name = "vlCusto")
-    private BigDecimal vlCusto;
+    @Column(name = "valor_venda", nullable = false)
+    private BigDecimal valorVenda;
 
-    @Column(name = "vlProduto")
-    private BigDecimal vlProduto;
-
-    @ManyToOne(/*fetch = FetchType.LAZY*/)
-    @JoinColumn(name = "fk_idCategoria")
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
-    @ManyToOne(/*fetch = FetchType.LAZY*/)
-    @JoinColumn(name = "fk_idMoeda")
+    @ManyToOne
+    @JoinColumn(name = "moeda_id", nullable = true)
     private Moeda moeda;
 
     /**
-     * Construtor para criar um novo Produto
-     *
-     * @return Produto - O produto que foi criado
+     * Construtor padrão JPA
      */
     public Produto() {
     }
 
     /**
-     * Construtor para criar um novo Produto
+     * Construtor completo para criar um novo Produto
      *
-     * @param id        O ID do Produto
-     * @param cd        O Codigo do Produto
-     * @param nm        O Nome do Produto
-     * @param ds        A Descricao do Produto
-     * @param vlCusto   O Valor de Custo do Produto
-     * @param vlProduto O Valor do Produto
-     * @param cat       A Categoria do Produto
-     * @param moe       A Moeda do Produto
-     * @return Produto - O produto que foi criado
+     * @param id O ID do Produto
+     * @param codigo O Código do Produto
+     * @param nome O Nome do Produto
+     * @param valorCompra O Valor de Compra do Produto
+     * @param valorVenda O Valor de Venda do Produto
+     * @param categoria A Categoria do Produto
+     * @param moeda A Moeda do Produto (opcional)
      */
-    public Produto(int id, String cd, String nm, String ds, BigDecimal vlCusto, BigDecimal vlProduto, Categoria cat,
-            Moeda moe) {
-        this.idProduto = id;
-        this.cdProduto = cd;
-        this.nmProduto = nm;
-        this.dsProduto = ds;
-        this.vlCusto = vlCusto;
-        this.vlProduto = vlProduto;
-        this.categoria = cat;
-        this.moeda = moe;
+    public Produto(int id, String codigo, String nome, BigDecimal valorCompra, BigDecimal valorVenda,
+            Categoria categoria, Moeda moeda) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
+        this.valorCompra = valorCompra;
+        this.valorVenda = valorVenda;
+        this.categoria = categoria;
+        this.moeda = moeda;
     }
 
     /**
@@ -77,125 +70,107 @@ public class Produto {
      *
      * @param id O ID do Produto
      */
-    public void setIdProduto(int id) {
-        this.idProduto = id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
-     * Atribui o Codigo do Produto
+     * Atribui o Código do Produto
      *
-     * @param cd O Codigo do Produto
+     * @param codigo O Código do Produto
      */
-    public void setCdProduto(String cd) {
-        this.cdProduto = cd;
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     /**
      * Atribui o Nome do Produto
      *
-     * @param nm O Nome do Produto
+     * @param nome O Nome do Produto
      */
-    public void setNmProduto(String nm) {
-        this.nmProduto = nm;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     /**
-     * Atribui a Descricao do Produto
+     * Atribui o Valor de Compra do Produto
      *
-     * @param ds A Descricao do Produto
+     * @param valorCompra O Valor de Compra do Produto
      */
-    public void setDsProduto(String ds) {
-        this.dsProduto = ds;
+    public void setValorCompra(BigDecimal valorCompra) {
+        this.valorCompra = valorCompra;
     }
 
     /**
-     * Atribui o Valor de Custo do Produto
+     * Atribui o Valor de Venda do Produto
      *
-     * @param vlCusto O Valor de Custo do Produto
+     * @param valorVenda O Valor de Venda do Produto
      */
-    public void setVlCusto(BigDecimal vlCusto) {
-        this.vlCusto = vlCusto;
-    }
-
-    /**
-     * Atribui o Valor do Produto
-     *
-     * @param vlProduto O Valor do Produto
-     */
-    public void setVlProduto(BigDecimal vlProduto) {
-        this.vlProduto = vlProduto;
+    public void setValorVenda(BigDecimal valorVenda) {
+        this.valorVenda = valorVenda;
     }
 
     /**
      * Atribui a Categoria do Produto
      *
-     * @param cat A Categoria do Produto
+     * @param categoria A Categoria do Produto
      */
-    public void setCategoria(Categoria cat) {
-        this.categoria = cat;
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
     /**
      * Atribui a Moeda do Produto
      *
-     * @param moe A Moeda do Produto
+     * @param moeda A Moeda do Produto
      */
-    public void setMoeda(Moeda moe) {
-        this.moeda = moe;
+    public void setMoeda(Moeda moeda) {
+        this.moeda = moeda;
     }
 
     /**
      * Retorna o ID do Produto
      *
-     * @return idProduto - O ID do Produto
+     * @return id - O ID do Produto
      */
-    public int getIdProduto() {
-        return this.idProduto;
+    public int getId() {
+        return id;
     }
 
     /**
-     * Retorna o Codigo do Produto
+     * Retorna o Código do Produto
      *
-     * @return cdProduto - O Codigo do Produto
+     * @return codigo - O Código do Produto
      */
-    public String getCdProduto() {
-        return this.cdProduto;
+    public String getCodigo() {
+        return codigo;
     }
 
     /**
      * Retorna o Nome do Produto
      *
-     * @return nmProduto - O Nome do Produto
+     * @return nome - O Nome do Produto
      */
-    public String getNmProduto() {
-        return this.nmProduto;
+    public String getNome() {
+        return nome;
     }
 
     /**
-     * Retorna a Descricao do Produto
+     * Retorna o Valor de Compra do Produto
      *
-     * @return dsProduto - A Descricao do Produto
+     * @return valorCompra - O Valor de Compra do Produto
      */
-    public String getDsProduto() {
-        return this.dsProduto;
+    public BigDecimal getValorCompra() {
+        return valorCompra;
     }
 
     /**
-     * Retorna o Valor de Custo do Produto
+     * Retorna o Valor de Venda do Produto
      *
-     * @return vlCusto - O Valor de Custo do Produto
+     * @return valorVenda - O Valor de Venda do Produto
      */
-    public BigDecimal getVlCusto() {
-        return this.vlCusto;
-    }
-
-    /**
-     * Retorna o Valor do Produto
-     *
-     * @return vlProduto - O Valor do Produto
-     */
-    public BigDecimal getVlProduto() {
-        return this.vlProduto;
+    public BigDecimal getValorVenda() {
+        return valorVenda;
     }
 
     /**
@@ -204,23 +179,21 @@ public class Produto {
      * @return categoria - A Categoria do Produto
      */
     public Categoria getCategoria() {
-        return this.categoria;
+        return categoria;
     }
 
     /**
      * Retorna a Moeda do Produto
      *
-     * @return moeda - A Moeda do Produto
+     * @return moeda - A Moeda do Produto (pode ser null)
      */
     public Moeda getMoeda() {
-        return this.moeda;
+        return moeda;
     }
 
     @Override
     public String toString() {
-        return "Produto(Id = %d, Codigo = %s, Nome = %s, Descricao = %s, Custo = %s, Preco = %s"
-                .formatted(this.getIdProduto(), this.getCdProduto(), this.getNmProduto(), this.getDsProduto(),
-                        this.getVlCusto(), this.getVlProduto());
+        return "Produto(Id = %d, Codigo = %s, Nome = %s, ValorCompra = %s, ValorVenda = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getValorCompra(), this.getValorVenda());
     }
-
 }

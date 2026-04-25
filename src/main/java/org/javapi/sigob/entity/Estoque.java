@@ -5,147 +5,96 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity(name = "estoques")
 public class Estoque {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idEstoque;
+    private int id;
 
-    @Column(name = "cdEstoque")
-    private String cdEstoque;
+    @Column(name = "codigo", nullable = false, unique = true)
+    private String codigo;
 
-    @Column(name = "nmEstoque")
-    private String nmEstoque;
-
-    @Column(name = "dsEstoque")
-    private String dsEstoque;
-
-    @ManyToOne(/*fetch = FetchType.LAZY*/)
-    @JoinColumn(name = "fk_idCategoria")
-    private Categoria categoria;
+    @Column(name = "nome", nullable = false)
+    private String nome;
 
     /**
-     * Construtor para criar um novo Estoque
-     *
-     * @return Estoque - O estoque criado
+     * Construtor padrão JPA
      */
     public Estoque() {
     }
 
     /**
-     * Construtor para criar um novo Estoque
+     * Construtor completo para criar um novo Estoque
      *
-     * @param id O ID do estoque
-     * @param cd O Código do estoque
-     * @param nm O Nome do estoque
-     * @param ds A Descrição do estoque
-     * @param cat A categoria do estoque
-     * @return Estoque - O estoque criado
+     * @param id O ID do Estoque
+     * @param codigo O Código do Estoque
+     * @param nome O Nome do Estoque
      */
-    public Estoque(int id, String cd, String nm, String ds, Categoria cat) {
-        this.idEstoque = id;
-        this.cdEstoque = cd;
-        this.nmEstoque = nm;
-        this.dsEstoque = ds;
-        this.categoria = cat;
+    public Estoque(int id, String codigo, String nome) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
     }
 
     /**
-     * Atribui o ID do estoque
+     * Atribui o ID do Estoque
      *
-     * @param id O ID do estoque
+     * @param id O ID do Estoque
      */
-    public void setIdEstoque(int id) {
-        this.idEstoque = id;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
-     * Atribui o Código do estoque
+     * Atribui o Código do Estoque
      *
-     * @param cd O Código do estoque
+     * @param codigo O Código do Estoque
      */
-    public void setCdEstoque(String cd) {
-        this.cdEstoque = cd;
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     /**
-     * Atribui o Nome do estoque
+     * Atribui o Nome do Estoque
      *
-     * @param nm O Nome do estoque
+     * @param nome O Nome do Estoque
      */
-    public void setNmEstoque(String nm) {
-        this.nmEstoque = nm;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     /**
-     * Atribui a Descrição do estoque
+     * Retorna o ID do Estoque
      *
-     * @param ds A Descrição do estoque
+     * @return id - O ID do Estoque
      */
-    public void setDsEstoque(String ds) {
-        this.dsEstoque = ds;
+    public int getId() {
+        return id;
     }
 
     /**
-     * Atribui a categoria do estoque
+     * Retorna o Código do Estoque
      *
-     * @param cat A categoria do estoque
+     * @return codigo - O Código do Estoque
      */
-    public void setCategoria(Categoria cat) {
-        this.categoria = cat;
+    public String getCodigo() {
+        return codigo;
     }
 
     /**
-     * Retorna o ID do estoque
+     * Retorna o Nome do Estoque
      *
-     * @return idEstoque - O ID do estoque
+     * @return nome - O Nome do Estoque
      */
-    public int getIdEstoque() {
-        return this.idEstoque;
-    }
-
-    /**
-     * Retorna o Código do estoque
-     *
-     * @return cdEstoque - O Código do estoque
-     */
-    public String getCdEstoque() {
-        return this.cdEstoque;
-    }
-
-    /**
-     * Retorna o Nome do estoque
-     *
-     * @return nmEstoque - O Nome do estoque
-     */
-    public String getNmEstoque() {
-        return this.nmEstoque;
-    }
-
-    /**
-     * Retorna a Descrição do estoque
-     *
-     * @return dsEstoque - A Descrição do estoque
-     */
-    public String getDsEstoque() {
-        return this.dsEstoque;
-    }
-
-    /**
-     * Retorna a categoria do estoque
-     *
-     * @return categoria - A categoria do estoque
-     */
-    public Categoria getCategoria() {
-        return this.categoria;
+    public String getNome() {
+        return nome;
     }
 
     @Override
     public String toString() {
-        return "Estoque(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"
-                .formatted(this.getIdEstoque(), this.getCdEstoque(), this.getNmEstoque(), this.getDsEstoque());
+        return "Estoque(Id = %d, Codigo = %s, Nome = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome());
     }
 }

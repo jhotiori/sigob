@@ -6,59 +6,31 @@ import org.javapi.sigob.entity.Categoria;
 
 import jakarta.persistence.EntityManager;
 
-public class CategoriaRepository {
-    private final EntityManager em;
+public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
 
     /**
      * Cria um novo CategoriaRepository
      *
-     * @param em EntityManager do repositorio
+     * @param em EntityManager do Repositorio
      */
     public CategoriaRepository(EntityManager em) {
-        this.em = em;
+        super(em, Categoria.class);
     }
 
     /**
-     * Salva uma nova Categoria no repositorio
+     * Verifica se uma Categoria está gerenciada pelo EntityManager
      *
-     * @param categoria A categoria a ser salva
-     */
-    public void save(Categoria categoria) {
-        em.persist(categoria);
-    }
-
-    /**
-     * Atualiza uma Categoria no repositorio
-     *
-     * @param categoria A categoria a ser atualizada
-     */
-    public void update(Categoria categoria) {
-        em.merge(categoria);
-    }
-
-    /**
-     * Remove uma Categoria do repositorio
-     *
-     * @param categoria A categoria a ser removida
-     */
-    public void delete(Categoria categoria) {
-        em.remove(em.contains(categoria) ? categoria : em.merge(categoria));
-    }
-
-    /**
-     * Confere se uma categoria existe
-     *
-     * @param categoria A categoria
-     * @return boolean - true se a categoria existe, false se nao
+     * @param categoria A Categoria para verificar
+     * @return boolean - true se gerenciada, false caso contrário
      */
     public boolean contains(Categoria categoria) {
-        return em.find(Categoria.class, categoria.getIdCategoria()) != null;
+        return em.contains(categoria);
     }
 
     /**
-     * Retorna uma lista com todas as Categorias
+     * Busca todas as Categorias disponíveis
      *
-     * @return List<Categoria> - A lista de categorias
+     * @return List<Categoria> - Todas as Categorias
      */
     public List<Categoria> findAll() {
         return em.createQuery("select c from categorias c", Categoria.class)
@@ -66,35 +38,25 @@ public class CategoriaRepository {
     }
 
     /**
-     * Busca por um Categoria pelo seu ID
+     * Busca Categorias cujo nome inicia com o valor informado
      *
-     * @param id ID do Categoria
-     * @return Categoria - A categoria buscada
+     * @param prefixo O prefixo do nome
+     * @return List<Categoria> - As Categorias encontradas
      */
-    public Categoria findById(int id) {
-        return em.find(Categoria.class, id);
-    }
-
-    /**
-     * Retorna uma lista com todas as Categorias que comecam com o prefixo
-     *
-     * @param prefixo O prefixo
-     * @return List<Categoria> - A lista de categorias
-     */
-    public List<Categoria> findByName(String prefixo) {
-        return em.createQuery("select c from categorias c where c.nmCategoria like :prefix", Categoria.class)
+    public List<Categoria> findByNome(String prefixo) {
+        return em.createQuery("select c from categorias c where c.nome like :prefix", Categoria.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
     }
 
     /**
-     * Busca por uma Categoria pelo seu codigo
+     * Busca uma Categoria cujo codigo inicia com o valor informado
      *
-     * @param codigo O codigo da categoria
-     * @return Categoria - A categoria buscada
+     * @param codigo O codigo da Categoria
+     * @return Categoria - A Categoria encontrada (pode ser null)
      */
     public Categoria findByCodigo(String codigo) {
-        return em.createQuery("select c from categorias c where c.cdCategoria like :str", Categoria.class)
+        return em.createQuery("select c from categorias c where c.codigo like :str", Categoria.class)
                 .setParameter("str", codigo + "%")
                 .getSingleResultOrNull();
     }

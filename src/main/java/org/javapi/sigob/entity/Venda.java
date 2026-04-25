@@ -1,7 +1,7 @@
 package org.javapi.sigob.entity;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,52 +13,55 @@ import jakarta.persistence.ManyToOne;
 
 @Entity(name = "vendas")
 public class Venda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idVenda;
+    private int id;
 
-    @Column(name = "dtVenda")
-    private ZonedDateTime dtVenda;
+    @Column(name = "status", nullable = false)
+    private String status;
 
-    @Column(name = "vlVenda")
-    private BigDecimal vlVenda;
+    @Column(name = "data_abertura", nullable = false)
+    private OffsetDateTime dataAbertura;
 
-    @Column(name = "flPago")
-    private boolean flPago;
+    @Column(name = "data_finalizada")
+    private OffsetDateTime dataFinalizada;
 
-    @ManyToOne(/* fetch = FetchType.LAZY */)
-    @JoinColumn(name = "fk_idCliente")
+    @Column(name = "valor_total", nullable = false)
+    private BigDecimal valorTotal;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne(/* fetch = FetchType.LAZY */)
-    @JoinColumn(name = "fk_idFuncionario")
+    @ManyToOne
+    @JoinColumn(name = "funcionario_id", nullable = false)
     private Funcionario funcionario;
 
     /**
-     * Construtor para criar uma nova Venda
-     *
-     * @return Venda - A venda que foi criada
+     * Construtor padrão JPA
      */
     public Venda() {
     }
 
     /**
-     * Construtor para criar uma nova Venda
+     * Construtor completo para criar uma nova Venda
      *
-     * @param idVenda     O ID da venda
-     * @param dtVenda     A data da venda
-     * @param vlVenda     O valor da venda
-     * @param flPago      Se a venda foi paga
-     * @param cliente     O cliente da venda
-     * @param funcionario O funcionario da venda
-     * @return Venda - A venda que foi criada
+     * @param id O ID da Venda
+     * @param status O Status da Venda (aberta/finalizada)
+     * @param dataAbertura A Data de Abertura da Venda
+     * @param dataFinalizada A Data de Finalização da Venda (opcional)
+     * @param valorTotal O Valor Total da Venda
+     * @param cliente O Cliente da Venda
+     * @param funcionario O Funcionario da Venda
      */
-    public Venda(int idVenda, ZonedDateTime dtVenda, BigDecimal vlVenda, boolean flPago, Cliente cliente,
-            Funcionario funcionario) {
-        this.idVenda = idVenda;
-        this.dtVenda = dtVenda;
-        this.vlVenda = vlVenda;
-        this.flPago = flPago;
+    public Venda(int id, String status, OffsetDateTime dataAbertura, OffsetDateTime dataFinalizada,
+            BigDecimal valorTotal, Cliente cliente, Funcionario funcionario) {
+        this.id = id;
+        this.status = status;
+        this.dataAbertura = dataAbertura;
+        this.dataFinalizada = dataFinalizada;
+        this.valorTotal = valorTotal;
         this.cliente = cliente;
         this.funcionario = funcionario;
     }
@@ -66,52 +69,61 @@ public class Venda {
     /**
      * Atribui o ID da Venda
      *
-     * @param idVenda o ID da Venda
+     * @param id O ID da Venda
      */
-    public void setIdVenda(int idVenda) {
-        this.idVenda = idVenda;
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
-     * Atribui a data da Venda
+     * Atribui o Status da Venda
      *
-     * @param dtVenda A data da Venda
+     * @param status O Status da Venda
      */
-    public void setDtVenda(ZonedDateTime dtVenda) {
-        this.dtVenda = dtVenda;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     /**
-     * Atribui o valor da Venda
+     * Atribui a Data de Abertura da Venda
      *
-     * @param vlVenda O valor da Venda
+     * @param dataAbertura A Data de Abertura da Venda
      */
-    public void setVlVenda(BigDecimal vlVenda) {
-        this.vlVenda = vlVenda;
+    public void setDataAbertura(OffsetDateTime dataAbertura) {
+        this.dataAbertura = dataAbertura;
     }
 
     /**
-     * Atribui se a Venda foi paga
+     * Atribui a Data de Finalização da Venda
      *
-     * @param flPago Se a Venda foi paga
+     * @param dataFinalizada A Data de Finalização da Venda
      */
-    public void setFlPago(boolean flPago) {
-        this.flPago = flPago;
+    public void setDataFinalizada(OffsetDateTime dataFinalizada) {
+        this.dataFinalizada = dataFinalizada;
     }
 
     /**
-     * Atribui o cliente da Venda
+     * Atribui o Valor Total da Venda
      *
-     * @param cliente O cliente da Venda
+     * @param valorTotal O Valor Total da Venda
+     */
+    public void setValorTotal(BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
+    /**
+     * Atribui o Cliente da Venda
+     *
+     * @param cliente O Cliente da Venda
      */
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
 
     /**
-     * Atribui o funcionario da Venda
+     * Atribui o Funcionario da Venda
      *
-     * @param funcionario O funcionario da Venda
+     * @param funcionario O Funcionario da Venda
      */
     public void setFuncionario(Funcionario funcionario) {
         this.funcionario = funcionario;
@@ -120,61 +132,69 @@ public class Venda {
     /**
      * Retorna o ID da Venda
      *
-     * @return idVenda - O ID da Venda
+     * @return id - O ID da Venda
      */
-    public int getIdVenda() {
-        return this.idVenda;
+    public int getId() {
+        return id;
     }
 
     /**
-     * Retorna a data da Venda
+     * Retorna o Status da Venda
      *
-     * @return dtVenda - A data da Venda
+     * @return status - O Status da Venda
      */
-    public ZonedDateTime getDtVenda() {
-        return this.dtVenda;
+    public String getStatus() {
+        return status;
     }
 
     /**
-     * Retorna o valor da Venda
+     * Retorna a Data de Abertura da Venda
      *
-     * @return vlVenda - O valor da Venda
+     * @return dataAbertura - A Data de Abertura da Venda
      */
-    public BigDecimal getVlVenda() {
-        return this.vlVenda;
+    public OffsetDateTime getDataAbertura() {
+        return dataAbertura;
     }
 
     /**
-     * Retorna se a Venda foi paga
+     * Retorna a Data de Finalização da Venda
      *
-     * @return flPago - Se a Venda foi paga
+     * @return dataFinalizada - A Data de Finalização da Venda (pode ser null)
      */
-    public boolean isFlPago() {
-        return this.flPago;
+    public OffsetDateTime getDataFinalizada() {
+        return dataFinalizada;
     }
 
     /**
-     * Retorna o cliente da Venda
+     * Retorna o Valor Total da Venda
      *
-     * @return cliente - O cliente da Venda
+     * @return valorTotal - O Valor Total da Venda
+     */
+    public BigDecimal getValorTotal() {
+        return valorTotal;
+    }
+
+    /**
+     * Retorna o Cliente da Venda
+     *
+     * @return cliente - O Cliente da Venda
      */
     public Cliente getCliente() {
-        return this.cliente;
+        return cliente;
     }
 
     /**
-     * Retorna o funcionario da Venda
+     * Retorna o Funcionario da Venda
      *
-     * @return funcionario - O funcionario da Venda
+     * @return funcionario - O Funcionario da Venda
      */
     public Funcionario getFuncionario() {
-        return this.funcionario;
+        return funcionario;
     }
 
     @Override
     public String toString() {
-        return "Venda(Id = %d, Data = %s, Valor = %s, Pago = %s, Cliente = %s, Funcionario = %s)"
-                .formatted(this.getIdVenda(), this.getDtVenda(), this.getVlVenda(), this.isFlPago(),
-                        this.getCliente().toString(), this.getFuncionario().toString());
+        return "Venda(Id = %d, Status = %s, DataAbertura = %s, DataFinalizada = %s, ValorTotal = %s)"
+                .formatted(this.getId(), this.getStatus(), this.getDataAbertura(), this.getDataFinalizada(), this.getValorTotal());
     }
 }

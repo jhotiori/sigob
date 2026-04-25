@@ -8,18 +8,19 @@ import jakarta.persistence.Id;
 
 @Entity(name = "moedas")
 public class Moeda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idMoeda;
+    private int id;
 
     @Column(name = "nmMoeda")
-    private String nmMoeda;
+    private String nome;
 
     @Column(name = "dsCifrao")
-    private String dsCifrao;
+    private String cifrao;
 
     @Column(name = "dsSigla")
-    private String dsSigla;
+    private String sigla;
 
     /**
      * Construtor para criar uma nova Mo
@@ -32,17 +33,17 @@ public class Moeda {
     /**
      * Construtor para criar uma nova Moeda
      *
-     * @param id       ID da moeda
-     * @param nm       Nome da moeda
-     * @param dsCifrao Cifrao da moeda
-     * @param dsSigla  Sigla da moeda
+     * @param id ID da moeda
+     * @param nome Nome da moeda
+     * @param cifrao Cifrao da moeda
+     * @param sigla Sigla da moeda
      * @return Moeda - A moeda que foi criada
      */
-    public Moeda(int id, String nm, String dsCifrao, String dsSigla) {
-        this.idMoeda = id;
-        this.nmMoeda = nm;
-        this.dsCifrao = dsCifrao;
-        this.dsSigla = dsSigla;
+    public Moeda(Integer id, String nome, String cifrao, String sigla) {
+        this.id = id;
+        this.nome = nome;
+        this.cifrao = cifrao;
+        this.sigla = sigla;
     }
 
     /**
@@ -50,35 +51,35 @@ public class Moeda {
      *
      * @param id O ID da Moeda
      */
-    public void setIdMoeda(int id) {
-        this.idMoeda = id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     /**
      * Atribui o Nome da Moeda
      *
-     * @param nm O Nome da Moeda
+     * @param nome O Nome da Moeda
      */
-    public void setNmMoeda(String nm) {
-        this.nmMoeda = nm;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     /**
      * Atribui o Cifrao da Moeda
      *
-     * @param ds O Cifrao da Moeda
+     * @param cifrao O Cifrao da Moeda
      */
-    public void setDsCifrao(String ds) {
-        this.dsCifrao = ds;
+    public void setCifrao(String cifrao) {
+        this.cifrao = cifrao;
     }
 
     /**
      * Atribui a Sigla da Moeda
      *
-     * @param ds A Sigla da Moeda
+     * @param sigla A Sigla da Moeda
      */
-    public void setDsSigla(String ds) {
-        this.dsSigla = ds;
+    public void setSigla(String sigla) {
+        this.sigla = sigla;
     }
 
     /**
@@ -86,8 +87,8 @@ public class Moeda {
      *
      * @return idMoeda - O ID da Moeda
      */
-    public int getIdMoeda() {
-        return this.idMoeda;
+    public int getId() {
+        return id;
     }
 
     /**
@@ -95,8 +96,8 @@ public class Moeda {
      *
      * @return nmMoeda - O Nome da Moeda
      */
-    public String getNmMoeda() {
-        return this.nmMoeda;
+    public String getNome() {
+        return nome;
     }
 
     /**
@@ -104,8 +105,8 @@ public class Moeda {
      *
      * @return dsCifrao - O Cifrao da Moeda
      */
-    public String getDsCifrao() {
-        return this.dsCifrao;
+    public String getCifrao() {
+        return cifrao;
     }
 
     /**
@@ -113,13 +114,13 @@ public class Moeda {
      *
      * @return dsSigla - A Sigla da Moeda
      */
-    public String getDsSigla() {
-        return this.dsSigla;
+    public String getSigla() {
+        return sigla;
     }
 
     @Override
     public String toString() {
         return "Moeda(Id = %d, Nome = %s, Cifrao = %s, Sigla = %s)"
-                .formatted(this.getIdMoeda(), this.getNmMoeda(), this.getDsCifrao(), this.getDsSigla());
+                .formatted(this.getId(), this.getNome(), this.getCifrao(), this.getSigla());
     }
 }

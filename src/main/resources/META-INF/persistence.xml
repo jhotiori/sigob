@@ -15,7 +15,7 @@
         <class>org.javapi.sigob.entity.Venda</class>
         <class>org.javapi.sigob.entity.ProdutosEstoques</class>
         <class>org.javapi.sigob.entity.ProdutosVendas</class>
-
+        <class>org.javapi.sigob.entity.Documento</class>
         <class>org.javapi.sigob.entity.Categoria</class>
         <class>org.javapi.sigob.entity.Acesso</class>
         <class>org.javapi.sigob.entity.Funcionario</class>
