@@ -76,6 +76,21 @@ public class FuncionarioService {
         this.repository.delete(funcionario);
     }
 
+    public String getNomeById(int id) {
+        Funcionario funcionario = getById(id);
+        return funcionario != null ? funcionario.getNmFuncionario() : null;
+    }
+
+    public String getCodigoById(int id) {
+        Funcionario funcionario = getById(id);
+        return funcionario != null ? funcionario.getCdFuncionario() : null;
+    }
+
+    public Acesso getAcessoById(int id) {
+        Funcionario funcionario = getById(id);
+        return funcionario != null ? funcionario.getAcesso() : null;
+    }
+
     private void validateFuncionario(Funcionario funcionario) {
         if (funcionario == null) {
             throw new FuncionarioException("Funcionário não pode ser nulo");

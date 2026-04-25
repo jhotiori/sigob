@@ -67,6 +67,13 @@ public class AcessoService {
         return this.repository.findByCodigo(codigo);
     }
 
+    public List<Acesso> getByDescricao(String descricao) {
+        if (descricao == null || descricao.isBlank()) {
+            throw new AcessoException("Descrição não pode ser nula ou vazia");
+        }
+        return this.repository.findByDescricao(descricao);
+    }
+
     public List<Acesso> getAll() {
         return this.repository.findAll();
     }
@@ -75,12 +82,28 @@ public class AcessoService {
         this.repository.delete(acesso);
     }
 
+    public String getNomeById(int id) {
+        Acesso acesso = getById(id);
+        return acesso != null ? acesso.getNmAcesso() : null;
+    }
+
+    public String getCodigoById(int id) {
+        Acesso acesso = getById(id);
+        return acesso != null ? acesso.getCdAcesso() : null;
+    }
+
+    public String getDescricaoById(int id) {
+        Acesso acesso = getById(id);
+        return acesso != null ? acesso.getDsAcesso() : null;
+    }
+
     private void validateAcesso(Acesso acesso) {
         if (acesso == null) {
             throw new AcessoException("Acesso não pode ser nulo");
         }
         validateNome(acesso.getNmAcesso());
         validateCodigo(acesso.getCdAcesso());
+        validateDescricao(acesso.getDsAcesso());
     }
 
     private void validateNome(String nome) {
@@ -92,6 +115,12 @@ public class AcessoService {
     private void validateCodigo(String codigo) {
         if (codigo == null || codigo.isBlank()) {
             throw new AcessoException("Código do acesso não pode ser nulo ou vazio");
+        }
+    }
+
+    private void validateDescricao(String descricao) {
+        if (descricao == null || descricao.isBlank()) {
+            throw new AcessoException("Descrição do acesso não pode ser nula ou vazia");
         }
     }
 }

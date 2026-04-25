@@ -47,6 +47,15 @@ public class MoedaRepository {
                 .orElse(null);
     }
 
+    public Moeda findBySigla(String sigla) {
+        return em.createQuery("select m from moedas m where m.dsSigla = :sigla", Moeda.class)
+                .setParameter("sigla", sigla)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
     public List<Moeda> findAll() {
         return em.createQuery("select m from moedas m", Moeda.class).getResultList();
     }

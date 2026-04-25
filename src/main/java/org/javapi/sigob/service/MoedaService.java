@@ -67,12 +67,32 @@ public class MoedaService {
         return this.repository.findByCodigo(codigo);
     }
 
+    public Moeda getBySigla(String sigla) {
+        validateSigla(sigla);
+        return this.repository.findBySigla(sigla);
+    }
+
     public List<Moeda> getAll() {
         return this.repository.findAll();
     }
 
     public void delete(Moeda moeda) {
         this.repository.delete(moeda);
+    }
+
+    public String getNomeById(int id) {
+        Moeda moeda = getById(id);
+        return moeda != null ? moeda.getNmMoeda() : null;
+    }
+
+    public String getCifraoById(int id) {
+        Moeda moeda = getById(id);
+        return moeda != null ? moeda.getDsCifrao() : null;
+    }
+
+    public String getSiglaById(int id) {
+        Moeda moeda = getById(id);
+        return moeda != null ? moeda.getDsSigla() : null;
     }
 
     private void validateMoeda(Moeda moeda) {

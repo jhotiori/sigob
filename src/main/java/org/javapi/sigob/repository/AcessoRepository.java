@@ -50,5 +50,11 @@ public class AcessoRepository {
                 .findFirst()
                 .orElse(null);
     }
+
+    public List<Acesso> findByDescricao(String descricao) {
+        return em.createQuery("select a from Acesso a where a.dsAcesso like :str", Acesso.class)
+                .setParameter("str", descricao + "%")
+                .getResultList();
+    }
 }
 

@@ -75,6 +75,16 @@ public class CategoriaService {
         this.repository.delete(categoria);
     }
 
+    public String getNomeById(int id) {
+        Categoria categoria = getById(id);
+        return categoria != null ? categoria.getNmCategoria() : null;
+    }
+
+    public String getCodigoById(int id) {
+        Categoria categoria = getById(id);
+        return categoria != null ? categoria.getCdCategoria() : null;
+    }
+
     private void validateCategoria(Categoria categoria) {
         if (categoria == null) {
             throw new CategoriaException("Categoria não pode ser nula");

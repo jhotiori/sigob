@@ -17,7 +17,7 @@ public class ProdutosEstoquesService {
         this.repository = repository;
     }
 
-    public void save(ProdutosEstoques produtoEstoque) {
+    public void save(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -27,14 +27,16 @@ public class ProdutosEstoquesService {
             this.repository.create(produtoEstoque);
             tx.commit();
         } catch (Exception e) {
-            tx.rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
             throw e;
         } finally {
             em.close();
         }
     }
 
-    public void update(ProdutosEstoques produtoEstoque) {
+    public void update(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -44,7 +46,9 @@ public class ProdutosEstoquesService {
             this.repository.update(produtoEstoque);
             tx.commit();
         } catch (Exception e) {
-            tx.rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
             throw e;
         } finally {
             em.close();
@@ -61,7 +65,7 @@ public class ProdutosEstoquesService {
         this.repository.contains(produtoEstoque);
     }
 
-    public ProdutosEstoques findById(int id) {
+    public ProdutosEstoques findById(int id) throws ProdutosEstoquesException {
         validateId(id);
         return this.repository.findById(id);
     }
@@ -70,34 +74,34 @@ public class ProdutosEstoquesService {
         return this.repository.findAll();
     }
 
-    public List <ProdutosEstoques> findByName(String name) {
+    public List<ProdutosEstoques> findByName(String name) throws ProdutosEstoquesException {
         validateObservacao(name);
         return this.repository.findByName(name);
     }
 
-    private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) {
+    private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         if (produtoEstoque == null) {
-            throw new ProdutosEstoquesException("Produtos não pode ser nulo");
+            throw new ProdutosEstoquesException("Produtos não pode ser nulo");
         }
         validateObservacao(produtoEstoque.getDsObservacao());
         validateQuantidade(produtoEstoque.getNrQuantidade());
     }
 
-    private void validateId(int id) {
+    private void validateId(int id) throws ProdutosEstoquesException {
         if (id < 0) {
-            throw new ProdutosEstoquesException("Id não pode ser negativo");
+            throw new ProdutosEstoquesException("Id não pode ser negativo");
         }
     }
 
-    private void validateQuantidade(int quantidade) {
+    private void validateQuantidade(int quantidade) throws ProdutosEstoquesException {
         if (quantidade < 0) {
-            throw new ProdutosEstoquesException("Quantidade não pode ser negativa");
+            throw new ProdutosEstoquesException("Quantidade não pode ser negativa");
         }
     }
 
-    private void validateObservacao(String observacao) {
+    private void validateObservacao(String observacao) throws ProdutosEstoquesException {
         if (observacao == null || observacao.isBlank()) {
-            throw new ProdutosEstoquesException("Observação não pode ser nulo ou vazio");
+            throw new ProdutosEstoquesException("Observação não pode ser nulo ou vazio");
         }
     }
 }
