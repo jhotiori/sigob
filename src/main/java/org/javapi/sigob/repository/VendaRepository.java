@@ -2,51 +2,57 @@ package org.javapi.sigob.repository;
 
 import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.Venda;
-import java.time.ZonedDateTime;
+
 import java.util.List;
 
-public class VendaRepository {
+public class VendaRepository extends BaseRepository <Venda, Integer>{
 
-    private EntityManager em;
-
+    /**
+     * Cria um novo VendaRepository
+     *
+     * @param em O EntityManager
+     */
     public VendaRepository(EntityManager em) {
-        this.em = em;
+        super(em, Venda.class);
     }
 
-    public Venda findById(int id) {
-        return em.find(Venda.class, id);
+    /**
+     * Verifica se um Venda está gerenciado pelo EntityManager
+     *
+     * @param venda O Venda para verificar
+     * @return boolean - true se gerenciado, false caso contrário
+     */
+    public boolean contains(Venda venda) {
+        return em.contains(venda);
     }
 
-    public void create(Venda venda) {
-        em.getTransaction().begin();
-        em.persist(venda);
-        em.getTransaction().commit();
-    }
-
-    public void update(Venda venda) {
-        em.getTransaction().begin();
-        em.merge(venda);
-        em.getTransaction().commit();
-    }
-
-    public void remove(Venda venda) {
-        em.getTransaction().begin();
-        em.remove(em.contains(venda) ? venda : em.merge(venda));
-        em.getTransaction().commit();
-    }
-
+    /**
+     * Busca todos os Venda disponíveis
+     *
+     * @return List<Venda> - Todos os Venda
+     */
     public List<Venda> findAll() {
-        return em.createQuery("select v from vendas v", Venda.class).getResultList();
-    }
-
-    public List<Venda> findByDtVenda(ZonedDateTime dtInicio, ZonedDateTime dtFim) {
-        return em.createQuery("select v from vendas v where v.dtVenda >= :dtInicial and v.dtVenda <= :dtFinal", Venda.class)
-                .setParameter("dtInicial", dtInicio)
-                .setParameter("dtFinal", dtFim)
+        return em.createQuery("select v from vendas v", Venda.class)
                 .getResultList();
     }
 
-    public boolean exists(Venda venda){
-        return em.contains(venda);
+    /**
+     * Busca Venda que tenham status 'ABERTA'
+     *
+     * @return List<Venda> - Os Venda encontrados
+     */
+    public List<Venda> findAbertas( ) {
+        return em.createQuery("select v from vendas v where v.status = 'ABERTA'", Venda.class)
+                .getResultList();
+    }
+
+    /**
+     * Busca Venda que tenham status 'FINALIZADA'
+     *
+     * @return List<Venda> - Os Venda encontrados
+     */
+    public List<Venda> findFinalizadas( ) {
+        return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
+                .getResultList();
     }
 }

@@ -32,8 +32,7 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>4.0.0-M1</version>
-            <scope>compile</scope>
+            <version>3.2.0</version>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
         <dependency>
@@ -48,6 +47,13 @@
             <artifactId>flyway-database-postgresql</artifactId>
             <version>12.3.0</version>
             <scope>runtime</scope>
+        </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-maven-plugin</artifactId>
+            <version>12.3.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

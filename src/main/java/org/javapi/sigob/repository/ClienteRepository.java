@@ -1,56 +1,63 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Cliente;
-
 import java.util.List;
 
-public class ClienteRepository {
-    private EntityManager em;
+import org.javapi.sigob.entity.Cliente;
 
+import jakarta.persistence.EntityManager;
+
+public class ClienteRepository extends BaseRepository<Cliente, Integer> {
+
+    /**
+     * Cria um novo ClienteRepository
+     *
+     * @param em O EntityManager
+     */
     public ClienteRepository(EntityManager em) {
-        this.em = em;
+        super(em, Cliente.class);
     }
 
-    public Cliente findById(int id){
-        return em.find(Cliente.class,id);
+    /**
+     * Verifica se um Cliente está gerenciado pelo EntityManager
+     *
+     * @param cliente O Cliente para verificar
+     * @return boolean - true se gerenciado, false caso contrário
+     */
+    public boolean contains(Cliente cliente) {
+        return em.contains(cliente);
     }
 
-    public void create(Cliente cliente){
-        em.getTransaction().begin();
-        em.persist(cliente);
-        em.getTransaction().commit();
-    }
-
-    public void update(Cliente cliente){
-        em.getTransaction().begin();
-        em.merge(cliente);
-        em.getTransaction().commit();
-    }
-
-
-    public void remove(Cliente cliente){
-        em.getTransaction().begin();
-        em.remove(em.contains(cliente) ? cliente : em.merge(cliente));
-        em.getTransaction().commit();
-    }
-
-    public List<Cliente> findAll(){
-        return em.createQuery("select c from clientes c", Cliente.class).getResultList();
-    }
-
-    public List<Cliente> findByName(String name){
-        return em.createQuery("select c from clientes c where nmCliente like :str", Cliente.class)
-                .setParameter("str", name + "%")
+    /**
+     * Busca todos os Clientes disponíveis
+     *
+     * @return List<Cliente> - Todos os Clientes
+     */
+    public List<Cliente> findAll() {
+        return em.createQuery("select c from clientes c", Cliente.class)
                 .getResultList();
     }
 
-    public Cliente findByDoc (String doc){
-        return em.find(Cliente.class,doc);
+    /**
+     * Busca Clientes cujo nome inicia com o valor informado
+     *
+     * @param nome O Nome do Cliente
+     * @return List<Cliente> - Os Clientes encontrados
+     */
+    public List<Cliente> findByNome(String nome) {
+        return em.createQuery("select c from clientes c where c.nome like :str", Cliente.class)
+                .setParameter("str", nome + "%")
+                .getResultList();
     }
 
-    public boolean exists (Cliente cliente){
-
-        return em.contains(cliente);
+    /**
+     * Busca Clientes pelo documento vinculado
+     *
+     * @param documento O número do Documento
+     * @return List<Cliente> - Os Clientes encontrados
+     */
+    public List<Cliente> findByDocumento(String documento) {
+        return em.createQuery("select c from clientes c where c.documento.documento like :str", Cliente.class)
+                .setParameter("str", documento + "%")
+                .getResultList();
     }
 }

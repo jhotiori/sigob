@@ -1,66 +1,139 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Table(name = "acessos")
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+
+@Entity(name = "acessos")
 public class Acesso {
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private int idAcesso;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    @Column (name = "nmAcesso")
-    private String nmAcesso;
+    @Column(name = "codigo")
+    private String codigo;
 
-    @Column (name = "cdAcesso")
-    private String cdAcesso;
+    @Column(name = "nome", nullable = false, unique = true)
+    private String nome;
 
-    @Column (name = "dsAcesso")
-    private String dsAcesso;
+    @Column(name = "descricao")
+    private String descricao;
 
-    //Constructor
-    public Acesso() {}
+    @ManyToMany(mappedBy = "acessos")
+    private final Set<Funcionario> funcionarios = new HashSet<>();
 
-    public Acesso(int idAcesso, String nmAcesso, String cdAcesso, String dsAcesso){
-        this.idAcesso = idAcesso;
-        this.nmAcesso = nmAcesso;
-        this.cdAcesso = cdAcesso;
-        this.dsAcesso = dsAcesso;
-    }
-
-    //Setters
-    public void setIdAcesso(int idAcesso){
-        this.idAcesso = idAcesso;
-    }
-    public void setNmAcesso(String nmAcesso){
-        this.nmAcesso = nmAcesso;
-    }
-    public void setCdAcesso(String cdAcesso){
-        this.cdAcesso = cdAcesso;
-    }
-    public void setDsAcesso(String dsAcesso){
-        this.dsAcesso = dsAcesso;
+    /**
+     * Construtor padrão JPA
+     */
+    public Acesso() {
     }
 
-    //Getters
-    public int getIdAcesso(){
-        return this.idAcesso;
-    }
-    public String getNmAcesso(){
-        return this.nmAcesso;
-    }
-    public String getCdAcesso(){
-        return this.cdAcesso;
-    }
-    public String getDsAcesso(){
-        return this.dsAcesso;
+    /**
+     * Construtor completo para criar um novo Acesso
+     *
+     * @param id O ID do Acesso
+     * @param codigo O Código do Acesso (opcional)
+     * @param nome O Nome do Acesso
+     * @param descricao A Descrição do Acesso
+     */
+    public Acesso(int id, String codigo, String nome, String descricao) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
+        this.descricao = descricao;
     }
 
-    //ToString
+    /**
+     * Atribui o ID do Acesso
+     *
+     * @param id O ID do Acesso
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * Atribui o Código do Acesso
+     *
+     * @param codigo O Código do Acesso
+     */
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    /**
+     * Atribui o Nome do Acesso
+     *
+     * @param nome O Nome do Acesso
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
+     * Atribui a Descrição do Acesso
+     *
+     * @param descricao A Descrição do Acesso
+     */
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    /**
+     * Retorna o ID do Acesso
+     *
+     * @return id - O ID do Acesso
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Retorna o Código do Acesso
+     *
+     * @return codigo - O Código do Acesso
+     */
+    public String getCodigo() {
+        return codigo;
+    }
+
+    /**
+     * Retorna o Nome do Acesso
+     *
+     * @return nome - O Nome do Acesso
+     */
+    public String getNome() {
+        return nome;
+    }
+
+    /**
+     * Retorna a Descrição do Acesso
+     *
+     * @return descricao - A Descrição do Acesso
+     */
+    public String getDescricao() {
+        return descricao;
+    }
+
+    /**
+     * Retorna os Funcionários (imutável externamente)
+     *
+     * @return funcionarios - Os Funcionários
+     */
+    public Set<Funcionario> getFuncionarios() {
+        return Set.copyOf(funcionarios);
+    }
+
     @Override
-    public String toString(){
-        String obj;
-        obj = String.format("ID: %d | CD: s% | NM: %s\nDS: %s", this.idAcesso, this.cdAcesso, this.nmAcesso, this.dsAcesso);
-        return obj;
+    public String toString() {
+        return "Acesso(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getDescricao());
     }
 }

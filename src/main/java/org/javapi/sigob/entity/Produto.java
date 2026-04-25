@@ -4,124 +4,196 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "produtos")
+@Entity(name = "produtos")
 public class Produto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idProduto;
+    private int id;
 
-    @Column(name = "cdProduto")
-    private String cdProduto;
+    @Column(name = "codigo", nullable = false, unique = true)
+    private String codigo;
 
-    @Column(name = "nmProduto")
-    private String nmProduto;
+    @Column(name = "nome", nullable = false)
+    private String nome;
 
-    @Column(name = "dsProduto")
-    private String dsProduto;
+    @Column(name = "valor_compra", nullable = false)
+    private BigDecimal valorCompra;
 
-    @Column(name = "vlCusto")
-    private BigDecimal vlCusto;
+    @Column(name = "valor_venda", nullable = false)
+    private BigDecimal valorVenda;
 
-    @Column(name = "vlProduto")
-    private BigDecimal vlProduto;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_idCategoria")
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_idMoeda")
+    @ManyToOne
+    @JoinColumn(name = "moeda_id", nullable = true)
     private Moeda moeda;
 
-    public Produto() {}
-    public Produto(int id, String cd, String nm, String ds, BigDecimal vlCusto, BigDecimal vlProduto, Categoria cat, Moeda moe) {
-        this.idProduto = id;
-        this.cdProduto = cd;
-        this.nmProduto = nm;
-        this.dsProduto = ds;
-        this.vlCusto = vlCusto;
-        this.vlProduto = vlProduto;
-        this.categoria = cat;
-        this.moeda = moe;
+    /**
+     * Construtor padrão JPA
+     */
+    public Produto() {
     }
 
-    public void setIdProduto(int id) {
-        this.idProduto = id;
+    /**
+     * Construtor completo para criar um novo Produto
+     *
+     * @param id O ID do Produto
+     * @param codigo O Código do Produto
+     * @param nome O Nome do Produto
+     * @param valorCompra O Valor de Compra do Produto
+     * @param valorVenda O Valor de Venda do Produto
+     * @param categoria A Categoria do Produto
+     * @param moeda A Moeda do Produto (opcional)
+     */
+    public Produto(int id, String codigo, String nome, BigDecimal valorCompra, BigDecimal valorVenda,
+            Categoria categoria, Moeda moeda) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
+        this.valorCompra = valorCompra;
+        this.valorVenda = valorVenda;
+        this.categoria = categoria;
+        this.moeda = moeda;
     }
 
-    public void setCdProduto(String cd) {
-        this.cdProduto = cd;
+    /**
+     * Atribui o ID do Produto
+     *
+     * @param id O ID do Produto
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void setNmProduto(String nm) {
-        this.nmProduto = nm;
+    /**
+     * Atribui o Código do Produto
+     *
+     * @param codigo O Código do Produto
+     */
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
-    public void setDsProduto(String ds) {
-        this.dsProduto = ds;
+    /**
+     * Atribui o Nome do Produto
+     *
+     * @param nome O Nome do Produto
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
-    public void setVlCusto(BigDecimal vlCusto) {
-        this.vlCusto = vlCusto;
+    /**
+     * Atribui o Valor de Compra do Produto
+     *
+     * @param valorCompra O Valor de Compra do Produto
+     */
+    public void setValorCompra(BigDecimal valorCompra) {
+        this.valorCompra = valorCompra;
     }
 
-    public void setVlProduto(BigDecimal vlProduto) {
-        this.vlProduto = vlProduto;
+    /**
+     * Atribui o Valor de Venda do Produto
+     *
+     * @param valorVenda O Valor de Venda do Produto
+     */
+    public void setValorVenda(BigDecimal valorVenda) {
+        this.valorVenda = valorVenda;
     }
 
-    public void setCategoria(Categoria cat) {
-        this.categoria = cat;
+    /**
+     * Atribui a Categoria do Produto
+     *
+     * @param categoria A Categoria do Produto
+     */
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
-    public void setMoeda(Moeda moe) {
-        this.moeda = moe;
+    /**
+     * Atribui a Moeda do Produto
+     *
+     * @param moeda A Moeda do Produto
+     */
+    public void setMoeda(Moeda moeda) {
+        this.moeda = moeda;
     }
 
-    public int getIdProduto() {
-        return idProduto;
+    /**
+     * Retorna o ID do Produto
+     *
+     * @return id - O ID do Produto
+     */
+    public int getId() {
+        return id;
     }
 
-    public String getCdProduto() {
-        return cdProduto;
+    /**
+     * Retorna o Código do Produto
+     *
+     * @return codigo - O Código do Produto
+     */
+    public String getCodigo() {
+        return codigo;
     }
 
-    public String getNmProduto() {
-        return nmProduto;
+    /**
+     * Retorna o Nome do Produto
+     *
+     * @return nome - O Nome do Produto
+     */
+    public String getNome() {
+        return nome;
     }
 
-    public String getDsProduto() {
-        return dsProduto;
+    /**
+     * Retorna o Valor de Compra do Produto
+     *
+     * @return valorCompra - O Valor de Compra do Produto
+     */
+    public BigDecimal getValorCompra() {
+        return valorCompra;
     }
 
-    public BigDecimal getVlCusto() {
-        return vlCusto;
+    /**
+     * Retorna o Valor de Venda do Produto
+     *
+     * @return valorVenda - O Valor de Venda do Produto
+     */
+    public BigDecimal getValorVenda() {
+        return valorVenda;
     }
 
-    public BigDecimal getVlProduto() {
-        return vlProduto;
-    }
-
+    /**
+     * Retorna a Categoria do Produto
+     *
+     * @return categoria - A Categoria do Produto
+     */
     public Categoria getCategoria() {
         return categoria;
     }
 
+    /**
+     * Retorna a Moeda do Produto
+     *
+     * @return moeda - A Moeda do Produto (pode ser null)
+     */
     public Moeda getMoeda() {
         return moeda;
     }
 
     @Override
     public String toString() {
-        return "Produto(Id = %d, Codigo = %s, Nome = %s, Descricao = %s, Custo = %s, Preco = %s"
-            .formatted(this.getIdProduto(), this.getCdProduto(), this.getNmProduto(), this.getDsProduto(), this.getVlCusto(), this.getVlProduto());
+        return "Produto(Id = %d, Codigo = %s, Nome = %s, ValorCompra = %s, ValorVenda = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getValorCompra(), this.getValorVenda());
     }
-
 }

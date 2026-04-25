@@ -1,52 +1,63 @@
 package org.javapi.sigob.repository;
 
-import org.javapi.sigob.entity.Categoria;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 
-public class CategoriaRepository {
-    private final EntityManager em;
+import org.javapi.sigob.entity.Categoria;
 
+import jakarta.persistence.EntityManager;
+
+public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
+
+    /**
+     * Cria um novo CategoriaRepository
+     *
+     * @param em EntityManager do Repositorio
+     */
     public CategoriaRepository(EntityManager em) {
-        this.em = em;
+        super(em, Categoria.class);
     }
 
-    public Categoria findById(int id) {
-        return em.find(Categoria.class, id);
-    }
-
-    public void create(Categoria categoria) {
-        em.persist(categoria);
-    }
-
-    public void update(Categoria categoria) {
-        em.merge(categoria);
-    }
-
-    public void delete(Categoria categoria) {
-        em.remove(em.contains(categoria) ? categoria : em.merge(categoria));
-    }
-
+    /**
+     * Verifica se uma Categoria está gerenciada pelo EntityManager
+     *
+     * @param categoria A Categoria para verificar
+     * @return boolean - true se gerenciada, false caso contrário
+     */
     public boolean contains(Categoria categoria) {
         return em.contains(categoria);
     }
 
+    /**
+     * Busca todas as Categorias disponíveis
+     *
+     * @return List<Categoria> - Todas as Categorias
+     */
     public List<Categoria> findAll() {
-        return em.createQuery("select c from Categoria c", Categoria.class).getResultList();
+        return em.createQuery("select c from categorias c", Categoria.class)
+                .getResultList();
     }
 
-    public List<Categoria> findByName(String prefixo) {
-        return em.createQuery("select c from Categoria c where c.nmCategoria like :prefix", Categoria.class)
+    /**
+     * Busca Categorias cujo nome inicia com o valor informado
+     *
+     * @param prefixo O prefixo do nome
+     * @return List<Categoria> - As Categorias encontradas
+     */
+    public List<Categoria> findByNome(String prefixo) {
+        return em.createQuery("select c from categorias c where c.nome like :prefix", Categoria.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
     }
 
+    /**
+     * Busca uma Categoria cujo codigo inicia com o valor informado
+     *
+     * @param codigo O codigo da Categoria
+     * @return Categoria - A Categoria encontrada (pode ser null)
+     */
     public Categoria findByCodigo(String codigo) {
-        return em.createQuery("select c from Categoria c where c.cdCategoria = :codigo", Categoria.class)
-                .setParameter("codigo", codigo)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
+        return em.createQuery("select c from categorias c where c.codigo like :str", Categoria.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
     }
 }

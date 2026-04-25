@@ -1,63 +1,63 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Moeda;
-
 import java.util.List;
 
-public class MoedaRepository {
-    private final EntityManager em;
+import org.javapi.sigob.entity.Moeda;
 
+import jakarta.persistence.EntityManager;
+
+public class MoedaRepository extends BaseRepository<Moeda, Integer> {
+
+    /**
+     * Cria um novo MoedaRepository
+     *
+     * @param em O EntityManager
+     */
     public MoedaRepository(EntityManager em) {
-        this.em = em;
+        super(em, Moeda.class);
     }
 
-    public void create(Moeda moeda) {
-        em.persist(moeda);
-    }
-
-    public void update(Moeda moeda) {
-        em.merge(moeda);
-    }
-
-    public void delete(Moeda moeda) {
-        em.remove(em.contains(moeda) ? moeda : em.merge(moeda));
-    }
-
+    /**
+     * Verifica se uma Moeda está gerenciada pelo EntityManager
+     *
+     * @param moeda A Moeda para verificar
+     * @return boolean - true se gerenciada, false caso contrário
+     */
     public boolean contains(Moeda moeda) {
         return em.contains(moeda);
     }
 
-    public Moeda findById(int id) {
-        return em.find(Moeda.class, id);
+    /**
+     * Busca todas as Moedas disponíveis
+     *
+     * @return List<Moeda> - Todas as Moedas
+     */
+    public List<Moeda> findAll() {
+        return em.createQuery("select m from moedas m", Moeda.class)
+                .getResultList();
     }
 
+    /**
+     * Busca Moedas cujo nome inicia com o valor informado
+     *
+     * @param nome O Nome para buscar
+     * @return List<Moeda> - As Moedas encontradas
+     */
     public List<Moeda> findByNome(String nome) {
-        return em.createQuery("select m from moedas m where m.nmMoeda like :str", Moeda.class)
+        return em.createQuery("select m from moedas m where m.nome like :str", Moeda.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
 
-    public Moeda findByCodigo(String codigo) {
-        return em.createQuery("select m from moedas m where m.cdMoeda = :codigo", Moeda.class)
-                .setParameter("codigo", codigo)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-
+    /**
+     * Busca uma Moeda pela sigla
+     *
+     * @param sigla A Sigla da Moeda
+     * @return Moeda - A Moeda encontrada (pode ser null)
+     */
     public Moeda findBySigla(String sigla) {
-        return em.createQuery("select m from moedas m where m.dsSigla = :sigla", Moeda.class)
-                .setParameter("sigla", sigla)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<Moeda> findAll() {
-        return em.createQuery("select m from moedas m", Moeda.class).getResultList();
+        return em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
+                .setParameter("str", sigla + "%")
+                .getSingleResultOrNull();
     }
 }
-

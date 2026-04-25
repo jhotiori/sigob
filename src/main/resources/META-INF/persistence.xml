@@ -15,20 +15,24 @@
         <class>org.javapi.sigob.entity.Venda</class>
         <class>org.javapi.sigob.entity.ProdutosEstoques</class>
         <class>org.javapi.sigob.entity.ProdutosVendas</class>
-
+        <class>org.javapi.sigob.entity.Documento</class>
+        <class>org.javapi.sigob.entity.Categoria</class>
+        <class>org.javapi.sigob.entity.Acesso</class>
+        <class>org.javapi.sigob.entity.Funcionario</class>
+        <class>org.javapi.sigob.entity.Moeda</class>
         <properties>
             <!-- JDBC CONFIGURATION -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/sigob"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres/sigob"/>
             <property name="jakarta.persistence.jdbc.user" value="postgres"/>
-            <property name="jakarta.persistence.jdbc.password" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="Aravos013"/>
 
             <!-- HIBERNATE CONFIGURATION -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
         </properties>
-    </persistence-unit>
+    </persistence-unit>`
 
 </persistence>

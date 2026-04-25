@@ -1,60 +1,72 @@
 package org.javapi.sigob.repository;
 
-import org.javapi.sigob.entity.Acesso;
-import jakarta.persistence.EntityManager;
-
 import java.util.List;
 
-public class AcessoRepository {
-    private final EntityManager em;
+import org.javapi.sigob.entity.Acesso;
 
+import jakarta.persistence.EntityManager;
+
+public class AcessoRepository extends BaseRepository<Acesso, Integer> {
+    /**
+     * Cria um novo AcessoRepository
+     *
+     * @param em EntityManager do Repositorio
+     */
     public AcessoRepository(EntityManager em) {
-        this.em = em;
+        super(em, Acesso.class);
     }
 
-    public Acesso findById(int id) {
-        return em.find(Acesso.class, id);
-    }
-
-    public void create(Acesso acesso) {
-        em.persist(acesso);
-    }
-
-    public void update(Acesso acesso) {
-        em.merge(acesso);
-    }
-
-    public void delete(Acesso acesso) {
-        em.remove(em.contains(acesso) ? acesso : em.merge(acesso));
-    }
-
+    /**
+     * Verifica se um Acesso está gerenciado pelo EntityManager
+     *
+     * @param acesso O Acesso para verificar
+     * @return boolean - true se gerenciado, false caso contrário
+     */
     public boolean contains(Acesso acesso) {
         return em.contains(acesso);
     }
 
+    /**
+     * Busca todos os Acessos disponíveis
+     *
+     * @return List<Acesso> - Todos os Acessos
+     */
     public List<Acesso> findAll() {
-        return em.createQuery("select a from Acesso a", Acesso.class).getResultList();
+        return em.createQuery("select a from acessos a", Acesso.class)
+                .getResultList();
     }
 
-    public List<Acesso> findByName(String nome) {
-        return em.createQuery("select a from Acesso a where a.nmAcesso like :str", Acesso.class)
+    /**
+     * Busca por um acesso pelo seu ID
+     *
+     * @param id ID do Acesso
+     * @return Acesso - O acesso que foi buscado (pode ser null)
+     */
+    public Acesso findById(int id) {
+        return em.find(Acesso.class, id);
+    }
+
+    /**
+     * Busca Acessos cujo nome inicia com o valor informado
+     *
+     * @param nome Nome para procurar
+     * @return List<Acesso> - Os Acessos encontrados
+     */
+    public List<Acesso> findByNome(String nome) {
+        return em.createQuery("select a from acessos a where a.nome like :str", Acesso.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
 
+    /**
+     * Busca um Acesso cujo codigo inicia com o valor informado
+     *
+     * @param codigo Codigo para procurar
+     * @return Acesso - O Acesso encontrado (pode ser null)
+     */
     public Acesso findByCodigo(String codigo) {
-        return em.createQuery("select a from Acesso a where a.cdAcesso = :codigo", Acesso.class)
-                .setParameter("codigo", codigo)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<Acesso> findByDescricao(String descricao) {
-        return em.createQuery("select a from Acesso a where a.dsAcesso like :str", Acesso.class)
-                .setParameter("str", descricao + "%")
-                .getResultList();
+        return em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
+                .setParameter("str", codigo + "%")
+                .getSingleResultOrNull();
     }
 }
-

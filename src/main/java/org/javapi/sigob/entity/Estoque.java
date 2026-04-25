@@ -2,88 +2,99 @@ package org.javapi.sigob.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "estoques")
+@Entity(name = "estoques")
 public class Estoque {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idEstoque;
+    private int id;
 
-    @Column(name = "cdEstoque")
-    private String cdEstoque;
+    @Column(name = "codigo", nullable = false, unique = true)
+    private String codigo;
 
-    @Column(name = "nmEstoque")
-    private String nmEstoque;
+    @Column(name = "nome", nullable = false)
+    private String nome;
 
-    @Column(name = "dsEstoque")
-    private String dsEstoque;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_idCategoria")
-    private Categoria categoria;
-
+    /**
+     * Construtor padrão JPA
+     */
     public Estoque() {
     }
 
-    public Estoque(int id, String cd, String nm, String ds, Categoria cat) {
-        this.idEstoque = id;
-        this.cdEstoque = cd;
-        this.nmEstoque = nm;
-        this.dsEstoque = ds;
-        this.categoria = cat;
+    /**
+     * Construtor completo para criar um novo Estoque
+     *
+     * @param id O ID do Estoque
+     * @param codigo O Código do Estoque
+     * @param nome O Nome do Estoque
+     */
+    public Estoque(int id, String codigo, String nome) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
     }
 
-    public void setIdEstoque(int id) {
-        this.idEstoque = id;
+    /**
+     * Atribui o ID do Estoque
+     *
+     * @param id O ID do Estoque
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void setCdEstoque(String cd) {
-        this.cdEstoque = cd;
+    /**
+     * Atribui o Código do Estoque
+     *
+     * @param codigo O Código do Estoque
+     */
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
-    public void setNmEstoque(String nm) {
-        this.nmEstoque = nm;
+    /**
+     * Atribui o Nome do Estoque
+     *
+     * @param nome O Nome do Estoque
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
-    public void setDsEstoque(String ds) {
-        this.dsEstoque = ds;
+    /**
+     * Retorna o ID do Estoque
+     *
+     * @return id - O ID do Estoque
+     */
+    public int getId() {
+        return id;
     }
 
-    public void setCategoria(Categoria cat) {
-        this.categoria = cat;
+    /**
+     * Retorna o Código do Estoque
+     *
+     * @return codigo - O Código do Estoque
+     */
+    public String getCodigo() {
+        return codigo;
     }
 
-    public int getIdEstoque() {
-        return this.idEstoque;
-    }
-
-    public String getCdEstoque() {
-        return this.cdEstoque;
-    }
-
-    public String getNmEstoque() {
-        return this.nmEstoque;
-    }
-
-    public String getDsEstoque() {
-        return this.dsEstoque;
-    }
-
-    public Categoria getCategoria() {
-        return this.categoria;
+    /**
+     * Retorna o Nome do Estoque
+     *
+     * @return nome - O Nome do Estoque
+     */
+    public String getNome() {
+        return nome;
     }
 
     @Override
     public String toString() {
-       return "Estoque(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"
-        .formatted(this.getIdEstoque(), this.getCdEstoque(), this.getNmEstoque(), this.getDsEstoque());
+        return "Estoque(Id = %d, Codigo = %s, Nome = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome());
     }
 }

@@ -1,55 +1,103 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-@Entity
-@Table(name = "categorias")
+@Entity(name = "categorias")
 public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idCategoria;
+    private int id;
 
-    @Column(name = "cdCategoria")
-    private String cdCategoria;
+    @Column(name = "codigo")
+    private String codigo;
 
-    @Column(name = "nmCategoria")
-    private String nmCategoria;
+    @Column(name = "nome")
+    private String nome;
 
-    //Constructor
-    public Categoria(){}
-
-    public Categoria(int id, String cd, String nm) {
-        this.idCategoria = id;
-        this.cdCategoria = cd;
-        this.nmCategoria = nm;
+    /**
+     * Construtor para criar uma nova categoria
+     *
+     * @return Categoria - A categoria que foi criada
+     */
+    public Categoria() {
     }
 
-    //Setters
-    public void setIdCategoria(int id){
-        this.idCategoria = id;
-    }
-    public void setCdCategoria(String cd){ this.cdCategoria = cd; }
-    public void setNmCategoria(String nm){
-        this.nmCategoria = nm;
-    }
-
-    //Getter
-    public int getIdCategoria() {
-        return idCategoria;
-    }
-    public String getCdCategoria() {
-        return cdCategoria;
-    }
-    public String getNmCategoria() {
-        return nmCategoria;
+    /**
+     * Construtor para criar uma nova categoria
+     *
+     * @param id O ID da categoria
+     * @param codigo O Codigo da categoria
+     * @param nome O Nome da categoria
+     * @return Categoria - A categoria que foi criada
+     */
+    public Categoria(Integer id, String codigo, String nome) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nome = nome;
     }
 
-    //toString
+    /**
+     * Atribui o ID da categoria
+     *
+     * @param id O ID da categoria
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * Atribui o Codigo da categoria
+     *
+     * @param codigo O Codigo da categoria
+     */
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    /**
+     * Atribui o Nome da categoria
+     *
+     * @param nome O Nome da categoria
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
+     * Retorna o ID da categoria
+     *
+     * @return idCategoria - O ID da categoria
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Retorna o Codigo da categoria
+     *
+     * @return cdCategoria - O Codigo da categoria
+     */
+    public String getCodigo() {
+        return codigo;
+    }
+
+    /**
+     * Retorna o Nome da categoria
+     *
+     * @return nmCategoria - O nome da categoria
+     */
+    public String getNome() {
+        return nome;
+    }
+
     @Override
-    public String toString(){
-        String obj;
-        obj = String.format("ID: %d | CD: %s | NM: %s",this.idCategoria,this.cdCategoria,this.nmCategoria);
-        return obj;
+    public String toString() {
+        return "Categoria(Id = %d, Codigo = %s, Nome = %s)"
+                .formatted(this.getId(), this.getCodigo(), this.getNome());
     }
 }

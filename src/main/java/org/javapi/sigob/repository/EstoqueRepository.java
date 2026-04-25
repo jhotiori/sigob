@@ -6,40 +6,46 @@ import org.javapi.sigob.entity.Estoque;
 
 import jakarta.persistence.EntityManager;
 
-public class EstoqueRepository {
-    private EntityManager em;
+public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
 
+    /**
+     * Cria um novo EstoqueRepository
+     *
+     * @param em O EntityManager
+     */
     public EstoqueRepository(EntityManager em) {
-        this.em = em;
+        super(em, Estoque.class);
     }
 
-    public void create(Estoque estoque) {
-        em.persist(estoque);
-    }
-
-    public void update(Estoque estoque) {
-        em.merge(estoque);
-    }
-
+    /**
+     * Verifica se um Estoque está gerenciado pelo EntityManager
+     *
+     * @param estoque O Estoque para verificar
+     * @return boolean - true se gerenciado, false caso contrário
+     */
     public boolean contains(Estoque estoque) {
         return em.contains(estoque);
     }
 
-    public void delete(Estoque estoque) {
-        em.remove(em.contains(estoque) ? estoque : em.merge(estoque));
-    }
-
+    /**
+     * Busca todos os Estoques disponíveis
+     *
+     * @return List<Estoque> - Todos os Estoques
+     */
     public List<Estoque> findAll() {
-        return em.createQuery("select e from estoques e", Estoque.class).getResultList();
-    }
-
-    public List<Estoque> findByName(String prefixo) {
-        return em.createQuery("select e from estoques e where e.nmEstoque like :prefix", Estoque.class)
-                .setParameter("prefix", prefixo + "%")
+        return em.createQuery("select e from estoques e", Estoque.class)
                 .getResultList();
     }
 
-    public Estoque findById(int id) {
-        return em.find(Estoque.class, id);
+    /**
+     * Busca Estoques cujo nome inicia com o valor informado
+     *
+     * @param nome O prefixo do nome
+     * @return List<Estoque> - Os Estoques encontrados
+     */
+    public List<Estoque> findByNome(String nome) {
+        return em.createQuery("select e from estoques e where e.nome like :prefix", Estoque.class)
+                .setParameter("prefix", nome + "%")
+                .getResultList();
     }
 }

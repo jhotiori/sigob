@@ -1,53 +1,68 @@
 package org.javapi.sigob.repository;
 
-import org.javapi.sigob.entity.Funcionario;
-import jakarta.persistence.EntityManager;
-
 import java.util.List;
 
-public class FuncionarioRepository {
-    private final EntityManager em;
+import org.javapi.sigob.entity.Funcionario;
 
+import jakarta.persistence.EntityManager;
+
+public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> {
+
+    /**
+     * Cria um novo FuncionarioRepository
+     *
+     * @param em O EntityManager
+     */
     public FuncionarioRepository(EntityManager em) {
-        this.em = em;
+        super(em, Funcionario.class);
     }
 
-    public Funcionario findById(int id) {
-        return em.find(Funcionario.class, id);
-    }
-
-    public void create(Funcionario funcionario) {
-        em.persist(funcionario);
-    }
-
-    public void update(Funcionario funcionario) {
-        em.merge(funcionario);
-    }
-
-    public void delete(Funcionario funcionario) {
-        em.remove(em.contains(funcionario) ? funcionario : em.merge(funcionario));
-    }
-
+    /**
+     * Verifica se um Funcionario está gerenciado pelo EntityManager
+     *
+     * @param funcionario O Funcionario para verificar
+     * @return boolean - true se gerenciado, false caso contrário
+     */
     public boolean contains(Funcionario funcionario) {
         return em.contains(funcionario);
     }
 
+    /**
+     * Busca todos os Funcionarios disponíveis
+     *
+     * @return List<Funcionario> - Todos os Funcionarios
+     */
     public List<Funcionario> findAll() {
-        return em.createQuery("select f from Funcionario f", Funcionario.class).getResultList();
+        return em.createQuery("select f from funcionarios f", Funcionario.class)
+                .getResultList();
     }
 
-    public List<Funcionario> findByName(String nome) {
-        return em.createQuery("select f from Funcionario f where f.nmFuncionario like :str", Funcionario.class)
+    /**
+     * Busca Funcionarios cujo nome inicia com o valor informado
+     *
+     * @param nome O Nome para procurar
+     * @return List<Funcionario> - Os Funcionarios encontrados
+     */
+    public List<Funcionario> findByNome(String nome) {
+        return em.createQuery("select f from funcionarios f where f.nome like :str", Funcionario.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
 
+    /**
+     * Busca um Funcionario pelo codigo, carregando Acesso e Documento
+     *
+     * @param codigo O Codigo do Funcionario
+     * @return Funcionario - O Funcionario encontrado (pode ser null)
+     */
     public Funcionario findByCodigo(String codigo) {
-        return em.createQuery("select f from Funcionario f where f.cdFuncionario = :codigo", Funcionario.class)
+        return em.createQuery("""
+                    SELECT f FROM funcionarios f
+                    JOIN FETCH f.acesso
+                    JOIN FETCH f.documento
+                    WHERE f.codigo = :codigo
+                """, Funcionario.class)
                 .setParameter("codigo", codigo)
-                .getResultList()
-                .stream()
-                .findFirst()
-                .orElse(null);
+                .getSingleResultOrNull();
     }
 }

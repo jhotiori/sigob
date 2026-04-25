@@ -1,96 +1,205 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.exception.CategoriaException;
 import org.javapi.sigob.repository.CategoriaRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import java.util.List;
 
 public class CategoriaService {
-    private final CategoriaRepository repository;
 
-    public CategoriaService(CategoriaRepository repository) {
-        this.repository = repository;
+    /**
+     * Construtor para criar um novo CategoriaService
+     *
+     * @return CategoriaService - O novo CategoriaService
+     */
+    public CategoriaService() {
     }
 
-    public void save(Categoria categoria, EntityManager em) {
-        validateCategoria(categoria);
+    /**
+     * Salva uma nova Categoria
+     *
+     * @param categoria A Categoria para ser salva
+     */
+    public void save(Categoria categoria) {
+        validateNome(categoria.getNome());
+        validateCodigo(categoria.getCodigo());
 
-        EntityTransaction tx = em.getTransaction();
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
         try {
-            tx.begin();
-            int idCategoria = categoria.getIdCategoria();
+            transaction.begin();
 
-            if (idCategoria > 0) {
-                this.repository.update(categoria);
+            if (categoria.getId() > 0) {
+                repository.update(categoria);
             } else {
-                this.repository.create(categoria);
+                repository.save(categoria);
             }
-            tx.commit();
+
+            transaction.commit();
         } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
             }
             throw e;
+        } finally {
+            em.close();
         }
     }
 
-    public void create(Categoria categoria) {
-        validateCategoria(categoria);
-        this.repository.create(categoria);
-    }
-
+    /**
+     * Atualiza uma Categoria
+     *
+     * @param categoria A Categoria para ser atualizada
+     * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
+     */
     public void update(Categoria categoria) {
         validateCategoria(categoria);
-        if (categoria.getIdCategoria() <= 0) {
-            throw new CategoriaException("ID da categoria deve ser maior que zero para atualizar");
+
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            transaction.begin();
+            repository.update(categoria);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
         }
-        this.repository.update(categoria);
     }
 
-    public Categoria getById(int id) {
-        if (id <= 0) {
-            throw new CategoriaException("ID da categoria não pode ser menor ou igual a zero");
-        }
-        return this.repository.findById(id);
-    }
-
-    public List<Categoria> getByNome(String nome) {
-        validateNome(nome);
-        return this.repository.findByName(nome);
-    }
-
-    public Categoria getByCodigo(String codigo) {
-        validateCodigo(codigo);
-        return this.repository.findByCodigo(codigo);
-    }
-
-    public List<Categoria> getAll() {
-        return this.repository.findAll();
-    }
-
+    /**
+     * Remove uma Categoria
+     *
+     * @param categoria A Categoria para ser removida
+     */
     public void delete(Categoria categoria) {
-        this.repository.delete(categoria);
+        EntityManager em = JPAConfig.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            transaction.begin();
+            repository.deleteById(categoria.getId());
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
-    public String getNomeById(int id) {
-        Categoria categoria = getById(id);
-        return categoria != null ? categoria.getNmCategoria() : null;
+    /**
+     * Confere se uma categoria existe
+     *
+     * @param categoria A categoria
+     * @return boolean - true se a categoria existe, false se nao
+     */
+    public boolean contains(Categoria categoria) {
+        EntityManager em = JPAConfig.getEntityManager();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            return repository.contains(categoria);
+        } finally {
+            em.close();
+        }
     }
 
-    public String getCodigoById(int id) {
-        Categoria categoria = getById(id);
-        return categoria != null ? categoria.getCdCategoria() : null;
+    /**
+     * Retorna uma lista com todas as Categorias
+     *
+     * @return List<Categoria> - A lista de categorias
+     */
+    public List<Categoria> findAll() {
+        EntityManager em = JPAConfig.getEntityManager();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            return repository.findAll();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca uma Categoria pelo seu ID
+     *
+     * @param id O ID da Categoria
+     * @return Categoria - A Categoria buscada
+     * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
+     */
+    public Optional<Categoria> findById(int id) {
+        EntityManager em = JPAConfig.getEntityManager();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            return repository.findById(id);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca por categorias que comecam com o prefixo (nome)
+     *
+     * @param nome O prefixo
+     * @return List<Categoria> - A lista de categorias
+     */
+    public List<Categoria> findByNome(String nome) {
+        validateNome(nome);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            return repository.findByNome(nome);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca por uma Categoria pelo seu codigo
+     *
+     * @param codigo O codigo da categoria
+     * @return Categoria - A categoria buscada
+     */
+    public Categoria findByCodigo(String codigo) {
+        validateCodigo(codigo);
+
+        EntityManager em = JPAConfig.getEntityManager();
+        CategoriaRepository repository = new CategoriaRepository(em);
+
+        try {
+            return repository.findByCodigo(codigo);
+        } finally {
+            em.close();
+        }
     }
 
     private void validateCategoria(Categoria categoria) {
         if (categoria == null) {
             throw new CategoriaException("Categoria não pode ser nula");
         }
-        validateNome(categoria.getNmCategoria());
-        validateCodigo(categoria.getCdCategoria());
+        validateNome(categoria.getNome());
+        validateCodigo(categoria.getCodigo());
     }
 
     private void validateNome(String nome) {
@@ -105,4 +214,3 @@ public class CategoriaService {
         }
     }
 }
-

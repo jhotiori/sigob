@@ -1,55 +1,132 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity(name = "clientes")
 public class Cliente {
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private int idCliente;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    @Column (name = "nmCliente")
-    private String nmCliente;
+    @Column(name = "nome")
+    private String nome;
 
-    @Column (name = "nrDocumento")
-    private String nrDocumento;
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
 
-    //Constructor
-    public Cliente() {};
+    @ManyToOne
+    @JoinColumn(name = "documento_id", nullable = true)
+    private Documento documento;
 
-    public Cliente(int idCliente, String nmCliente, String nrDocumento) {
-        this.idCliente = idCliente;
-        this.nmCliente = nmCliente;
-        this.nrDocumento = nrDocumento;
+    /**
+     * Construtor para criar um novo Cliente
+     *
+     * @return Cliente - O Cliente criado
+     */
+    public Cliente() {
     }
 
-    //Setters
-    public void  setIdCliente(int idCliente) {
-        this.idCliente = idCliente;
-    }
-    public void  setNmCliente(String nmCliente) {
-        this.nmCliente = nmCliente;
-    }
-    public void  setNrDocumento(String nrDocumento) {
-        this.nrDocumento = nrDocumento;
+    ;
+
+    /**
+     * Construtor completo para criar um novo Cliente
+     *
+     * @param id             O ID do Cliente
+     * @param nome           O Nome do Cliente
+     * @param dataNascimento A Data de Nascimento do Cliente
+     * @param documento      O Documento do Cliente (opcional)
+     */
+    public Cliente(int id, String nome, LocalDate dataNascimento, Documento documento) {
+        this.id = id;
+        this.nome = nome;
+        this.dataNascimento = dataNascimento;
+        this.documento = documento;
     }
 
-    //Getters
-    public int getIdCliente() {
-        return idCliente;
-    }
-    public String getNmCliente() {
-        return nmCliente;
-    }
-    public String getNrDocumento() {
-        return nrDocumento;
+    /**
+     * Atribui o ID do Cliente
+     *
+     * @param id O ID do Cliente
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
-    //ToString
+    /**
+     * Atribui o Nome do Cliente
+     *
+     * @param nome O Nome do Cliente
+     */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
+     * Atribui a Data de Nascimento do Cliente
+     *
+     * @param dataNascimento A Data de Nascimento do Cliente
+     */
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
+    }
+
+    /**
+     * Atribui o Documento do Cliente
+     *
+     * @param documento O Documento do Cliente
+     */
+    public void setDocumento(Documento documento) {
+        this.documento = documento;
+    }
+
+    /**
+     * Retorna o ID do Cliente
+     *
+     * @return id - O ID do Cliente
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Retorna o Nome do Cliente
+     *
+     * @return nome - O Nome do Cliente
+     */
+    public String getNome() {
+        return nome;
+    }
+
+    /**
+     * Retorna a Data de Nascimento do Cliente
+     *
+     * @return dataNascimento - A Data de Nascimento do Cliente
+     */
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
+    }
+
+    /**
+     * Retorna o Documento do Cliente
+     *
+     * @return documento - O Documento do Cliente (pode ser null)
+     */
+    public Documento getDocumento() {
+        return documento;
+    }
+
     @Override
     public String toString() {
-        String obj;
-        obj = String.format("ID: %d\nNM: %s | DOC: %s", idCliente, nmCliente, nrDocumento);
-        return obj;
+        return "Cliente(Id = %d, Nome = %s, DataNascimento = %s)"
+                .formatted(this.getId(), this.getNome(), this.getDataNascimento());
     }
 }
