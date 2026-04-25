@@ -27,8 +27,8 @@ public class AcessoService {
      * @throws AcessoException Se o acesso for invalido
      */
     public void save(Acesso acesso) {
-        validateNome(acesso.getNmAcesso());
-        validateCodigo(acesso.getCdAcesso());
+        validateNome(acesso.getNome());
+        validateCodigo(acesso.getCodigo());
 
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
@@ -87,7 +87,9 @@ public class AcessoService {
 
         try {
             transaction.begin();
-            repository.delete(acesso);
+            // Re-anexa a entidade ao contexto JPA antes de deletar
+            Acesso managed = em.contains(acesso) ? acesso : em.merge(acesso);
+            repository.deleteById(acesso.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -191,8 +193,8 @@ public class AcessoService {
         if (acesso == null) {
             throw new AcessoException("Acesso não pode ser nulo");
         }
-        validateNome(acesso.getNmAcesso());
-        validateCodigo(acesso.getCdAcesso());
+        validateNome(acesso.getNome());
+        validateCodigo(acesso.getCodigo());
     }
 
     private void validateNome(String nome) {

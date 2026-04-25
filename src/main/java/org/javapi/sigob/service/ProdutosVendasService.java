@@ -39,15 +39,15 @@ public class ProdutosVendasService {
             transaction.begin();
             validateProdutosVendas(produtosVendas);
 
-            int idProdutoVenda = produtosVendas.getIdProdutoVenda();
+            int id = produtosVendas.getId();
             Produto produto = produtosVendas.getProduto();
             Venda venda = produtosVendas.getVenda();
-            int quantidade = produtosVendas.getNrQuantidade();
-            BigDecimal saldo = produtosVendas.getVlSaldo();
+            int quantidade = produtosVendas.getQuantidade();
+            BigDecimal saldo = produtosVendas.getSaldo();
 
-            ProdutosVendas produtoFinal = new ProdutosVendas(idProdutoVenda, quantidade, saldo, produto, venda);
+            ProdutosVendas produtoFinal = new ProdutosVendas(id, quantidade, saldo, produto, venda);
 
-            if (idProdutoVenda > 0) {
+            if (id > 0) {
                 repository.update(produtoFinal);
             } else {
                 repository.save(produtoFinal);
@@ -77,7 +77,7 @@ public class ProdutosVendasService {
 
         try {
             transaction.begin();
-            repository.delete(produtosVendas);
+            repository.deleteById(produtosVendas.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -133,7 +133,7 @@ public class ProdutosVendasService {
         ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
 
         try {
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -152,7 +152,7 @@ public class ProdutosVendasService {
 
         try {
             validateProduto(produto);
-            return repository.findByProdutoId(produto.getIdProduto());
+            return repository.findByProdutoId(produto.getId());
         } finally {
             em.close();
         }
@@ -170,7 +170,7 @@ public class ProdutosVendasService {
         ProdutosVendasRepository repository = new ProdutosVendasRepository(em);
 
         try {
-            return repository.findByVendaId(venda.getIdVenda());
+            return repository.findByVendaId(venda.getId());
         } finally {
             em.close();
         }
@@ -180,8 +180,8 @@ public class ProdutosVendasService {
         if (produtoVendas == null) {
             throw new ProdutosVendasException("ProdutosVendas nao pode ser nulo!");
         }
-        validateQuantidade(produtoVendas.getNrQuantidade());
-        validateSaldo(produtoVendas.getVlSaldo());
+        validateQuantidade(produtoVendas.getQuantidade());
+        validateSaldo(produtoVendas.getSaldo());
         validateProduto(produtoVendas.getProduto());
         validateVenda(produtoVendas.getVenda());
     }

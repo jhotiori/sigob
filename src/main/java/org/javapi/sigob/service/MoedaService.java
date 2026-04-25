@@ -34,7 +34,7 @@ public class MoedaService {
 
         try {
             transaction.begin();
-            if (moeda.getIdMoeda() > 0) {
+            if (moeda.getId() > 0) {
                 repository.update(moeda);
             } else {
                 repository.save(moeda);
@@ -88,7 +88,7 @@ public class MoedaService {
         MoedaRepository repository = new MoedaRepository(em);
 
         try {
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -126,7 +126,7 @@ public class MoedaService {
         MoedaRepository repository = new MoedaRepository(em);
 
         try {
-            return repository.findByCodigo(codigo);
+            return repository.findBySigla(codigo);
         } finally {
             em.close();
         }
@@ -160,7 +160,7 @@ public class MoedaService {
 
         try {
             transaction.begin();
-            repository.delete(moeda);
+            repository.deleteById(moeda.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -176,9 +176,9 @@ public class MoedaService {
         if (moeda == null) {
             throw new MoedaException("Moeda não pode ser nula");
         }
-        validateNome(moeda.getNmMoeda());
-        validateCifrao(moeda.getDsCifrao());
-        validateSigla(moeda.getDsSigla());
+        validateNome(moeda.getNome());
+        validateCifrao(moeda.getCifrao());
+        validateSigla(moeda.getSigla());
     }
 
     private void validateNome(String nome) {

@@ -1,6 +1,7 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Cliente;
@@ -28,16 +29,10 @@ public class ClienteService {
      * @return Cliente - O Cliente salvo
      */
     public Cliente save(Cliente cliente) {
-        validateNome(cliente.getNmCliente());
-        validateDocumento(cliente.getNrDocumento());
+        validateNome(cliente.getNome());
 
-        int id = cliente.getIdCliente();
-        String nome = cliente.getNmCliente();
-        String documento = cliente.getNrDocumento();
-
-        if (!findByDocumento(documento).isEmpty()) {
-            throw new ClienteException("Cliente com o mesmo documento já cadastrado!");
-        }
+        int id = cliente.getId();
+        String nome = cliente.getNome();
 
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
@@ -46,7 +41,7 @@ public class ClienteService {
         try {
             transaction.begin();
 
-            var novoCliente = new Cliente(id, nome, documento);
+            var novoCliente = new Cliente(id, nome, cliente.getDataNascimento(), cliente.getDocumento());
             if (id > 0) {
                 repository.update(novoCliente);
             } else {
@@ -96,7 +91,7 @@ public class ClienteService {
 
         try {
             transaction.begin();
-            repository.remove(cliente);
+            repository.deleteById(cliente.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -130,7 +125,7 @@ public class ClienteService {
      * @param id O ID do Cliente
      * @return Cliente - O Cliente buscado
      */
-    public Cliente findById(int id) {
+    public Optional<Cliente> findById(int id) {
         EntityManager em = JPAConfig.getEntityManager();
         ClienteRepository repository = new ClienteRepository(em);
 
@@ -167,8 +162,6 @@ public class ClienteService {
      * @return Cliente - O Cliente buscado
      */
     public List<Cliente> findByDocumento(String documento) {
-        validateDocumento(documento);
-
         EntityManager em = JPAConfig.getEntityManager();
         ClienteRepository repository = new ClienteRepository(em);
 
@@ -183,19 +176,12 @@ public class ClienteService {
         if (cliente == null) {
             throw new ClienteException("Cliente não pode ser nulo");
         }
-        validateNome(cliente.getNmCliente());
-        validateDocumento(cliente.getNrDocumento());
+        validateNome(cliente.getNome());
     }
 
     private void validateNome(String nome) {
         if (nome == null || nome.isBlank()) {
             throw new ClienteException("Nome do cliente não pode ser nulo ou vazio");
-        }
-    }
-
-    private void validateDocumento(String documento) {
-        if (documento == null || documento.isBlank()) {
-            throw new ClienteException("Documento do cliente não pode ser nulo ou vazio");
         }
     }
 }

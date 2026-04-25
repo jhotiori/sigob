@@ -1,6 +1,7 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.ProdutosEstoques;
@@ -14,8 +15,6 @@ public class ProdutosEstoquesService {
 
     /**
      * Cria um novo ProdutosEstoquesService
-     *
-     * @return ProdutosEstoquesService - O ProdutosEstoquesService
      */
     public ProdutosEstoquesService() {
     }
@@ -24,7 +23,7 @@ public class ProdutosEstoquesService {
      * Salva um novo ProdutosEstoques
      *
      * @param produtoEstoque O ProdutosEstoques
-     * @throws ProdutosEstoquesException Se o ProdutosEstoques for invalido
+     * @throws ProdutosEstoquesException Se o ProdutosEstoques for inválido
      */
     public void save(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
@@ -51,7 +50,7 @@ public class ProdutosEstoquesService {
      * Atualiza um ProdutosEstoques
      *
      * @param produtoEstoque O ProdutosEstoques
-     * @throws ProdutosEstoquesException Se o ProdutosEstoques for invalido
+     * @throws ProdutosEstoquesException Se o ProdutosEstoques for inválido
      */
     public void update(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         validateProdutosEstoques(produtoEstoque);
@@ -77,16 +76,16 @@ public class ProdutosEstoquesService {
     /**
      * Deleta um ProdutosEstoques
      *
-     * @param produtoEstoques O ProdutosEstoques
+     * @param produtoEstoque O ProdutosEstoques
      */
-    public void delete(ProdutosEstoques produtoEstoques) {
+    public void delete(ProdutosEstoques produtoEstoque) {
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
         ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
 
         try {
             transaction.begin();
-            repository.delete(produtoEstoques);
+            repository.delete(produtoEstoque);
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -99,10 +98,10 @@ public class ProdutosEstoquesService {
     }
 
     /**
-     * Verifica se um ProdutosEstoques está contido no EntityManager
+     * Verifica se um ProdutosEstoques está gerenciado pelo EntityManager
      *
      * @param produtoEstoque O ProdutosEstoques
-     * @return boolean - true se o ProdutosEstoques estiver contido, false se nao
+     * @return boolean - true se gerenciado, false caso contrário
      */
     public boolean contains(ProdutosEstoques produtoEstoque) {
         EntityManager em = JPAConfig.getEntityManager();
@@ -135,9 +134,9 @@ public class ProdutosEstoquesService {
      * Retorna um ProdutosEstoques pelo ID
      *
      * @param id O ID do ProdutosEstoques
-     * @return ProdutosEstoques - O ProdutosEstoques
+     * @return ProdutosEstoques - O ProdutosEstoques ou null se não encontrado
      */
-    public ProdutosEstoques findById(int id) {
+    public Optional<ProdutosEstoques> findById(int id) {
         EntityManager em = JPAConfig.getEntityManager();
         ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
 
@@ -149,19 +148,34 @@ public class ProdutosEstoquesService {
     }
 
     /**
-     * Busca um ProdutosEstoques pelo nome
+     * Busca ProdutosEstoques pelo ID do Produto
      *
-     * @param nome O nome do ProdutosEstoques
-     * @return List<ProdutosEstoques> - A lista de ProdutosEstoques
+     * @param produtoId O ID do Produto
+     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques do produto
      */
-    public List<ProdutosEstoques> findByNome(String nome) throws ProdutosEstoquesException {
-        validateObservacao(nome);
-
+    public List<ProdutosEstoques> findByProduto(int produtoId) {
         EntityManager em = JPAConfig.getEntityManager();
         ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
 
         try {
-            return repository.findByNome(nome);
+            return repository.findByProduto(produtoId);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Busca ProdutosEstoques pelo ID do Estoque
+     *
+     * @param estoqueId O ID do Estoque
+     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques do estoque
+     */
+    public List<ProdutosEstoques> findByEstoque(int estoqueId) {
+        EntityManager em = JPAConfig.getEntityManager();
+        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+
+        try {
+            return repository.findByEstoque(estoqueId);
         } finally {
             em.close();
         }
@@ -169,21 +183,20 @@ public class ProdutosEstoquesService {
 
     private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
         if (produtoEstoque == null) {
-            throw new ProdutosEstoquesException("Produtos não pode ser nulo");
+            throw new ProdutosEstoquesException("ProdutosEstoques não pode ser nulo");
         }
-        validateObservacao(produtoEstoque.getDsObservacao());
-        validateQuantidade(produtoEstoque.getNrQuantidade());
+        if (produtoEstoque.getProduto() == null) {
+            throw new ProdutosEstoquesException("Produto não pode ser nulo");
+        }
+        if (produtoEstoque.getEstoque() == null) {
+            throw new ProdutosEstoquesException("Estoque não pode ser nulo");
+        }
+        validateQuantidade(produtoEstoque.getQuantidade());
     }
 
     private void validateQuantidade(int quantidade) throws ProdutosEstoquesException {
         if (quantidade < 0) {
-            throw new ProdutosEstoquesException("Quantidade não pode ser negativa");
-        }
-    }
-
-    private void validateObservacao(String observacao) throws ProdutosEstoquesException {
-        if (observacao == null || observacao.isBlank()) {
-            throw new ProdutosEstoquesException("Observação não pode ser nulo ou vazio");
+            throw new ProdutosEstoquesException("Quantidade não pode ser negativa");
         }
     }
 }

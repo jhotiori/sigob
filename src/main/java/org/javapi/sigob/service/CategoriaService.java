@@ -1,6 +1,7 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Categoria;
@@ -26,8 +27,8 @@ public class CategoriaService {
      * @param categoria A Categoria para ser salva
      */
     public void save(Categoria categoria) {
-        validateNome(categoria.getNmCategoria());
-        validateCodigo(categoria.getCdCategoria());
+        validateNome(categoria.getNome());
+        validateCodigo(categoria.getCodigo());
 
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
@@ -36,7 +37,7 @@ public class CategoriaService {
         try {
             transaction.begin();
 
-            if (categoria.getIdCategoria() > 0) {
+            if (categoria.getId() > 0) {
                 repository.update(categoria);
             } else {
                 repository.save(categoria);
@@ -92,7 +93,7 @@ public class CategoriaService {
 
         try {
             transaction.begin();
-            repository.delete(categoria);
+            repository.deleteById(categoria.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -144,7 +145,7 @@ public class CategoriaService {
      * @return Categoria - A Categoria buscada
      * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
-    public Categoria findById(int id) {
+    public Optional<Categoria> findById(int id) {
         EntityManager em = JPAConfig.getEntityManager();
         CategoriaRepository repository = new CategoriaRepository(em);
 
@@ -168,7 +169,7 @@ public class CategoriaService {
         CategoriaRepository repository = new CategoriaRepository(em);
 
         try {
-            return repository.findByName(nome);
+            return repository.findByNome(nome);
         } finally {
             em.close();
         }
@@ -197,8 +198,8 @@ public class CategoriaService {
         if (categoria == null) {
             throw new CategoriaException("Categoria não pode ser nula");
         }
-        validateNome(categoria.getNmCategoria());
-        validateCodigo(categoria.getCdCategoria());
+        validateNome(categoria.getNome());
+        validateCodigo(categoria.getCodigo());
     }
 
     private void validateNome(String nome) {

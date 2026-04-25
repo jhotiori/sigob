@@ -87,7 +87,7 @@ public class ProdutoService {
 
         try {
             transaction.begin();
-            repository.delete(produto);
+            repository.deleteById(produto.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -100,7 +100,7 @@ public class ProdutoService {
     }
 
     /**
-     * Verifica se um Produto está salvo
+     * Verifica se um Produto está salvo
      *
      * @param produto O produto para ser verificado
      * @return boolean - true se o produto estiver salvo, false se nao
@@ -143,7 +143,7 @@ public class ProdutoService {
         ProdutoRepository repository = new ProdutoRepository(em);
 
         try {
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -170,35 +170,35 @@ public class ProdutoService {
 
     private void validateProduto(Produto produto) {
         if (produto == null) {
-            throw new ProdutoException("Produto não pode ser nulo");
+            throw new ProdutoException("Produto não pode ser nulo");
         }
-        validateNome(produto.getNmProduto());
-        validateCodigo(produto.getCdProduto());
-        validateValorCusto(produto.getVlCusto());
-        validateValorVenda(produto.getVlProduto());
+        validateNome(produto.getNome());
+        validateCodigo(produto.getCodigo());
+        validateValorCusto(produto.getValorCompra());
+        validateValorVenda(produto.getValorVenda());
     }
 
     private void validateCodigo(String codigo) {
         if (codigo == null || codigo.isBlank()) {
-            throw new ProdutoException("Código do produto não pode ser nulo ou vazio");
+            throw new ProdutoException("Código do produto não pode ser nulo ou vazio");
         }
     }
 
     private void validateNome(String nome) {
         if (nome == null || nome.isBlank()) {
-            throw new ProdutoException("Nome do produto não pode ser nulo ou vazio");
+            throw new ProdutoException("Nome do produto não pode ser nulo ou vazio");
         }
     }
 
     private void validateValorCusto(BigDecimal custo) {
         if (custo == null || custo.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ProdutoException("Custo do produto não pode ser nulo ou menor a zero");
+            throw new ProdutoException("Custo do produto não pode ser nulo ou menor a zero");
         }
     }
 
     private void validateValorVenda(BigDecimal valor) {
         if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProdutoException("Custo de venda do produto não pode ser nulo ou menor ou igual a zero");
+            throw new ProdutoException("Custo de venda do produto não pode ser nulo ou menor ou igual a zero");
         }
     }
 }

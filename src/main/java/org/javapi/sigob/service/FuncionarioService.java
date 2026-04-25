@@ -1,6 +1,7 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Acesso;
@@ -53,9 +54,9 @@ public class FuncionarioService {
      * @param funcionario O funcionario para atualizar
      */
     public void update(Funcionario funcionario) {
-        validateNome(funcionario.getNmFuncionario());
-        validateCodigo(funcionario.getCdFuncionario());
-        validateAcesso(funcionario.getAcesso());
+        validateNome(funcionario.getNome());
+        validateCodigo(funcionario.getCodigo());
+        validateAcessos(funcionario.getAcessos());
 
         EntityManager em = JPAConfig.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
@@ -87,7 +88,7 @@ public class FuncionarioService {
 
         try {
             transaction.begin();
-            repository.delete(funcionario);
+            repository.deleteById(funcionario.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -143,7 +144,7 @@ public class FuncionarioService {
         FuncionarioRepository repository = new FuncionarioRepository(em);
 
         try {
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -191,9 +192,9 @@ public class FuncionarioService {
         if (funcionario == null) {
             throw new FuncionarioException("Funcionário não pode ser nulo");
         }
-        validateNome(funcionario.getNmFuncionario());
-        validateCodigo(funcionario.getCdFuncionario());
-        validateAcesso(funcionario.getAcesso());
+        validateNome(funcionario.getNome());
+        validateCodigo(funcionario.getCodigo());
+        validateAcessos(funcionario.getAcessos());
     }
 
     private void validateNome(String nome) {
@@ -208,9 +209,9 @@ public class FuncionarioService {
         }
     }
 
-    private void validateAcesso(Acesso acesso) {
-        if (acesso == null) {
-            throw new FuncionarioException("Acesso do funcionário não pode ser nulo");
+    private void validateAcessos(Set<Acesso> acessos) {
+        if (acessos == null || acessos.isEmpty()) {
+            throw new FuncionarioException("Funcionário deve possuir ao menos um acesso");
         }
     }
 }

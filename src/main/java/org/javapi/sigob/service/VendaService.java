@@ -1,6 +1,6 @@
 package org.javapi.sigob.service;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.javapi.sigob.config.JPAConfig;
@@ -37,7 +37,7 @@ public class VendaService {
             VendaRepository repository = new VendaRepository(em);
             transaction.begin();
 
-            if (venda.getIdVenda() > 0) {
+            if (venda.getId() > 0) {
                 repository.update(venda);
             } else {
                 repository.save(venda);
@@ -67,7 +67,7 @@ public class VendaService {
         try {
             VendaRepository repository = new VendaRepository(em);
             transaction.begin();
-            repository.delete(venda);
+            repository.deleteById(venda.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -123,7 +123,7 @@ public class VendaService {
 
         try {
             VendaRepository repository = new VendaRepository(em);
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -136,12 +136,12 @@ public class VendaService {
      * @param dataFim    A data final
      * @return List<Venda> - A lista de vendas
      */
-    public List<Venda> findByDataVenda(ZonedDateTime dataInicio, ZonedDateTime dataFim) {
+    public List<Venda> findByDataVenda(OffsetDateTime dataInicio, OffsetDateTime dataFim) {
         EntityManager em = JPAConfig.getEntityManager();
 
         try {
             VendaRepository repository = new VendaRepository(em);
-            return repository.findByDataVenda(dataInicio, dataFim);
+            return repository.findFinalizadas();
         } finally {
             em.close();
         }
@@ -153,12 +153,6 @@ public class VendaService {
         }
         validateCliente(venda.getCliente());
         validateFuncionario(venda.getFuncionario());
-    }
-
-    private void validatePago(boolean pago) {
-        if (pago) {
-            throw new VendaException("Venda nao pode ser paga!");
-        }
     }
 
     private void validateCliente(Cliente cliente) {

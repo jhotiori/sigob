@@ -15,7 +15,7 @@ public class EstoqueService {
     /**
      * Cria um novo EstoqueService
      *
-     * @return EstoqueService - O serviço de estoques
+     * @return EstoqueService - O serviço de estoques
      */
     public EstoqueService() {
     }
@@ -86,7 +86,7 @@ public class EstoqueService {
 
         try {
             transaction.begin();
-            repository.delete(estoque);
+            repository.deleteById(estoque.getId());
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -142,7 +142,7 @@ public class EstoqueService {
         EstoqueRepository repository = new EstoqueRepository(em);
 
         try {
-            return repository.findById(id);
+            return repository.findById(id).orElse(null);
         } finally {
             em.close();
         }
@@ -167,21 +167,21 @@ public class EstoqueService {
 
     private void validateEstoque(Estoque estoque) {
         if (estoque == null) {
-            throw new EstoqueException("Estoque não pode ser nulo");
+            throw new EstoqueException("Estoque não pode ser nulo");
         }
-        validateCodigo(estoque.getCdEstoque());
-        validateNome(estoque.getNmEstoque());
+        validateCodigo(estoque.getCodigo());
+        validateNome(estoque.getNome());
     }
 
     private void validateCodigo(String codigo) {
         if (codigo == null || codigo.isBlank()) {
-            throw new EstoqueException("Código do estoque não pode ser nulo ou vazio");
+            throw new EstoqueException("Código do estoque não pode ser nulo ou vazio");
         }
     }
 
     private void validateNome(String nome) {
         if (nome == null || nome.isBlank()) {
-            throw new EstoqueException("Nome do estoque não pode ser nulo ou vazio");
+            throw new EstoqueException("Nome do estoque não pode ser nulo ou vazio");
         }
     }
 }

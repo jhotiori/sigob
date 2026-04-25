@@ -70,4 +70,7 @@ public class ProdutosEstoquesRepository extends BaseRepository<ProdutosEstoques,
                 .setParameter("estoqueId", estoqueId)
                 .getResultList();
     }
+
+    public void delete(ProdutosEstoques produtoEstoque) {
+    }
 }
