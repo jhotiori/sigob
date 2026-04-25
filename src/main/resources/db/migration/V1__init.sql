@@ -58,6 +58,14 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     FOREIGN KEY (acesso_id) REFERENCES acessos(id)
 );
 
+CREATE TABLE IF NOT EXISTS funcionarios_acessos (
+    funcionario_id INT NOT NULL,
+    acesso_id INT NOT NULL,
+    PRIMARY KEY (funcionario_id, acesso_id),
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id),
+    FOREIGN KEY (acesso_id) REFERENCES acessos(id)
+);
+
 CREATE TABLE IF NOT EXISTS vendas (
     id SERIAL PRIMARY KEY,
     status VARCHAR(16) NOT NULL,
