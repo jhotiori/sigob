@@ -1,14 +1,12 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Estoque;
-import org.javapi.sigob.exception.EstoqueException;
 import org.javapi.sigob.repository.EstoqueRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class EstoqueService {
 
@@ -24,78 +22,42 @@ public class EstoqueService {
      * Salva um estoque
      *
      * @param estoque O estoque para ser salvo
-     * @throws EstoqueException Se o estoque for invalido
+     * @throws IllegalArgumentException Se o estoque for invalido
      */
     public void save(Estoque estoque) {
         validateEstoque(estoque);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        EstoqueRepository repository = new EstoqueRepository(em);
-
-        try {
-            transaction.begin();
-            repository.save(estoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new EstoqueRepository(em).save(estoque);
+        });
     }
 
     /**
      * Atualiza um estoque
      *
      * @param estoque O estoque para ser atualizado
-     * @throws EstoqueException Se o estoque for invalido
+     * @throws IllegalArgumentException Se o estoque for invalido
      */
     public void update(Estoque estoque) {
         validateEstoque(estoque);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        EstoqueRepository repository = new EstoqueRepository(em);
-
-        try {
-            transaction.begin();
-            repository.update(estoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new EstoqueRepository(em).update(estoque);
+        });
     }
 
     /**
      * Deleta um estoque
      *
      * @param estoque O estoque para ser deletado
+     * @throws IllegalArgumentException Se o estoque for invalido
      */
     public void delete(Estoque estoque) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        EstoqueRepository repository = new EstoqueRepository(em);
+        validateEstoque(estoque);
 
-        try {
-            transaction.begin();
-            repository.deleteById(estoque.getId());
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new EstoqueRepository(em).deleteById(estoque.getId());
+        });
     }
 
     /**
@@ -103,16 +65,14 @@ public class EstoqueService {
      *
      * @param estoque O estoque para conferir
      * @return boolean - true se o estoque existe, false se nao
+     * @throws IllegalArgumentException Se o estoque for invalido
      */
     public boolean contains(Estoque estoque) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EstoqueRepository repository = new EstoqueRepository(em);
+        validateEstoque(estoque);
 
-        try {
-            return repository.contains(estoque);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new EstoqueRepository(em).contains(estoque.getId());
+        });
     }
 
     /**
@@ -121,31 +81,24 @@ public class EstoqueService {
      * @return List<Estoque> - A lista de estoques
      */
     public List<Estoque> findAll() {
-        EntityManager em = JPAConfig.getEntityManager();
-        EstoqueRepository repository = new EstoqueRepository(em);
-
-        try {
-            return repository.findAll();
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new EstoqueRepository(em).findAll();
+        });
     }
 
     /**
      * Busca um estoque pelo id
      *
      * @param id O id do estoque
-     * @return Estoque - O estoque encontrado
+     * @return Optional<Estoque> - O estoque encontrado
+     * @throws IllegalArgumentException Se o id for invalido
      */
-    public Estoque findById(int id) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EstoqueRepository repository = new EstoqueRepository(em);
+    public Optional<Estoque> findById(int id) {
+        validateId(id);
 
-        try {
-            return repository.findById(id).orElse(null);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new EstoqueRepository(em).findById(id);
+        });
     }
 
     /**
@@ -153,35 +106,64 @@ public class EstoqueService {
      *
      * @param prefixo O prefixo do estoque
      * @return List<Estoque> - A lista de estoques encontrados
+     * @throws IllegalArgumentException Se o prefixo for invalido
      */
     public List<Estoque> findByNome(String prefixo) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EstoqueRepository repository = new EstoqueRepository(em);
+        validateNome(prefixo);
 
-        try {
-            return repository.findByNome(prefixo);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new EstoqueRepository(em).findByNome(prefixo);
+        });
     }
 
+    /**
+     * Valida um estoque por completo
+     *
+     * @param estoque O estoque a ser validado
+     * @throws IllegalArgumentException Se o estoque for invalido
+     */
     private void validateEstoque(Estoque estoque) {
-        if (estoque == null) {
-            throw new EstoqueException("Estoque não pode ser nulo");
-        }
+        Validator.start()
+                .expectNotNull(estoque, "Estoque não pode ser nulo")
+                .validate();
+
         validateCodigo(estoque.getCodigo());
         validateNome(estoque.getNome());
     }
 
+    /**
+     * Valida o código de um estoque
+     *
+     * @param codigo O código a ser validado
+     * @throws IllegalArgumentException Se o código for invalido
+     */
     private void validateCodigo(String codigo) {
-        if (codigo == null || codigo.isBlank()) {
-            throw new EstoqueException("Código do estoque não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(codigo, "Código do estoque não pode ser nulo ou vazio")
+                .validate();
     }
 
+    /**
+     * Valida o nome de um estoque
+     *
+     * @param nome O nome a ser validado
+     * @throws IllegalArgumentException Se o nome for invalido
+     */
     private void validateNome(String nome) {
-        if (nome == null || nome.isBlank()) {
-            throw new EstoqueException("Nome do estoque não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(nome, "Nome do estoque não pode ser nulo ou vazio")
+                .validate();
+    }
+
+    /**
+     * Valida o ID de um estoque
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se o ID for invalido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID não pode ser nulo")
+                .validate();
     }
 }

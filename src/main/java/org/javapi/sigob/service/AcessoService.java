@@ -1,14 +1,13 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.exception.AcessoException;
 import org.javapi.sigob.repository.AcessoRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class AcessoService {
 
@@ -29,23 +28,9 @@ public class AcessoService {
     public void save(Acesso acesso) {
         validateNome(acesso.getNome());
         validateCodigo(acesso.getCodigo());
-
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            transaction.begin();
-            repository.save(acesso);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new AcessoRepository(em).save(acesso);
+        });
     }
 
     /**
@@ -56,23 +41,9 @@ public class AcessoService {
      */
     public void update(Acesso acesso) {
         validateAcesso(acesso);
-
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            transaction.begin();
-            repository.update(acesso);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new AcessoRepository(em).update(acesso);
+        });
     }
 
     /**
@@ -81,24 +52,10 @@ public class AcessoService {
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            transaction.begin();
-            // Re-anexa a entidade ao contexto JPA antes de deletar
-            Acesso managed = em.contains(acesso) ? acesso : em.merge(acesso);
-            repository.deleteById(acesso.getId());
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        validateAcesso(acesso);
+        TransactionExecutor.executeVoid(em -> {
+            new AcessoRepository(em).deleteById(acesso.getId());
+        });
     }
 
     /**
@@ -108,14 +65,10 @@ public class AcessoService {
      * @return boolean - true se o Acesso existe, false se nao existir
      */
     public boolean contains(Acesso acesso) {
-        EntityManager em = JPAConfig.getEntityManager();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            return repository.contains(acesso);
-        } finally {
-            em.close();
-        }
+        validateAcesso(acesso);
+        return TransactionExecutor.query(em -> {
+            return new AcessoRepository(em).contains(acesso.getId());
+        });
     }
 
     /**
@@ -124,31 +77,23 @@ public class AcessoService {
      * @return List<Acesso> - A lista de Acessos
      */
     public List<Acesso> findAll() {
-        EntityManager em = JPAConfig.getEntityManager();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            return repository.findAll();
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new AcessoRepository(em).findAll();
+        });
     }
 
     /**
      * Busca um Acesso pelo seu ID
      *
      * @param id O ID do Acesso
-     * @return Acesso - O Acesso buscado
+     * @throws IllegalArgumentException Se o ID for invalido
+     * @return Optional<Acesso> - O Acesso buscado
      */
-    public Acesso findById(int id) {
-        EntityManager em = JPAConfig.getEntityManager();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            return repository.findById(id);
-        } finally {
-            em.close();
-        }
+    public Optional<Acesso> findById(int id) {
+        validateId(id);
+        return TransactionExecutor.query(em -> {
+            return new AcessoRepository(em).findById(id);
+        });
     }
 
     /**
@@ -159,53 +104,71 @@ public class AcessoService {
      */
     public List<Acesso> findByNome(String nome) {
         validateNome(nome);
-
-        EntityManager em = JPAConfig.getEntityManager();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            return repository.findByNome(nome);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new AcessoRepository(em).findByNome(nome);
+        });
     }
 
     /**
      * Busca um Acesso pelo seu codigo
      *
      * @param codigo O codigo do Acesso
-     * @return Acesso - O Acesso buscado
+     * @return Optional<Acesso> - O Acesso buscado
      */
-    public Acesso findByCodigo(String codigo) {
+    public Optional<Acesso> findByCodigo(String codigo) {
         validateCodigo(codigo);
-
-        EntityManager em = JPAConfig.getEntityManager();
-        AcessoRepository repository = new AcessoRepository(em);
-
-        try {
-            return repository.findByCodigo(codigo);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new AcessoRepository(em).findByCodigo(codigo);
+        });
     }
 
+    /**
+     * Valida um acesso por completo
+     *
+     * @param acesso O acesso a ser validado
+     * @throws IllegalArgumentException Se o acesso for invalido
+     */
     private void validateAcesso(Acesso acesso) {
-        if (acesso == null) {
-            throw new AcessoException("Acesso não pode ser nulo");
-        }
+        Validator.start()
+                .expectNotNull(acesso, "Acesso nao pode ser nulo!")
+                .validate();
         validateNome(acesso.getNome());
         validateCodigo(acesso.getCodigo());
     }
 
+    /**
+     * Valida o nome de um acesso
+     *
+     * @param nome O nome a ser validado
+     * @throws IllegalArgumentException Se o nome for invalido
+     */
     private void validateNome(String nome) {
-        if (nome == null || nome.isBlank()) {
-            throw new AcessoException("Nome do acesso não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(nome, "Nome do acesso não pode ser nulo ou vazio!")
+                .validate();
     }
 
+    /**
+     * Valida o codigo de um acesso
+     *
+     * @param codigo O codigo a ser validado
+     * @throws IllegalArgumentException Se o codigo for invalido
+     */
     private void validateCodigo(String codigo) {
-        if (codigo == null || codigo.isBlank()) {
-            throw new AcessoException("Código do acesso não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(codigo, "Código do acesso não pode ser nulo ou vazio!")
+                .validate();
+    }
+
+    /**
+     * Valida o ID de um acesso
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se o ID for invalido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID não pode ser nulo!")
+                .validate();
     }
 }

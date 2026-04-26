@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Funcionario;
 
@@ -15,16 +16,6 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
      */
     public FuncionarioRepository(EntityManager em) {
         super(em, Funcionario.class);
-    }
-
-    /**
-     * Verifica se um Funcionario está gerenciado pelo EntityManager
-     *
-     * @param funcionario O Funcionario para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Funcionario funcionario) {
-        return em.contains(funcionario);
     }
 
     /**
@@ -50,19 +41,19 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
     }
 
     /**
-     * Busca um Funcionario pelo codigo, carregando Acesso e Documento
+     * Busca um Funcionario pelo codigo
      *
      * @param codigo O Codigo do Funcionario
-     * @return Funcionario - O Funcionario encontrado (pode ser null)
+     * @return Optional<Funcionario> - O Funcionario encontrado
      */
-    public Funcionario findByCodigo(String codigo) {
-        return em.createQuery("""
-                    SELECT f FROM funcionarios f
-                    JOIN FETCH f.acesso
-                    JOIN FETCH f.documento
-                    WHERE f.codigo = :codigo
-                """, Funcionario.class)
-                .setParameter("codigo", codigo)
-                .getSingleResultOrNull();
+    public Optional<Funcionario> findByCodigo(String codigo) {
+        return Optional.ofNullable(
+                em.createQuery("""
+                        SELECT f FROM funcionarios f
+                        WHERE f.codigo = :codigo
+                        """, Funcionario.class)
+                        .setParameter("codigo", codigo)
+                        .getSingleResultOrNull()
+        );
     }
 }

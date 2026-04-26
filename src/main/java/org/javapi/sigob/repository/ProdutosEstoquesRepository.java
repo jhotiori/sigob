@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.ProdutosEstoques;
 
@@ -18,59 +19,62 @@ public class ProdutosEstoquesRepository extends BaseRepository<ProdutosEstoques,
     }
 
     /**
-     * Verifica se um ProdutoEstoque está gerenciado pelo EntityManager
+     * Busca todos os ProdutosEstoques disponíveis
      *
-     * @param produtoEstoque O ProdutoEstoque para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(ProdutosEstoques produtoEstoque) {
-        return em.contains(produtoEstoque);
-    }
-
-    /**
-     * Busca todos os ProdutoEstoques disponíveis
-     *
-     * @return List<ProdutoEstoque> - Todos os ProdutoEstoques
+     * @return List<ProdutosEstoques> - Todos os ProdutosEstoques
      */
     public List<ProdutosEstoques> findAll() {
-        return em.createQuery("select pe from produto_estoques pe", ProdutosEstoques.class)
+        return em.createQuery("select pe from produtos_estoques pe", ProdutosEstoques.class)
                 .getResultList();
     }
 
     /**
-     * Busca todos os ProdutoEstoques de um Produto
+     * Busca todos os ProdutosEstoques de um Produto
      *
      * @param produtoId O ID do Produto
-     * @return List<ProdutoEstoque> - Os ProdutoEstoques encontrados
+     * @return List<ProdutosEstoques> - Os ProdutosEstoques encontrados
      */
     public List<ProdutosEstoques> findByProduto(int produtoId) {
         return em.createQuery("""
-                        SELECT pe FROM produto_estoques pe
-                        JOIN FETCH pe.produto
-                        JOIN FETCH pe.estoque
-                        WHERE pe.produto.id = :produtoId
-                        """, ProdutosEstoques.class)
+                SELECT pe FROM produtos_estoques pe
+                WHERE pe.produto.id = :produtoId
+                """, ProdutosEstoques.class)
                 .setParameter("produtoId", produtoId)
                 .getResultList();
     }
 
     /**
-     * Busca todos os ProdutoEstoques de um Estoque
+     * Busca todos os ProdutosEstoques de um Estoque
      *
      * @param estoqueId O ID do Estoque
-     * @return List<ProdutoEstoque> - Os ProdutoEstoques encontrados
+     * @return List<ProdutosEstoques> - Os ProdutosEstoques encontrados
      */
     public List<ProdutosEstoques> findByEstoque(int estoqueId) {
         return em.createQuery("""
-                        SELECT pe FROM produto_estoques pe
-                        JOIN FETCH pe.produto
-                        JOIN FETCH pe.estoque
-                        WHERE pe.estoque.id = :estoqueId
-                        """, ProdutosEstoques.class)
+                SELECT pe FROM produtos_estoques pe
+                WHERE pe.estoque.id = :estoqueId
+                """, ProdutosEstoques.class)
                 .setParameter("estoqueId", estoqueId)
                 .getResultList();
     }
 
-    public void delete(ProdutosEstoques produtoEstoque) {
+    /**
+     * Busca o vínculo único entre Produto e Estoque
+     *
+     * @param produtoId O ID do Produto
+     * @param estoqueId O ID do Estoque
+     * @return ProdutosEstoques - O vínculo encontrado (ou null)
+     */
+    public Optional<ProdutosEstoques> findUnique(int produtoId, int estoqueId) {
+        return Optional.ofNullable(
+            em.createQuery("""
+                SELECT pe FROM produtos_estoques pe
+                WHERE pe.produto.id = :produtoId
+                  AND pe.estoque.id = :estoqueId
+                """, ProdutosEstoques.class)
+                .setParameter("produtoId", produtoId)
+                .setParameter("estoqueId", estoqueId)
+                .getSingleResultOrNull()
+        );
     }
 }

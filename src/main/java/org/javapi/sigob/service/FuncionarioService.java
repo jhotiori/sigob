@@ -1,16 +1,14 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.exception.FuncionarioException;
 import org.javapi.sigob.repository.FuncionarioRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class FuncionarioService {
 
@@ -26,78 +24,42 @@ public class FuncionarioService {
      * Salva um novo Funcionario
      *
      * @param funcionario O funcionario para salvar
+     * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public void save(Funcionario funcionario) {
         validateFuncionario(funcionario);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
-
-        try {
-            transaction.begin();
-            repository.save(funcionario);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new FuncionarioRepository(em).save(funcionario);
+        });
     }
 
     /**
      * Atualiza um Funcionario
      *
      * @param funcionario O funcionario para atualizar
+     * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public void update(Funcionario funcionario) {
-        validateNome(funcionario.getNome());
-        validateCodigo(funcionario.getCodigo());
-        validateAcessos(funcionario.getAcessos());
+        validateFuncionario(funcionario);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
-
-        try {
-            transaction.begin();
-            repository.update(funcionario);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new FuncionarioRepository(em).update(funcionario);
+        });
     }
 
     /**
      * Deleta um Funcionario
      *
      * @param funcionario O funcionario para deletar
+     * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public void delete(Funcionario funcionario) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
+        validateFuncionario(funcionario);
 
-        try {
-            transaction.begin();
-            repository.deleteById(funcionario.getId());
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new FuncionarioRepository(em).deleteById(funcionario.getId());
+        });
     }
 
     /**
@@ -105,16 +67,14 @@ public class FuncionarioService {
      *
      * @param funcionario O funcionario para conferir
      * @return boolean - true se o funcionario existe, false se nao
+     * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public boolean contains(Funcionario funcionario) {
-        EntityManager em = JPAConfig.getEntityManager();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
+        validateFuncionario(funcionario);
 
-        try {
-            return repository.contains(funcionario);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new FuncionarioRepository(em).contains(funcionario.getId());
+        });
     }
 
     /**
@@ -123,95 +83,118 @@ public class FuncionarioService {
      * @return List<Funcionario> - A lista de funcionarios
      */
     public List<Funcionario> findAll() {
-        EntityManager em = JPAConfig.getEntityManager();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
-
-        try {
-            return repository.findAll();
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new FuncionarioRepository(em).findAll();
+        });
     }
 
     /**
      * Busca um funcionario pelo id
      *
      * @param id O ID do funcionario
-     * @return Funcionario - O funcionario
+     * @return Optional<Funcionario> - O funcionario encontrado
+     * @throws IllegalArgumentException Se o id for invalido
      */
-    public Funcionario findById(int id) {
-        EntityManager em = JPAConfig.getEntityManager();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
+    public Optional<Funcionario> findById(int id) {
+        validateId(id);
 
-        try {
-            return repository.findById(id).orElse(null);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new FuncionarioRepository(em).findById(id);
+        });
     }
 
     /**
-     * Busca um por funcionarios que contem o nome
+     * Busca funcionarios que contem o nome
      *
      * @param nome O nome para procurar
      * @return List<Funcionario> - A lista de funcionarios
+     * @throws IllegalArgumentException Se o nome for invalido
      */
     public List<Funcionario> findByNome(String nome) {
         validateNome(nome);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
-
-        try {
-            return repository.findByNome(nome);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new FuncionarioRepository(em).findByNome(nome);
+        });
     }
 
     /**
-     * Busca pelo Funcionario que contem o codigo
+     * Busca um Funcionario pelo codigo
      *
      * @param codigo O codigo para procurar
-     * @return Funcionario - O funcionario
+     * @return Optional<Funcionario> - O funcionario encontrado
+     * @throws IllegalArgumentException Se o codigo for invalido
      */
-    public Funcionario findByCodigo(String codigo) {
+    public Optional<Funcionario> findByCodigo(String codigo) {
         validateCodigo(codigo);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        FuncionarioRepository repository = new FuncionarioRepository(em);
-
-        try {
-            return repository.findByCodigo(codigo);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new FuncionarioRepository(em).findByCodigo(codigo);
+        });
     }
 
+    /**
+     * Valida um Funcionario por completo
+     *
+     * @param funcionario O funcionario a ser validado
+     * @throws IllegalArgumentException Se o funcionario for invalido
+     */
     private void validateFuncionario(Funcionario funcionario) {
-        if (funcionario == null) {
-            throw new FuncionarioException("Funcionário não pode ser nulo");
-        }
+        Validator.start()
+                .expectNotNull(funcionario, "Funcionário não pode ser nulo")
+                .validate();
+
         validateNome(funcionario.getNome());
         validateCodigo(funcionario.getCodigo());
         validateAcessos(funcionario.getAcessos());
     }
 
+    /**
+     * Valida o nome de um Funcionario
+     *
+     * @param nome O nome a ser validado
+     * @throws IllegalArgumentException Se o nome for invalido
+     */
     private void validateNome(String nome) {
-        if (nome == null || nome.isBlank()) {
-            throw new FuncionarioException("Nome do funcionário não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(nome, "Nome do funcionário não pode ser nulo ou vazio")
+                .validate();
     }
 
+    /**
+     * Valida o codigo de um Funcionario
+     *
+     * @param codigo O codigo a ser validado
+     * @throws IllegalArgumentException Se o codigo for invalido
+     */
     private void validateCodigo(String codigo) {
-        if (codigo == null || codigo.isBlank()) {
-            throw new FuncionarioException("Código do funcionário não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(codigo, "Código do funcionário não pode ser nulo ou vazio")
+                .validate();
     }
 
+    /**
+     * Valida os acessos de um Funcionario
+     *
+     * @param acessos O conjunto de acessos
+     * @throws IllegalArgumentException Se os acessos forem invalidos
+     */
     private void validateAcessos(Set<Acesso> acessos) {
-        if (acessos == null || acessos.isEmpty()) {
-            throw new FuncionarioException("Funcionário deve possuir ao menos um acesso");
-        }
+        Validator.start()
+                .expect(acessos, a -> a != null && !a.isEmpty(),
+                        "Funcionário deve possuir ao menos um acesso")
+                .validate();
+    }
+
+    /**
+     * Valida o ID de um Funcionario
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se o ID for invalido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID não pode ser nulo")
+                .validate();
     }
 }

@@ -1,11 +1,12 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Venda;
-
 import java.util.List;
 
-public class VendaRepository extends BaseRepository <Venda, Integer>{
+import org.javapi.sigob.entity.Venda;
+
+import jakarta.persistence.EntityManager;
+
+public class VendaRepository extends BaseRepository<Venda, Integer> {
 
     /**
      * Cria um novo VendaRepository
@@ -14,16 +15,6 @@ public class VendaRepository extends BaseRepository <Venda, Integer>{
      */
     public VendaRepository(EntityManager em) {
         super(em, Venda.class);
-    }
-
-    /**
-     * Verifica se um Venda está gerenciado pelo EntityManager
-     *
-     * @param venda O Venda para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Venda venda) {
-        return em.contains(venda);
     }
 
     /**
@@ -41,7 +32,7 @@ public class VendaRepository extends BaseRepository <Venda, Integer>{
      *
      * @return List<Venda> - Os Venda encontrados
      */
-    public List<Venda> findAbertas( ) {
+    public List<Venda> findAbertas() {
         return em.createQuery("select v from vendas v where v.status = 'ABERTA'", Venda.class)
                 .getResultList();
     }
@@ -51,7 +42,7 @@ public class VendaRepository extends BaseRepository <Venda, Integer>{
      *
      * @return List<Venda> - Os Venda encontrados
      */
-    public List<Venda> findFinalizadas( ) {
+    public List<Venda> findFinalizadas() {
         return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
                 .getResultList();
     }
