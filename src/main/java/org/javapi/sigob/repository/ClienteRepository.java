@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Cliente;
 
@@ -15,16 +16,6 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
      */
     public ClienteRepository(EntityManager em) {
         super(em, Cliente.class);
-    }
-
-    /**
-     * Verifica se um Cliente está gerenciado pelo EntityManager
-     *
-     * @param cliente O Cliente para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Cliente cliente) {
-        return em.contains(cliente);
     }
 
     /**
@@ -50,14 +41,16 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
     }
 
     /**
-     * Busca Clientes pelo documento vinculado
+     * Busca um Cliente pelo documento vinculado
      *
      * @param documento O número do Documento
-     * @return List<Cliente> - Os Clientes encontrados
+     * @return Optional<Cliente> - O Cliente encontrado
      */
-    public List<Cliente> findByDocumento(String documento) {
-        return em.createQuery("select c from clientes c where c.documento.documento like :str", Cliente.class)
-                .setParameter("str", documento + "%")
-                .getResultList();
+    public Optional<Cliente> findByDocumento(String documento) {
+        return Optional.ofNullable(
+                em.createQuery("select c from clientes c where c.documento.documento like :str", Cliente.class)
+                        .setParameter("str", documento + "%")
+                        .getSingleResultOrNull()
+        );
     }
 }

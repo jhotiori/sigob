@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 
 /**
  * Repositorio base para todos os outros repositorios
+ *
  * @param <T> A entidade
  * @param <ID> O tipo do ID
  */
@@ -57,6 +58,16 @@ public abstract class BaseRepository<T, ID> {
      */
     public T update(T entity) {
         return em.merge(entity);
+    }
+
+    /**
+     * Verifica se uma Entity com o ID providenciado esta no Banco de Dados
+     *
+     * @param <ID> O tipo do ID
+     * @return boolean - true se existir, false caso contrário
+     */
+    public boolean contains(ID id) {
+        return findById(id).isPresent();
     }
 
     /**

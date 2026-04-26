@@ -18,16 +18,6 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
     }
 
     /**
-     * Verifica se um Estoque está gerenciado pelo EntityManager
-     *
-     * @param estoque O Estoque para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Estoque estoque) {
-        return em.contains(estoque);
-    }
-
-    /**
      * Busca todos os Estoques disponíveis
      *
      * @return List<Estoque> - Todos os Estoques

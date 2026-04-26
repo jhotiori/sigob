@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@Entity(name = "produtosEstoques")
+@Entity(name = "produtos_estoques")
 public class ProdutosEstoques {
 
     @Id

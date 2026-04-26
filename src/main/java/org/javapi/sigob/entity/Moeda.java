@@ -13,33 +13,33 @@ public class Moeda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "nmMoeda")
+    @Column(name = "nome", nullable = false)
     private String nome;
 
-    @Column(name = "dsCifrao")
+    @Column(name = "cifrao", nullable = false)
     private String cifrao;
 
-    @Column(name = "dsSigla")
+    @Column(name = "sigla", nullable = false)
     private String sigla;
 
     /**
-     * Construtor para criar uma nova Mo
+     * Construtor padrão JPA
      *
-     * @return Moeda - A moeda que foi criada
+     * @return Moeda - A moeda criada
      */
     public Moeda() {
     }
 
     /**
-     * Construtor para criar uma nova Moeda
+     * Construtor completo para criar uma nova Moeda
      *
      * @param id ID da moeda
      * @param nome Nome da moeda
      * @param cifrao Cifrao da moeda
      * @param sigla Sigla da moeda
-     * @return Moeda - A moeda que foi criada
+     * @return Moeda - A moeda criada
      */
-    public Moeda(Integer id, String nome, String cifrao, String sigla) {
+    public Moeda(int id, String nome, String cifrao, String sigla) {
         this.id = id;
         this.nome = nome;
         this.cifrao = cifrao;
@@ -51,7 +51,7 @@ public class Moeda {
      *
      * @param id O ID da Moeda
      */
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -85,7 +85,7 @@ public class Moeda {
     /**
      * Retorna o ID da Moeda
      *
-     * @return idMoeda - O ID da Moeda
+     * @return int - O ID da Moeda
      */
     public int getId() {
         return id;
@@ -94,7 +94,7 @@ public class Moeda {
     /**
      * Retorna o Nome da Moeda
      *
-     * @return nmMoeda - O Nome da Moeda
+     * @return String - O Nome da Moeda
      */
     public String getNome() {
         return nome;
@@ -103,7 +103,7 @@ public class Moeda {
     /**
      * Retorna o Cifrao da Moeda
      *
-     * @return dsCifrao - O Cifrao da Moeda
+     * @return String - O Cifrao da Moeda
      */
     public String getCifrao() {
         return cifrao;
@@ -112,7 +112,7 @@ public class Moeda {
     /**
      * Retorna a Sigla da Moeda
      *
-     * @return dsSigla - A Sigla da Moeda
+     * @return String - A Sigla da Moeda
      */
     public String getSigla() {
         return sigla;

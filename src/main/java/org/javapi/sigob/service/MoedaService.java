@@ -1,14 +1,12 @@
 package org.javapi.sigob.service;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.Moeda;
-import org.javapi.sigob.exception.MoedaException;
 import org.javapi.sigob.repository.MoedaRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class MoedaService {
 
@@ -21,115 +19,105 @@ public class MoedaService {
     }
 
     /**
-     * Salva uma moeda (cria ou atualiza)
+     * Salva uma nova moeda
      *
      * @param moeda A moeda para salvar
+     * @throws IllegalArgumentException Se a moeda for invalida
      */
     public void save(Moeda moeda) {
         validateMoeda(moeda);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        MoedaRepository repository = new MoedaRepository(em);
-
-        try {
-            transaction.begin();
-            if (moeda.getId() > 0) {
-                repository.update(moeda);
-            } else {
-                repository.save(moeda);
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new MoedaRepository(em).save(moeda);
+        });
     }
 
     /**
-     * Atualiza uma moeda
+     * Atualiza uma moeda existente
      *
      * @param moeda A moeda para atualizar
-     * @throws MoedaException Se o ID da moeda for invalido
+     * @throws IllegalArgumentException Se a moeda for invalida
      */
     public void update(Moeda moeda) {
         validateMoeda(moeda);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        MoedaRepository repository = new MoedaRepository(em);
+        TransactionExecutor.executeVoid(em -> {
+            new MoedaRepository(em).update(moeda);
+        });
+    }
 
-        try {
-            transaction.begin();
-            repository.update(moeda);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+    /**
+     * Remove uma moeda
+     *
+     * @param moeda A moeda para remover
+     * @throws IllegalArgumentException Se a moeda for invalida
+     */
+    public void delete(Moeda moeda) {
+        validateMoeda(moeda);
+
+        TransactionExecutor.executeVoid(em -> {
+            new MoedaRepository(em).deleteById(moeda.getId());
+        });
+    }
+
+    /**
+     * Confere se uma moeda existe
+     *
+     * @param moeda A moeda para conferir
+     * @throws IllegalArgumentException Se a moeda for invalida
+     * @return boolean - true se existir, false caso contrario
+     */
+    public boolean contains(Moeda moeda) {
+        validateMoeda(moeda);
+
+        return TransactionExecutor.query(em -> {
+            return new MoedaRepository(em).contains(moeda.getId());
+        });
     }
 
     /**
      * Busca uma moeda pelo ID
      *
      * @param id O ID da moeda
-     * @return Moeda - A moeda encontrada
+     * @throws IllegalArgumentException Se o ID for invalido
+     * @return Optional<Moeda> - A moeda encontrada
      */
-    public Moeda findById(int id) {
-        EntityManager em = JPAConfig.getEntityManager();
-        MoedaRepository repository = new MoedaRepository(em);
+    public Optional<Moeda> findById(int id) {
+        validateId(id);
 
-        try {
-            return repository.findById(id).orElse(null);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new MoedaRepository(em).findById(id);
+        });
     }
 
     /**
      * Busca moedas pelo nome
      *
      * @param nome O nome para buscar
+     * @throws IllegalArgumentException Se o nome for invalido
      * @return List<Moeda> - A lista de moedas
      */
     public List<Moeda> findByNome(String nome) {
         validateNome(nome);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        MoedaRepository repository = new MoedaRepository(em);
-
-        try {
-            return repository.findByNome(nome);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new MoedaRepository(em).findByNome(nome);
+        });
     }
 
     /**
-     * Busca uma moeda pelo codigo
+     * Busca uma moeda pela sigla
      *
-     * @param codigo O codigo da moeda
-     * @return Moeda - A moeda encontrada
+     * @param sigla A sigla da moeda
+     * @throws IllegalArgumentException Se a sigla for invalida
+     * @return Optional<Moeda> - A moeda encontrada
      */
-    public Moeda findByCodigo(String codigo) {
-        validateCodigo(codigo);
+    public Optional<Moeda> findBySigla(String sigla) {
+        validateSigla(sigla);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        MoedaRepository repository = new MoedaRepository(em);
-
-        try {
-            return repository.findBySigla(codigo);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new MoedaRepository(em).findBySigla(sigla);
+        });
     }
 
     /**
@@ -138,70 +126,72 @@ public class MoedaService {
      * @return List<Moeda> - A lista de moedas
      */
     public List<Moeda> findAll() {
-        EntityManager em = JPAConfig.getEntityManager();
-        MoedaRepository repository = new MoedaRepository(em);
-
-        try {
-            return repository.findAll();
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new MoedaRepository(em).findAll();
+        });
     }
 
     /**
-     * Remove uma moeda
+     * Valida uma moeda por completo
      *
-     * @param moeda A moeda para remover
+     * @param moeda A moeda a ser validada
+     * @throws IllegalArgumentException Se a moeda for invalida
      */
-    public void delete(Moeda moeda) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        MoedaRepository repository = new MoedaRepository(em);
-
-        try {
-            transaction.begin();
-            repository.deleteById(moeda.getId());
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
     private void validateMoeda(Moeda moeda) {
-        if (moeda == null) {
-            throw new MoedaException("Moeda não pode ser nula");
-        }
+        Validator.start()
+                .expectNotNull(moeda, "Moeda nao pode ser nula!")
+                .validate();
+
         validateNome(moeda.getNome());
         validateCifrao(moeda.getCifrao());
         validateSigla(moeda.getSigla());
     }
 
+    /**
+     * Valida o nome da moeda
+     *
+     * @param nome O nome a ser validado
+     * @throws IllegalArgumentException Se o nome for invalido
+     */
     private void validateNome(String nome) {
-        if (nome == null || nome.isBlank()) {
-            throw new MoedaException("Nome da moeda não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(nome, "Nome da moeda nao pode ser nulo ou vazio!")
+                .validate();
     }
 
+    /**
+     * Valida o cifrao da moeda
+     *
+     * @param cifrao O cifrao a ser validado
+     * @throws IllegalArgumentException Se o cifrao for invalido
+     */
     private void validateCifrao(String cifrao) {
-        if (cifrao == null || cifrao.isBlank()) {
-            throw new MoedaException("Cifrao da moeda não pode ser nulo ou vazio");
-        }
+        Validator.start()
+                .expectNotBlank(cifrao, "Cifrao da moeda nao pode ser nulo ou vazio!")
+                .validate();
     }
 
+    /**
+     * Valida a sigla da moeda
+     *
+     * @param sigla A sigla a ser validada
+     * @throws IllegalArgumentException Se a sigla for invalida
+     */
     private void validateSigla(String sigla) {
-        if (sigla == null || sigla.isBlank()) {
-            throw new MoedaException("Sigla da moeda não pode ser nula ou vazia");
-        }
+        Validator.start()
+                .expectNotBlank(sigla, "Sigla da moeda nao pode ser nula ou vazia!")
+                .validate();
     }
 
-    private void validateCodigo(String codigo) {
-        if (codigo == null || codigo.isBlank()) {
-            throw new MoedaException("Código da moeda não pode ser nulo ou vazio");
-        }
+    /**
+     * Valida o ID da moeda
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se o ID for invalido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID da moeda nao pode ser nulo!")
+                .validate();
     }
 }

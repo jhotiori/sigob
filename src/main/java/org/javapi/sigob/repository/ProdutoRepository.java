@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Produto;
 
@@ -15,16 +16,6 @@ public class ProdutoRepository extends BaseRepository<Produto, Integer> {
      */
     public ProdutoRepository(EntityManager em) {
         super(em, Produto.class);
-    }
-
-    /**
-     * Verifica se um Produto está gerenciado pelo EntityManager
-     *
-     * @param produto O Produto para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Produto produto) {
-        return em.contains(produto);
     }
 
     /**
@@ -50,26 +41,32 @@ public class ProdutoRepository extends BaseRepository<Produto, Integer> {
     }
 
     /**
-     * Busca um Produto pelo codigo
+     * Busca um Produto pelo código (único)
      *
-     * @param codigo O Codigo do Produto
-     * @return Produto - O Produto encontrado (pode ser null)
+     * @param codigo O Código do Produto
+     * @return Optional<Produto> - O Produto encontrado, se existir
      */
-    public Produto findByCodigo(String codigo) {
-        return em.createQuery("select p from produtos p where p.codigo = :codigo", Produto.class)
-                .setParameter("codigo", codigo)
-                .getSingleResultOrNull();
+    public Optional<Produto> findByCodigo(String codigo) {
+        return Optional.ofNullable(
+                em.createQuery("select p from produtos p where p.codigo = :codigo", Produto.class)
+                        .setParameter("codigo", codigo)
+                        .getSingleResultOrNull()
+        );
     }
 
     /**
-     * Busca todos os Produtos de uma Categoria
+     * Busca todos os Produtos de uma Categoria pelo nome (único)
      *
-     * @param categoriaId O ID da Categoria
+     * @param nomeCategoria O nome da Categoria
      * @return List<Produto> - Os Produtos encontrados
      */
-    public List<Produto> findByCategoria(int categoriaId) {
-        return em.createQuery("select p from produtos p where p.categoria.id = :categoriaId", Produto.class)
-                .setParameter("categoriaId", categoriaId)
+    public List<Produto> findByCategoriaNome(String nomeCategoria) {
+        return em.createQuery("""
+                        SELECT p FROM produtos p
+                        JOIN p.categoria c
+                        WHERE c.nome = :nome
+                        """, Produto.class)
+                .setParameter("nome", nomeCategoria)
                 .getResultList();
     }
 }

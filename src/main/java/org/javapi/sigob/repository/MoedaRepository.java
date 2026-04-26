@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Moeda;
 
@@ -15,16 +16,6 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      */
     public MoedaRepository(EntityManager em) {
         super(em, Moeda.class);
-    }
-
-    /**
-     * Verifica se uma Moeda está gerenciada pelo EntityManager
-     *
-     * @param moeda A Moeda para verificar
-     * @return boolean - true se gerenciada, false caso contrário
-     */
-    public boolean contains(Moeda moeda) {
-        return em.contains(moeda);
     }
 
     /**
@@ -50,14 +41,16 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
     }
 
     /**
-     * Busca uma Moeda pela sigla
+     * Busca uma Moeda cuja sigla inicia com o valor informado
      *
      * @param sigla A Sigla da Moeda
-     * @return Moeda - A Moeda encontrada (pode ser null)
+     * @return Optional<Moeda> - A Moeda encontrada (pode ser null)
      */
-    public Moeda findBySigla(String sigla) {
-        return em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
+    public Optional<Moeda> findBySigla(String sigla) {
+        return Optional.ofNullable(
+            em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
                 .setParameter("str", sigla + "%")
-                .getSingleResultOrNull();
+                .getSingleResultOrNull()
+            );
     }
 }

@@ -1,11 +1,13 @@
 package org.javapi.sigob.repository;
 
-import jakarta.persistence.EntityManager;
-import org.javapi.sigob.entity.Documento;
-
 import java.util.List;
 
-public class DocumentoRepository extends BaseRepository<Documento, Integer>{
+import org.javapi.sigob.entity.Documento;
+
+import jakarta.persistence.EntityManager;
+
+public class DocumentoRepository extends BaseRepository<Documento, Integer> {
+
     /**
      * Cria um novo DocumentoRepository
      *
@@ -13,16 +15,6 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer>{
      */
     public DocumentoRepository(EntityManager em) {
         super(em, Documento.class);
-    }
-
-    /**
-     * Verifica se um Documento está gerenciado pelo EntityManager
-     *
-     * @param documento O Documento para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Documento documento) {
-        return em.contains(documento);
     }
 
     /**
@@ -58,5 +50,4 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer>{
                 .setParameter("str", tipo + "%")
                 .getSingleResultOrNull();
     }
-
 }

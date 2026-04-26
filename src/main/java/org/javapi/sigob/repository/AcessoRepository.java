@@ -1,12 +1,14 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
 
 import jakarta.persistence.EntityManager;
 
 public class AcessoRepository extends BaseRepository<Acesso, Integer> {
+
     /**
      * Cria um novo AcessoRepository
      *
@@ -17,16 +19,6 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
     }
 
     /**
-     * Verifica se um Acesso está gerenciado pelo EntityManager
-     *
-     * @param acesso O Acesso para verificar
-     * @return boolean - true se gerenciado, false caso contrário
-     */
-    public boolean contains(Acesso acesso) {
-        return em.contains(acesso);
-    }
-
-    /**
      * Busca todos os Acessos disponíveis
      *
      * @return List<Acesso> - Todos os Acessos
@@ -34,16 +26,6 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
     public List<Acesso> findAll() {
         return em.createQuery("select a from acessos a", Acesso.class)
                 .getResultList();
-    }
-
-    /**
-     * Busca por um acesso pelo seu ID
-     *
-     * @param id ID do Acesso
-     * @return Acesso - O acesso que foi buscado (pode ser null)
-     */
-    public Acesso findById(int id) {
-        return em.find(Acesso.class, id);
     }
 
     /**
@@ -62,11 +44,13 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      * Busca um Acesso cujo codigo inicia com o valor informado
      *
      * @param codigo Codigo para procurar
-     * @return Acesso - O Acesso encontrado (pode ser null)
+     * @return Optional<Acesso> - O Acesso encontrado (pode ser vazio)
      */
-    public Acesso findByCodigo(String codigo) {
-        return em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
-                .setParameter("str", codigo + "%")
-                .getSingleResultOrNull();
+    public Optional<Acesso> findByCodigo(String codigo) {
+        return Optional.ofNullable(
+                em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
+                        .setParameter("str", codigo + "%")
+                        .getSingleResultOrNull()
+        );
     }
 }

@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Categoria;
 
@@ -15,16 +16,6 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
      */
     public CategoriaRepository(EntityManager em) {
         super(em, Categoria.class);
-    }
-
-    /**
-     * Verifica se uma Categoria está gerenciada pelo EntityManager
-     *
-     * @param categoria A Categoria para verificar
-     * @return boolean - true se gerenciada, false caso contrário
-     */
-    public boolean contains(Categoria categoria) {
-        return em.contains(categoria);
     }
 
     /**
@@ -53,11 +44,13 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
      * Busca uma Categoria cujo codigo inicia com o valor informado
      *
      * @param codigo O codigo da Categoria
-     * @return Categoria - A Categoria encontrada (pode ser null)
+     * @return Optional<Categoria> - A Categoria encontrada (pode ser vazio)
      */
-    public Categoria findByCodigo(String codigo) {
-        return em.createQuery("select c from categorias c where c.codigo like :str", Categoria.class)
-                .setParameter("str", codigo + "%")
-                .getSingleResultOrNull();
+    public Optional<Categoria> findByCodigo(String codigo) {
+        return Optional.ofNullable(
+                em.createQuery("select c from categorias c where c.codigo like :str", Categoria.class)
+                        .setParameter("str", codigo + "%")
+                        .getSingleResultOrNull()
+        );
     }
 }

@@ -7,13 +7,13 @@ import java.util.List;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.entity.ProdutosEstoques;
-import org.javapi.sigob.entity.ProdutosVendas;
+import org.javapi.sigob.entity.ItemVendas;
 import org.javapi.sigob.entity.Venda;
 import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.service.ClienteService;
 import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
-import org.javapi.sigob.service.ProdutosVendasService;
+import org.javapi.sigob.service.ItemVendaService;
 import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
@@ -21,7 +21,7 @@ import org.javapi.sigob.util.Logger;
 public class MenuVendas extends Menu {
 
     private final VendaService vendaService = new VendaService();
-    private final ProdutosVendasService pvService = new ProdutosVendasService();
+    private final ItemVendaService pvService = new ItemVendaService();
     private final ProdutosEstoquesService peService = new ProdutosEstoquesService();
     private final ClienteService clienteService = new ClienteService();
     private final FuncionarioService funcionarioService = new FuncionarioService();
@@ -118,12 +118,12 @@ public class MenuVendas extends Menu {
             boolean continuar = true;
 
             while (continuar) {
-                List<ProdutosVendas> itens = pvService.findByVendaId(venda);
+                List<ItemVendas> itens = pvService.findByVendaId(venda);
 
                 if (itens.isEmpty()) {
                     Logger.warn("Carrinho vazio!");
                 } else {
-                    for (ProdutosVendas pv : itens) {
+                    for (ItemVendas pv : itens) {
                         System.out.printf("[%d] %s | Qtde: %d | Valor: %.2f%n",
                                 pv.getIdProdutoVenda(),
                                 pv.getProduto().getNmProduto(),
@@ -183,28 +183,28 @@ public class MenuVendas extends Menu {
         BigDecimal total = pe.getProduto().getVlProduto()
                 .multiply(BigDecimal.valueOf(qtde));
 
-        ProdutosVendas pv = new ProdutosVendas(0, qtde, total, pe.getProduto(), venda);
+        ItemVendas pv = new ItemVendas(0, qtde, total, pe.getProduto(), venda);
         pvService.save(pv);
 
         Logger.success("Item adicionado ao carrinho!");
     }
 
     private void removerItemCarrinho(Venda venda) {
-        List<ProdutosVendas> itens = pvService.findByVendaId(venda);
+        List<ItemVendas> itens = pvService.findByVendaId(venda);
 
         if (itens.isEmpty()) {
             Logger.warn("Carrinho vazio!");
             return;
         }
 
-        for (ProdutosVendas pv : itens) {
+        for (ItemVendas pv : itens) {
             System.out.printf("[%d] %s%n",
                     pv.getIdProdutoVenda(),
                     pv.getProduto().getNmProduto());
         }
 
         int id = Inputter.lerInt("ID do item: ");
-        ProdutosVendas pv = pvService.findById(id);
+        ItemVendas pv = pvService.findById(id);
 
         if (pv == null || pv.getVenda().getIdVenda() != venda.getIdVenda()) {
             Logger.warn("Item inválido!");
@@ -241,7 +241,7 @@ public class MenuVendas extends Menu {
                 return;
             }
 
-            List<ProdutosVendas> itens = pvService.findByVendaId(venda);
+            List<ItemVendas> itens = pvService.findByVendaId(venda);
 
             if (itens.isEmpty()) {
                 Logger.warn("Carrinho vazio!");
@@ -249,7 +249,7 @@ public class MenuVendas extends Menu {
             }
 
             BigDecimal total = itens.stream()
-                    .map(ProdutosVendas::getVlSaldo)
+                    .map(ItemVendas::getVlSaldo)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             boolean confirmar = Inputter.lerBoolean("Confirmar pagamento?");
@@ -261,7 +261,7 @@ public class MenuVendas extends Menu {
                 return;
             }
 
-            for (ProdutosVendas pv : itens) {
+            for (ItemVendas pv : itens) {
                 peService.findAll().stream()
                         .filter(pe -> pe.getProduto().getIdProduto() == pv.getProduto().getIdProduto())
                         .findFirst()

@@ -3,18 +3,17 @@ package org.javapi.sigob.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.javapi.sigob.config.JPAConfig;
 import org.javapi.sigob.entity.ProdutosEstoques;
-import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class ProdutosEstoquesService {
 
     /**
      * Cria um novo ProdutosEstoquesService
+     *
+     * @return ProdutosEstoquesService - O serviço
      */
     public ProdutosEstoquesService() {
     }
@@ -22,181 +21,196 @@ public class ProdutosEstoquesService {
     /**
      * Salva um novo ProdutosEstoques
      *
-     * @param produtoEstoque O ProdutosEstoques
-     * @throws ProdutosEstoquesException Se o ProdutosEstoques for inválido
+     * @param produtoEstoque O ProdutosEstoques a ser salvo
+     * @throws IllegalArgumentException Se o ProdutosEstoques for inválido
+     * @throws IllegalArgumentException Se o vínculo já existir
      */
-    public void save(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
-        validateProdutosEstoques(produtoEstoque);
+    public void save(ProdutosEstoques produtoEstoque) {
+        validateProdutoEstoque(produtoEstoque);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        TransactionExecutor.executeVoid(em -> {
+            ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
 
-        try {
-            transaction.begin();
+            int produtoId = produtoEstoque.getProduto().getId();
+            int estoqueId = produtoEstoque.getEstoque().getId();
+
+            Optional<ProdutosEstoques> existente = repository.findUnique(produtoId, estoqueId);
+            if (existente.isPresent()) {
+                throw new IllegalArgumentException("Produto já vinculado a este estoque");
+            }
+
             repository.save(produtoEstoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        });
     }
 
     /**
-     * Atualiza um ProdutosEstoques
+     * Atualiza um ProdutosEstoques existente
      *
-     * @param produtoEstoque O ProdutosEstoques
-     * @throws ProdutosEstoquesException Se o ProdutosEstoques for inválido
+     * @param produtoEstoque O ProdutosEstoques a ser atualizado
+     * @throws IllegalArgumentException Se o ProdutosEstoques for inválido
      */
-    public void update(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
-        validateProdutosEstoques(produtoEstoque);
+    public void update(ProdutosEstoques produtoEstoque) {
+        validateProdutoEstoque(produtoEstoque);
 
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
-
-        try {
-            transaction.begin();
-            repository.update(produtoEstoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new ProdutosEstoquesRepository(em).update(produtoEstoque);
+        });
     }
 
     /**
-     * Deleta um ProdutosEstoques
+     * Remove um ProdutosEstoques
      *
-     * @param produtoEstoque O ProdutosEstoques
+     * @param produtoEstoque O ProdutosEstoques a ser removido
+     * @throws IllegalArgumentException Se o ProdutosEstoques for inválido
      */
     public void delete(ProdutosEstoques produtoEstoque) {
-        EntityManager em = JPAConfig.getEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        validateProdutoEstoque(produtoEstoque);
 
-        try {
-            transaction.begin();
-            repository.delete(produtoEstoque);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
-        }
+        TransactionExecutor.executeVoid(em -> {
+            new ProdutosEstoquesRepository(em).deleteById(produtoEstoque.getId());
+        });
     }
 
     /**
-     * Verifica se um ProdutosEstoques está gerenciado pelo EntityManager
+     * Verifica se um ProdutosEstoques existe
      *
-     * @param produtoEstoque O ProdutosEstoques
-     * @return boolean - true se gerenciado, false caso contrário
+     * @param produtoEstoque O ProdutosEstoques a ser verificado
+     * @return boolean - true se existir, false caso contrário
+     * @throws IllegalArgumentException Se o ProdutosEstoques for inválido
      */
     public boolean contains(ProdutosEstoques produtoEstoque) {
-        EntityManager em = JPAConfig.getEntityManager();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        validateProdutoEstoque(produtoEstoque);
 
-        try {
-            return repository.contains(produtoEstoque);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).contains(produtoEstoque.getId());
+        });
     }
 
     /**
-     * Retorna uma lista com todos os ProdutosEstoques
+     * Retorna todos os ProdutosEstoques
      *
-     * @return List<ProdutosEstoques> - A lista de ProdutosEstoques
+     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques
      */
     public List<ProdutosEstoques> findAll() {
-        EntityManager em = JPAConfig.getEntityManager();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
-
-        try {
-            return repository.findAll();
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).findAll();
+        });
     }
 
     /**
-     * Retorna um ProdutosEstoques pelo ID
+     * Busca um ProdutosEstoques pelo ID
      *
      * @param id O ID do ProdutosEstoques
-     * @return ProdutosEstoques - O ProdutosEstoques ou null se não encontrado
+     * @return Optional<ProdutosEstoques> - O resultado da busca
+     * @throws IllegalArgumentException Se o ID for inválido
      */
     public Optional<ProdutosEstoques> findById(int id) {
-        EntityManager em = JPAConfig.getEntityManager();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        validateId(id);
 
-        try {
-            return repository.findById(id);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).findById(id);
+        });
     }
 
     /**
      * Busca ProdutosEstoques pelo ID do Produto
      *
      * @param produtoId O ID do Produto
-     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques do produto
+     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques
+     * @throws IllegalArgumentException Se o ID for inválido
      */
     public List<ProdutosEstoques> findByProduto(int produtoId) {
-        EntityManager em = JPAConfig.getEntityManager();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        validateId(produtoId);
 
-        try {
-            return repository.findByProduto(produtoId);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).findByProduto(produtoId);
+        });
     }
 
     /**
      * Busca ProdutosEstoques pelo ID do Estoque
      *
      * @param estoqueId O ID do Estoque
-     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques do estoque
+     * @return List<ProdutosEstoques> - Lista de ProdutosEstoques
+     * @throws IllegalArgumentException Se o ID for inválido
      */
     public List<ProdutosEstoques> findByEstoque(int estoqueId) {
-        EntityManager em = JPAConfig.getEntityManager();
-        ProdutosEstoquesRepository repository = new ProdutosEstoquesRepository(em);
+        validateId(estoqueId);
 
-        try {
-            return repository.findByEstoque(estoqueId);
-        } finally {
-            em.close();
-        }
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).findByEstoque(estoqueId);
+        });
     }
 
-    private void validateProdutosEstoques(ProdutosEstoques produtoEstoque) throws ProdutosEstoquesException {
-        if (produtoEstoque == null) {
-            throw new ProdutosEstoquesException("ProdutosEstoques não pode ser nulo");
-        }
-        if (produtoEstoque.getProduto() == null) {
-            throw new ProdutosEstoquesException("Produto não pode ser nulo");
-        }
-        if (produtoEstoque.getEstoque() == null) {
-            throw new ProdutosEstoquesException("Estoque não pode ser nulo");
-        }
-        validateQuantidade(produtoEstoque.getQuantidade());
+    /**
+     * Busca o vínculo único entre Produto e Estoque
+     *
+     * @param produtoId O ID do Produto
+     * @param estoqueId O ID do Estoque
+     * @return Optional<ProdutosEstoques> - O vínculo encontrado
+     * @throws IllegalArgumentException Se algum ID for inválido
+     */
+    public Optional<ProdutosEstoques> findUnique(int produtoId, int estoqueId) {
+        validateId(produtoId);
+        validateId(estoqueId);
+
+        return TransactionExecutor.query(em -> {
+            return new ProdutosEstoquesRepository(em).findUnique(produtoId, estoqueId);
+        });
     }
 
-    private void validateQuantidade(int quantidade) throws ProdutosEstoquesException {
-        if (quantidade < 0) {
-            throw new ProdutosEstoquesException("Quantidade não pode ser negativa");
-        }
+    /**
+     * Valida um ProdutosEstoques por completo
+     *
+     * @param produtoEstoque O ProdutosEstoques a ser validado
+     * @throws IllegalArgumentException Se for inválido
+     */
+    private void validateProdutoEstoque(ProdutosEstoques produtoEstoque) {
+        Validator.start()
+                .expectNotNull(produtoEstoque, "ProdutosEstoques não pode ser nulo!")
+                .validate();
+
+        validateProduto(produtoEstoque);
+        validateEstoque(produtoEstoque);
+    }
+
+    /**
+     * Valida o Produto dentro de ProdutosEstoques
+     *
+     * @param produtoEstoque O ProdutosEstoques
+     * @throws IllegalArgumentException Se inválido
+     */
+    private void validateProduto(ProdutosEstoques produtoEstoque) {
+        Validator.start()
+                .expectNotNull(produtoEstoque.getProduto(), "Produto não pode ser nulo!")
+                .validate();
+
+        validateId(produtoEstoque.getProduto().getId());
+    }
+
+    /**
+     * Valida o Estoque dentro de ProdutosEstoques
+     *
+     * @param produtoEstoque O ProdutosEstoques
+     * @throws IllegalArgumentException Se inválido
+     */
+    private void validateEstoque(ProdutosEstoques produtoEstoque) {
+        Validator.start()
+                .expectNotNull(produtoEstoque.getEstoque(), "Estoque não pode ser nulo!")
+                .validate();
+
+        validateId(produtoEstoque.getEstoque().getId());
+    }
+
+    /**
+     * Valida um ID
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se for inválido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID não pode ser nulo!")
+                .validate();
     }
 }
