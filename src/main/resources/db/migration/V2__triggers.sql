@@ -19,21 +19,21 @@ END IF;
 END IF;
 
     IF NEW.valor_venda <= NEW.valor_compra THEN
-        RAISE EXCEPTION 'valor_venda (%) não pode ser menor ou igual a valor_compra (%) — margem negativa não permitida.',
+        RAISE EXCEPTION 'valor_venda (%) não pode ser menor ou igual a valor_compra (%) - margem negativa não permitida.',
             NEW.valor_venda, NEW.valor_compra;
 END IF;
 
     IF TG_OP = 'UPDATE' THEN
         IF OLD.nome IS DISTINCT FROM NEW.nome THEN
-            RAISE NOTICE 'Produto ID % — nome alterado: "%" → "%"', NEW.id, OLD.nome, NEW.nome;
+            RAISE NOTICE 'Produto ID % - nome alterado: "%" → "%"', NEW.id, OLD.nome, NEW.nome;
 END IF;
 
         IF OLD.valor_compra IS DISTINCT FROM NEW.valor_compra THEN
-            RAISE NOTICE 'Produto ID % — valor_compra alterado: % → %', NEW.id, OLD.valor_compra, NEW.valor_compra;
+            RAISE NOTICE 'Produto ID % - valor_compra alterado: % → %', NEW.id, OLD.valor_compra, NEW.valor_compra;
 END IF;
 
         IF OLD.valor_venda IS DISTINCT FROM NEW.valor_venda THEN
-            RAISE NOTICE 'Produto ID % — valor_venda alterado: % → %', NEW.id, OLD.valor_venda, NEW.valor_venda;
+            RAISE NOTICE 'Produto ID % - valor_venda alterado: % → %', NEW.id, OLD.valor_venda, NEW.valor_venda;
 END IF;
 END IF;
 
@@ -60,7 +60,7 @@ WHERE categoria_id = OLD.id;
 
 IF vTotal > 0 THEN
         RAISE EXCEPTION
-            'Categoria "%" (ID %) não pode ser removida — está vinculada a % produto(s).',
+            'Categoria "%" (ID %) não pode ser removida - está vinculada a % produto(s).',
             OLD.nome, OLD.id, vTotal;
 END IF;
 
@@ -81,13 +81,13 @@ BEGIN
 
     IF NEW.status NOT IN ('aberta', 'finalizada') THEN
         RAISE EXCEPTION
-            'status inválido: "%". Valores aceitos: "aberta" ou "finalizada".',
+            'Status inválido: "%". Valores aceitos: "aberta" ou "finalizada".',
             NEW.status;
 END IF;
 
     IF NEW.status = 'finalizada' AND NEW.data_finalizada IS NULL THEN
         NEW.data_finalizada := NOW();
-        RAISE NOTICE 'Venda ID % finalizada — data_finalizada preenchida automaticamente: %',
+        RAISE NOTICE 'Venda ID % finalizada - data_finalizada preenchida automaticamente: %',
             NEW.id, NEW.data_finalizada;
 END IF;
 

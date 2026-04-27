@@ -42,7 +42,7 @@ public class MenuCliente extends Menu {
 
         LocalDate dataNascimento = null;
         if (Inputter.readBoolean("Deseja adicionar Data de Nascimento? [S/N]: ")) {
-            dataNascimento = Inputter.readLocalDate("Data de Nascimento: ");
+            dataNascimento = Inputter.readLocalDate("Data de Nascimento [DD-MM-YYYY]: ");
         }
 
         Documento documento = null;

@@ -32,7 +32,7 @@ public class Funcionario {
             joinColumns = @JoinColumn(name = "funcionario_id"),
             inverseJoinColumns = @JoinColumn(name = "acesso_id")
     )
-    private final Set<Acesso> acessos = new HashSet<>();
+    private Set<Acesso> acessos = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "documento_id", nullable = false)
@@ -181,7 +181,7 @@ public class Funcionario {
      * Retorna os acessos (imutável externamente)
      */
     public Set<Acesso> getAcessos() {
-        return Set.copyOf(acessos);
+        return acessos;
     }
 
     @Override

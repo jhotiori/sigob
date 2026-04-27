@@ -25,6 +25,11 @@ public class MenuMain extends Menu {
         this.service = service;
     }
 
+    @Override
+    public void show() {
+        start();
+    }
+
     /**
      * Ponto de entrada do sistema.
      */
@@ -35,14 +40,14 @@ public class MenuMain extends Menu {
         buildMenuByRole(funcionario);
 
         setTitle("SIGOB - Olá, %s!".formatted(funcionario.getNome()));
-        show();
+        super.show();
     }
 
     /**
      * Realiza o login do funcionário.
      */
     private Funcionario logar() {
-        Logger.info("(<< SIGOB - LOGIN >>)");
+        System.out.println("<< SIGOB - LOGIN >>");
 
         while (true) {
             try {

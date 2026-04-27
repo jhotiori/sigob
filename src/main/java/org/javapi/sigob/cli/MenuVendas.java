@@ -78,7 +78,7 @@ public class MenuVendas extends Menu {
             Venda venda = new Venda();
             venda.setCliente(cliente);
             venda.setFuncionario(funcionario);
-            venda.setStatus("ABERTA");
+            venda.setStatus("aberta");
             venda.setDataAbertura(OffsetDateTime.now());
             venda.setValorTotal(BigDecimal.ZERO);
 
@@ -259,7 +259,7 @@ public class MenuVendas extends Menu {
                 estoqueService.update(pe);
             }
 
-            venda.setStatus("FINALIZADA");
+            venda.setStatus("finalizada");
             venda.setDataFinalizada(OffsetDateTime.now());
             venda.setValorTotal(total);
 
@@ -307,7 +307,7 @@ public class MenuVendas extends Menu {
 
         Optional<Venda> opt = vendaService.findById(id);
 
-        if (opt.isEmpty() || !"ABERTA".equals(opt.get().getStatus())) {
+        if (opt.isEmpty() || !"aberta".equals(opt.get().getStatus())) {
             Logger.warn("Venda inválida!");
             return null;
         }
@@ -317,19 +317,15 @@ public class MenuVendas extends Menu {
 
     private Cliente resolverCliente() {
         String nome = Inputter.readString("Nome do cliente: ");
-
         List<Cliente> lista = clienteService.findByNome(nome);
 
-        if (!lista.isEmpty()) {
-            return lista.get(0);
+        while (lista.isEmpty()) {
+            Logger.warn("Nenhum cliente encontrado!");
+            nome = Inputter.readString("Nome do cliente: ");
+            lista = clienteService.findByNome(nome);
         }
 
-        Cliente c = new Cliente();
-        c.setNome(nome);
-
-        clienteService.save(c);
-
-        return c;
+        return !lista.isEmpty() ? lista.get(0) : null;
     }
 
     private Funcionario resolverFuncionario() {

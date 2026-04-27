@@ -10,7 +10,7 @@ public final class MenuConfig {
 
     public static int calculateWidth(String title, int maxSize) {
         int base = Math.max(title.length(), maxSize);
-        return base + 10; // padding + "[99] - "
+        return base + 50; // padding + "[99] - "
     }
 
     /**
