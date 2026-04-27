@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     codigo VARCHAR(16) UNIQUE NOT NULL,
     documento_id INT NOT NULL,
     FOREIGN KEY (documento_id) REFERENCES documentos(id),
-    FOREIGN KEY (acesso_id) REFERENCES acessos(id)
 );
 
 CREATE TABLE IF NOT EXISTS funcionarios_acessos (
