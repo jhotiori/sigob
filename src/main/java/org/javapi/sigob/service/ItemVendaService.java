@@ -158,7 +158,7 @@ public class ItemVendaService {
                 .validate();
 
         validateQuantidade(itemVenda.getQuantidade());
-        validateValorUnitario(itemVenda.getValorUnitario());
+        validateValorSaldo(itemVenda.getValorSaldo());
         validateProdutoEstoque(itemVenda.getProdutoEstoque());
         validateVenda(itemVenda.getVenda());
     }
@@ -178,12 +178,12 @@ public class ItemVendaService {
     /**
      * Valida valor unitário
      *
-     * @param valorUnitario O valor
+     * @param valorSaldo O valor
      * @throws IllegalArgumentException Se o valor for inválido
      */
-    private void validateValorUnitario(BigDecimal valorUnitario) {
+    private void validateValorSaldo(BigDecimal valorSaldo) {
         Validator.start()
-                .expect(valorUnitario,
+                .expect(valorSaldo,
                         v -> v != null && v.compareTo(BigDecimal.ZERO) > 0,
                         "Valor unitário deve ser maior que 0")
                 .validate();
