@@ -49,7 +49,8 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
     public Optional<Funcionario> findByCodigo(String codigo) {
         return Optional.ofNullable(
                 em.createQuery("""
-                        SELECT f FROM funcionarios f
+                        SELECT DISTINCT f FROM funcionarios f
+                        JOIN FETCH f.acessos
                         WHERE f.codigo = :codigo
                         """, Funcionario.class)
                         .setParameter("codigo", codigo)

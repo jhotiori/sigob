@@ -1,67 +1,97 @@
-INSERT INTO documentos (documento, tipo) VALUES
-    ('123.456.789-00', 'CPF'),
-    ('987.654.321-00', 'CPF'),
-    ('456.789.123-00', 'CPF'),
-    ('12.345.678/0001-99', 'CNPJ'),
-    ('98.765.432/0001-11', 'CNPJ');
+-- =========================
+-- MOEDAS
+-- =========================
+INSERT INTO moedas (id, nome, cifrao, sigla) VALUES
+(1, 'Real Brasileiro', 'R$', 'BRL');
 
+-- =========================
+-- CATEGORIAS
+-- =========================
+INSERT INTO categorias (id, nome) VALUES
+(1, 'Eletrônicos'),
+(2, 'Alimentos'),
+(3, 'Vestuário');
 
-INSERT INTO acessos (nome, descricao) VALUES
-    ('ADMIN',    'Acesso total ao sistema'),
-    ('ESTOQUE',  'Acesso restrito ao módulo de estoque'),
-    ('VENDAS',   'Acesso restrito ao módulo de vendas');
+-- =========================
+-- ACESSOS
+-- =========================
+INSERT INTO acessos (id, nome, descricao) VALUES
+(1, 'ADMIN', 'Acesso total'),
+(2, 'VENDEDOR', 'Pode realizar vendas');
 
+-- =========================
+-- DOCUMENTOS
+-- =========================
+INSERT INTO documentos (id, documento, tipo) VALUES
+(1, '12345678901', 'CPF'),
+(2, '98765432100', 'CPF'),
+(3, '11122233344', 'CPF'),
+(4, '55566677788', 'CPF');
 
-INSERT INTO categorias (nome) VALUES
-    ('Energéticos'),
-    ('Refrigerantes'),
-    ('Álcool');
+-- =========================
+-- CLIENTES (alguns sem documento)
+-- =========================
+INSERT INTO clientes (id, nome, data_nascimento, documento_id) VALUES
+(1, 'João Silva', '05-10-1990', 1),
+(2, 'Maria Souza', '03-22-1985', 2),
+(3, 'Carlos Lima', NULL, NULL),
+(4, 'Ana Costa', '01-15-2000', NULL);
 
+-- =========================
+-- FUNCIONARIOS
+-- =========================
+INSERT INTO funcionarios (id, nome, codigo, documento_id) VALUES
+(1, 'admin', 'admin', 3),
+(2, 'vendedor', 'vendedor', 4);
 
-INSERT INTO moedas (nome, cifrao, sigla) VALUES
-    ('Real Brasileiro', 'R$',  'BRL'),
-    ('Dólar Americano', 'US$', 'USD'),
-    ('Euro',            '€',   'EUR');
+-- =========================
+-- FUNCIONARIOS_ACESSOS (1 acesso por funcionário)
+-- =========================
+INSERT INTO funcionarios_acessos (funcionario_id, acesso_id) VALUES
+(1, 1),
+(2, 2);
 
+-- =========================
+-- ESTOQUES
+-- =========================
+INSERT INTO estoques (id, codigo, nome) VALUES
+(1, 'EST001', 'Estoque Principal'),
+(2, 'EST002', 'Estoque Secundário');
 
+-- =========================
+-- PRODUTOS
+-- =========================
+INSERT INTO produtos (id, codigo, nome, valor_compra, valor_venda, categoria_id, moeda_id) VALUES
+(1, 'P001', 'Notebook', 2500.00, 3500.00, 1, 1),
+(2, 'P002', 'Camiseta', 20.00, 50.00, 3, 1),
+(3, 'P003', 'Arroz 5kg', 15.00, 25.00, 2, 1);
 
-INSERT INTO clientes (nome, data_nascimento, documento_id) VALUES
-    ('Ana Souza',      '1990-03-15', 1),
-    ('Bruno Lima',     '1985-07-22', 2),
-    ('Carla Mendes',   '2000-11-05', NULL),
-    ('Diego Ferreira', '1978-01-30', 3),
-    ('Elena Costa',    '1995-06-18', NULL);
+-- =========================
+-- PRODUTOS_ESTOQUES (1 produto → 1 estoque)
+-- =========================
+INSERT INTO produtos_estoques (id, quantidade, produto_id, estoque_id) VALUES
+(1, 10, 1, 1),
+(2, 100, 2, 1),
+(3, 200, 3, 2);
 
+-- =========================
+-- VENDAS
+-- =========================
+INSERT INTO vendas (id, status, data_abertura, data_finalizada, valor_total, cliente_id, funcionario_id) VALUES
+(1, 'finalizada', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 3550.00, 1, 1),
+(2, 'finalizada', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 100.00, 2, 2);
 
+-- =========================
+-- ITEM_VENDAS (valor_saldo = preço unitário)
+-- =========================
 
-INSERT INTO estoques (codigo, nome) VALUES
-    ('EST-001', 'Frigobar 1'),
-    ('EST-002', 'Freezer 3'),
-    ('EST-003', 'Prateleira 6');
+-- Venda 1:
+-- Notebook (1 × 3500) + Camiseta (1 × 50) = 3550
+INSERT INTO item_vendas (id, quantidade, valor_saldo, produtoEstoque_id, venda_id) VALUES
+(1, 1, 3500.00, 1, 1),
+(2, 1, 50.00, 2, 1);
 
-
-
-INSERT INTO funcionarios (nome, codigo, acesso_id, documento_id) VALUES
-    ('Roberto Admin',    'FUNC-001', 1, 3),
-    ('Mariana Estoque',  'FUNC-002', 2, 4),
-    ('Paulo Vendas',     'FUNC-003', 3, 5),
-    ('Juliana Vendas',   'FUNC-004', 3, 1),
-    ('Felipe Estoque',   'FUNC-005', 2, 2);
-
-
-
-INSERT INTO produtos (codigo, nome, valor_compra, valor_venda, categoria_id, moeda_id) VALUES
-    ('CavalãoL', 'Full Horse 1L',      6.00, 12.00, 1, 1),
-    ('Citruz2L', 'Sherepas 2L',         4.50,   9.50, 2, 1),
-    ('GuaraJesus2L', 'Guaraná Jesus 2L',     3.00,  9.90, 2, 1),
-    ('SkollLataBig','Skoll - Lata 350ml',          3.25,   6.00, 3, 1),
-    ('RTouro600', 'ReadTauros 600ml',        2.75,  8.00, 1, 1);
-
-
-
-INSERT INTO vendas (status, valor_total, cliente_id, funcionario_id) VALUES
-    ('aberta',     3200.00, 1, 3),
-    ('aberta',      389.80, 2, 4),
-    ('finalizada',   34.90, 3, 3),
-    ('aberta',      479.80, 4, 4),
-    ('finalizada',  179.90, 5, 3);
+-- Venda 2:
+-- Camiseta (2 × 50) = 100
+INSERT INTO item_vendas (id, quantidade, valor_saldo, produtoEstoque_id, venda_id) VALUES
+(3, 2, 50.00, 2, 2);

@@ -10,14 +10,6 @@ CREATE TABLE IF NOT EXISTS moedas (
     sigla VARCHAR(8) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS clientes (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(64) NOT NULL,
-    data_nascimento DATE,
-    documento_id INT,
-    FOREIGN KEY (documento_id) REFERENCES documentos(id)
-);
-
 CREATE TABLE IF NOT EXISTS documentos (
     id SERIAL PRIMARY KEY,
     documento varchar(64) NOT NULL UNIQUE,
@@ -36,6 +28,22 @@ CREATE TABLE IF NOT EXISTS estoques (
     nome VARCHAR(128) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS clientes (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(64) NOT NULL,
+    data_nascimento DATE,
+    documento_id INT,
+    FOREIGN KEY (documento_id) REFERENCES documentos(id)
+);
+
+CREATE TABLE IF NOT EXISTS funcionarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(64) NOT NULL,
+    codigo VARCHAR(16) UNIQUE NOT NULL,
+    documento_id INT NOT NULL,
+    FOREIGN KEY (documento_id) REFERENCES documentos(id)
+);
+
 CREATE TABLE IF NOT EXISTS produtos (
     id SERIAL PRIMARY KEY,
     codigo VARCHAR(64) UNIQUE NOT NULL,
@@ -46,14 +54,6 @@ CREATE TABLE IF NOT EXISTS produtos (
     moeda_id INT NOT NULL,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id),
     FOREIGN KEY (moeda_id) REFERENCES moedas(id)
-);
-
-CREATE TABLE IF NOT EXISTS funcionarios (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(64) NOT NULL,
-    codigo VARCHAR(16) UNIQUE NOT NULL,
-    documento_id INT NOT NULL,
-    FOREIGN KEY (documento_id) REFERENCES documentos(id),
 );
 
 CREATE TABLE IF NOT EXISTS funcionarios_acessos (
