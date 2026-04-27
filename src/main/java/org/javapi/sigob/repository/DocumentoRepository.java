@@ -1,6 +1,7 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Documento;
 
@@ -28,26 +29,28 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer> {
     }
 
     /**
-     * Busca Documento cujo nome inicia com o valor informado
+     * Busca Documento cujo documento (valor dele) inicia com o valor informado
      *
      * @param prefixo O prefixo do nome
      * @return List<Documento> - As Documento encontradas
      */
-    public List<Documento> findByNome(String prefixo) {
-        return em.createQuery("select d from documentos d where d.nome like :prefix", Documento.class)
-                .setParameter("prefix", prefixo + "%")
-                .getResultList();
+    public Optional<Documento> findByDocumento(String valor) {
+        return Optional.ofNullable(
+            em.createQuery("select d from documentos d where d.documento like :prefix", Documento.class)
+                .setParameter("prefix", valor + "%")
+                .getSingleResultOrNull()
+        );
     }
 
     /**
-     * Busca um Documento cujo tipo inicia com o valor informado
+     * Busca por Documentos cujo tipo inicia com o valor informado
      *
      * @param tipo O tipo do Documento
-     * @return Documento - A Documento encontrada (pode ser null)
+     * @return List<Documento> - Os Documento encontrados
      */
-    public Documento findByTipo(String tipo) {
-        return em.createQuery("select c from documentos c where c.tipo like :str", Documento.class)
+    public List<Documento> findByTipo(String tipo) {
+        return em.createQuery("select d from documentos d where d.tipo like :str", Documento.class)
                 .setParameter("str", tipo + "%")
-                .getSingleResultOrNull();
+                .getResultList();
     }
 }

@@ -2,6 +2,7 @@ package org.javapi.sigob.cli;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Moeda;
@@ -12,93 +13,88 @@ import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pelas operações de produto via CLI.
+ */
 public class MenuProduto extends Menu {
 
-    /**
-     * Inicializa o menu de produtos e registra as entradas disponíveis.
-     */
-    public MenuProduto() {
-        super("Produtos");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Buscar (ID)", this::buscarPorId);
-        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
-    }
+    private final ProdutoService service;
+    private final CategoriaService categoriaService;
+    private final MoedaService moedaService;
 
-    private final ProdutoService service = new ProdutoService();
-    private final CategoriaService categoriaService = new CategoriaService();
-    private final MoedaService moedaService = new MoedaService();
+    public MenuProduto(ProdutoService service, CategoriaService categoriaService, MoedaService moedaService) {
+        super("Operações de Produtos");
+
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Buscar (ID)", this::buscarPorId);
+        add("Buscar (NOME)", this::buscarPorNome);
+        add("Listar (TODOS)", this::listarTodos);
+
+        this.service = service;
+        this.categoriaService = categoriaService;
+        this.moedaService = moedaService;
+    }
 
     /**
      * Realiza o cadastro de um novo produto.
      */
     private void cadastrar() {
-        String codigo = Inputter.lerString("Insira o Código do Produto: ");
-        String nome = Inputter.lerString("Insira o Nome do Produto: ");
-        String descricao = Inputter.lerString("Insira a Descrição: ");
-        BigDecimal custo = Inputter.lerBigDecimal("Insira o Custo: ");
-        BigDecimal venda = Inputter.lerBigDecimal("Insira o Preço de Venda: ");
-        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
-        int idMoeda = Inputter.lerInt("Insira o ID da Moeda: ");
+        String codigo = Inputter.readString("Código do Produto: ");
+        String nome = Inputter.readString("Nome do Produto: ");
+
+        BigDecimal custo = Inputter.readBigDecimal("Valor de Compra: ");
+        BigDecimal venda = Inputter.readBigDecimal("Valor de Venda: ");
+
+        Categoria categoria = resolveCategoria();
+        Moeda moeda = resolveMoeda();
 
         try {
-            Categoria categoria = categoriaService.findById(idCategoria);
-            if (categoria == null) {
-                Logger.warn("Categoria não encontrada!");
-                return;
-            }
-
-            Moeda moeda = moedaService.findById(idMoeda);
-            if (moeda == null) {
-                Logger.warn("Moeda não encontrada!");
-                return;
-            }
-
-            service.save(new Produto(0, codigo, nome, descricao, custo, venda, categoria, moeda));
-            Logger.success("Produto " + nome + " cadastrado com sucesso!");
-
+            service.save(new Produto(0, codigo, nome, custo, venda, categoria, moeda));
+            Logger.success("Produto %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar produto: " + e.getMessage());
         }
     }
 
     /**
-     * Atualiza os dados de um produto existente.
+     * Atualiza um produto existente.
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID do Produto: ");
+        Produto atual = resolveProduto();
 
-        while (service.findById(id) == null) {
-            Logger.warn("Produto não encontrado!");
-            id = Inputter.lerInt("Insira o ID do Produto: ");
+        String codigo = Inputter.readString("Novo Código [vazio mantém]: ");
+        codigo = codigo.isBlank() ? atual.getCodigo() : codigo;
+
+        String nome = Inputter.readString("Novo Nome [vazio mantém]: ");
+        nome = nome.isBlank() ? atual.getNome() : nome;
+
+        BigDecimal custo = Inputter.readBigDecimal("Novo Valor de Compra: ");
+        BigDecimal venda = Inputter.readBigDecimal("Novo Valor de Venda: ");
+
+        Categoria categoria = atual.getCategoria();
+        if (Inputter.readBoolean("Deseja alterar Categoria? [S/N]: ")) {
+            categoria = resolveCategoria();
         }
 
-        String codigo = Inputter.lerString("Insira o Novo Código: ");
-        String nome = Inputter.lerString("Insira o Novo Nome: ");
-        String descricao = Inputter.lerString("Insira a Nova Descrição: ");
-        BigDecimal custo = Inputter.lerBigDecimal("Insira o Novo Custo: ");
-        BigDecimal venda = Inputter.lerBigDecimal("Insira o Novo Preço: ");
-        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
-        int idMoeda = Inputter.lerInt("Insira o ID da Moeda: ");
+        Moeda moeda = atual.getMoeda();
+        if (Inputter.readBoolean("Deseja alterar Moeda? [S/N]: ")) {
+            moeda = resolveMoeda();
+        }
 
         try {
-            Categoria categoria = categoriaService.findById(idCategoria);
-            if (categoria == null) {
-                Logger.warn("Categoria não encontrada!");
-                return;
-            }
+            service.update(new Produto(
+                    atual.getId(),
+                    codigo,
+                    nome,
+                    custo,
+                    venda,
+                    categoria,
+                    moeda
+            ));
 
-            Moeda moeda = moedaService.findById(idMoeda);
-            if (moeda == null) {
-                Logger.warn("Moeda não encontrada!");
-                return;
-            }
-
-            service.update(new Produto(id, codigo, nome, descricao, custo, venda, categoria, moeda));
-            Logger.success("Produto " + id + " atualizado com sucesso!");
-
+            Logger.success("Produto %d atualizado com sucesso!".formatted(atual.getId()));
         } catch (Exception e) {
             Logger.error("Erro ao atualizar produto: " + e.getMessage());
         }
@@ -108,14 +104,15 @@ public class MenuProduto extends Menu {
      * Busca um produto pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID do Produto: ");
+        int id = Inputter.readInt("ID do Produto: ");
 
         try {
-            Produto produto = service.findById(id);
-            if (produto == null) {
+            Optional<Produto> produto = service.findById(id);
+
+            if (produto.isEmpty()) {
                 Logger.warn("Produto não encontrado!");
             } else {
-                System.out.println(produto);
+                System.out.println(produto.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar produto: " + e.getMessage());
@@ -126,7 +123,7 @@ public class MenuProduto extends Menu {
      * Busca produtos pelo nome.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome do Produto: ");
+        String nome = Inputter.readString("Nome do Produto: ");
 
         try {
             List<Produto> produtos = service.findByNome(nome);
@@ -144,7 +141,7 @@ public class MenuProduto extends Menu {
     }
 
     /**
-     * Lista todos os produtos cadastrados.
+     * Lista todos os produtos.
      */
     private void listarTodos() {
         try {
@@ -166,19 +163,67 @@ public class MenuProduto extends Menu {
      * Remove um produto pelo ID.
      */
     private void excluir() {
-        int id = Inputter.lerInt("Insira o ID do Produto: ");
+        Produto produto = resolveProduto();
 
         try {
-            Produto produto = service.findById(id);
-
-            if (produto == null) {
-                Logger.warn("Produto não encontrado!");
-            } else {
-                service.delete(produto);
-                Logger.success("Produto " + id + " excluído com sucesso!");
-            }
+            service.delete(produto);
+            Logger.success("Produto %d excluído com sucesso!".formatted(produto.getId()));
         } catch (Exception e) {
             Logger.error("Erro ao excluir produto: " + e.getMessage());
         }
+    }
+
+    /**
+     * Resolve um produto pelo ID.
+     *
+     * @return Produto - O Produto resolvido
+     */
+    private Produto resolveProduto() {
+        int id = Inputter.readInt("ID do Produto: ");
+        Optional<Produto> produto = service.findById(id);
+
+        while (produto.isEmpty()) {
+            Logger.warn("Produto não encontrado!");
+            id = Inputter.readInt("ID do Produto: ");
+            produto = service.findById(id);
+        }
+
+        return produto.get();
+    }
+
+    /**
+     * Resolve uma categoria pelo ID.
+     *
+     * @return Categoria - A Categoria resolvida
+     */
+    private Categoria resolveCategoria() {
+        int id = Inputter.readInt("ID da Categoria: ");
+        Optional<Categoria> categoria = categoriaService.findById(id);
+
+        while (categoria.isEmpty()) {
+            Logger.warn("Categoria não encontrada!");
+            id = Inputter.readInt("ID da Categoria: ");
+            categoria = categoriaService.findById(id);
+        }
+
+        return categoria.get();
+    }
+
+    /**
+     * Resolve uma moeda pelo ID.
+     *
+     * @return Moeda - A Moeda resolvida
+     */
+    private Moeda resolveMoeda() {
+        int id = Inputter.readInt("ID da Moeda: ");
+        Optional<Moeda> moeda = moedaService.findById(id);
+
+        while (moeda.isEmpty()) {
+            Logger.warn("Moeda não encontrada!");
+            id = Inputter.readInt("ID da Moeda: ");
+            moeda = moedaService.findById(id);
+        }
+
+        return moeda.get();
     }
 }

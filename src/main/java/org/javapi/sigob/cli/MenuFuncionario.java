@@ -1,95 +1,168 @@
 package org.javapi.sigob.cli;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.entity.Documento;
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.service.AcessoService;
+import org.javapi.sigob.service.ClienteService;
+import org.javapi.sigob.service.DocumentoService;
 import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
-
+/**
+ * Menu responsável pelas operações de funcionários via CLI.
+ */
 public class MenuFuncionario extends Menu {
 
-    /**
-     * Inicializa o menu de funcionários e registra as entradas disponíveis.
-     */
-    public MenuFuncionario() {
-        super("Funcionários");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Buscar (ID)", this::buscarPorId);
-        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Buscar (CODIGO)", this::buscarPorCodigo);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
-    }
+    private final FuncionarioService service;
+    private final AcessoService acessoService;
+    private final DocumentoService documentoService;
+    private final ClienteService clienteService;
 
-    private final FuncionarioService service = new FuncionarioService();
-    private final AcessoService acessoService = new AcessoService();
+    public MenuFuncionario(FuncionarioService service, AcessoService acessoService, DocumentoService documentoService, ClienteService clienteService) {
+        super("Operações de Funcionários");
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Buscar (ID)", this::buscarPorId);
+        add("Buscar (NOME)", this::buscarPorNome);
+        add("Buscar (CODIGO)", this::buscarPorCodigo);
+        add("Listar (TODOS)", this::listarTodos);
+
+        this.service = service;
+        this.acessoService = acessoService;
+        this.documentoService = documentoService;
+        this.clienteService = clienteService;
+    }
 
     /**
      * Realiza o cadastro de um novo funcionário.
      */
     private void cadastrar() {
-        String nome = Inputter.lerString("Insira o Nome do Funcionário: ");
-        String codigo = Inputter.lerString("Insira o Código do Funcionário: ");
-        int idAcesso = Inputter.lerInt("Insira o ID do Acesso: ");
+        String nome = Inputter.readNotBlankString("Nome do Funcionário: ");
+        String codigo = Inputter.readNotBlankString("Código do Funcionário: ");
 
-        try {
-            Acesso acesso = acessoService.findById(idAcesso);
+        // Documento obrigatório
+        String tipo = Inputter.readNotBlankString("Tipo do Documento: ");
+        String valor = Inputter.readNotBlankString("Documento: ");
 
-            if (acesso == null) {
-                Logger.warn("Acesso não encontrado!");
-                return;
+        Documento documento = new Documento(0, valor, tipo);
+
+        // Acessos (mínimo 1)
+        Set<Acesso> acessos = new HashSet<>();
+        List<Acesso> disponiveis = acessoService.findAll();
+
+        if (disponiveis.isEmpty()) {
+            Logger.warn("Nenhum acesso cadastrado! Não é possível criar funcionário.");
+            return;
+        }
+
+        System.out.println("Selecione os acessos (digite IDs, 0 para finalizar):");
+
+        while (true) {
+            for (Acesso a : disponiveis) {
+                System.out.println(a);
             }
 
-            Funcionario funcionario = new Funcionario();
-            funcionario.setNmFuncionario(nome);
-            funcionario.setCdFuncionario(codigo);
-            funcionario.setAcesso(acesso);
+            int id = Inputter.readInt("ID do Acesso: ");
+
+            if (id == 0) {
+                if (acessos.isEmpty()) {
+                    Logger.warn("Funcionário deve possuir ao menos um acesso!");
+                    continue;
+                }
+                break;
+            }
+
+            Optional<Acesso> acesso = acessoService.findById(id);
+
+            if (acesso.isEmpty()) {
+                Logger.warn("Acesso não encontrado!");
+                continue;
+            }
+
+            acessos.add(acesso.get());
+        }
+
+        try {
+            // 1. salva documento
+            documentoService.save(documento);
+
+            // 2. cria cliente automaticamente
+            Cliente cliente = new Cliente(0, nome, null, documento);
+            clienteService.save(cliente);
+
+            // 3. cria funcionario
+            Funcionario funcionario = new Funcionario(0, nome, codigo, documento);
+
+            for (Acesso a : acessos) {
+                funcionario.addAcesso(a);
+            }
 
             service.save(funcionario);
-            Logger.success("Funcionário " + nome + " cadastrado com sucesso!");
+
+            Logger.success("Funcionário %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar funcionário: " + e.getMessage());
         }
     }
 
     /**
-     * Atualiza os dados de um funcionário existente.
+     * Realiza a atualização de um funcionário.
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
+        int id = Inputter.readInt("ID do Funcionário: ");
 
-        while (service.findById(id) == null) {
+        Optional<Funcionario> funcionario = service.findById(id);
+
+        while (funcionario.isEmpty()) {
             Logger.warn("Funcionário não encontrado!");
-            id = Inputter.lerInt("Insira o ID do Funcionário: ");
+            id = Inputter.readInt("ID do Funcionário: ");
+            funcionario = service.findById(id);
         }
 
-        String nome = Inputter.lerString("Insira o Novo Nome do Funcionário: ");
-        String codigo = Inputter.lerString("Insira o Novo Código do Funcionário: ");
-        int idAcesso = Inputter.lerInt("Insira o ID do Acesso: ");
+        String nome = Inputter.readString("Novo Nome [vazio mantém]: ");
+        nome = nome.isBlank() ? funcionario.get().getNome() : nome;
+
+        String codigo = Inputter.readString("Novo Código [vazio mantém]: ");
+        codigo = codigo.isBlank() ? funcionario.get().getCodigo() : codigo;
+
+        Funcionario f = funcionario.get();
+        f.setNome(nome);
+        f.setCodigo(codigo);
 
         try {
-            Acesso acesso = acessoService.findById(idAcesso);
-
-            if (acesso == null) {
-                Logger.warn("Acesso não encontrado!");
-                return;
-            }
-
-            Funcionario funcionario = new Funcionario();
-            funcionario.setIdFuncionario(id);
-            funcionario.setNmFuncionario(nome);
-            funcionario.setCdFuncionario(codigo);
-            funcionario.setAcesso(acesso);
-
-            service.update(funcionario);
-            Logger.success("Funcionário " + id + " atualizado com sucesso!");
+            service.update(f);
+            Logger.success("Funcionário %d atualizado com sucesso!".formatted(id));
         } catch (Exception e) {
             Logger.error("Erro ao atualizar funcionário: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remove um funcionário pelo ID.
+     */
+    private void excluir() {
+        int id = Inputter.readInt("ID do Funcionário: ");
+
+        try {
+            Optional<Funcionario> funcionario = service.findById(id);
+
+            if (funcionario.isEmpty()) {
+                Logger.warn("Funcionário não encontrado!");
+            } else {
+                service.delete(funcionario.get());
+                Logger.success("Funcionário %d excluído com sucesso!".formatted(id));
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir funcionário: " + e.getMessage());
         }
     }
 
@@ -97,14 +170,15 @@ public class MenuFuncionario extends Menu {
      * Busca um funcionário pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
+        int id = Inputter.readInt("ID do Funcionário: ");
 
         try {
-            Funcionario funcionario = service.findById(id);
-            if (funcionario == null) {
+            Optional<Funcionario> funcionario = service.findById(id);
+
+            if (funcionario.isEmpty()) {
                 Logger.warn("Funcionário não encontrado!");
             } else {
-                System.out.println(funcionario);
+                System.out.println(funcionario.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar funcionário: " + e.getMessage());
@@ -112,10 +186,10 @@ public class MenuFuncionario extends Menu {
     }
 
     /**
-     * Busca funcionários pelo nome.
+     * Busca um funcionário pelo nome.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome do Funcionário: ");
+        String nome = Inputter.readString("Nome do Funcionário: ");
 
         try {
             List<Funcionario> funcionarios = service.findByNome(nome);
@@ -136,14 +210,15 @@ public class MenuFuncionario extends Menu {
      * Busca um funcionário pelo código.
      */
     private void buscarPorCodigo() {
-        String codigo = Inputter.lerString("Insira o Código do Funcionário: ");
+        String codigo = Inputter.readString("Código do Funcionário: ");
 
         try {
-            Funcionario funcionario = service.findByCodigo(codigo);
-            if (funcionario == null) {
+            Optional<Funcionario> funcionario = service.findByCodigo(codigo);
+
+            if (funcionario.isEmpty()) {
                 Logger.warn("Funcionário não encontrado!");
             } else {
-                System.out.println(funcionario);
+                System.out.println(funcionario.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar funcionário: " + e.getMessage());
@@ -166,26 +241,6 @@ public class MenuFuncionario extends Menu {
             }
         } catch (Exception e) {
             Logger.error("Erro ao listar funcionários: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Remove um funcionário pelo ID.
-     */
-    private void excluir() {
-        int id = Inputter.lerInt("Insira o ID do Funcionário: ");
-
-        try {
-            Funcionario funcionario = service.findById(id);
-
-            if (funcionario == null) {
-                Logger.warn("Funcionário não encontrado!");
-            } else {
-                service.delete(funcionario);
-                Logger.success("Funcionário " + id + " excluido com sucesso!");
-            }
-        } catch (Exception e) {
-            Logger.error("Erro ao excluir funcionário: " + e.getMessage());
         }
     }
 }

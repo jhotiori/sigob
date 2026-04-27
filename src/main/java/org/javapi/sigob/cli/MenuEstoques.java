@@ -1,205 +1,208 @@
 package org.javapi.sigob.cli;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.entity.Produto;
 import org.javapi.sigob.entity.ProdutosEstoques;
-import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.service.EstoqueService;
 import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pela gestão de itens em estoque (ProdutosEstoques).
+ */
 public class MenuEstoques extends Menu {
 
+    private final ProdutosEstoquesService service;
+    private final ProdutoService produtoService;
+    private final EstoqueService estoqueService;
+
     /**
-     * Inicializa o menu de estoques e registra as entradas disponíveis.
+     * Inicializa o menu de movimentação de estoque.
+     *
+     * @param service Serviço de ProdutosEstoques
+     * @param produtoService Serviço de Produtos
+     * @param estoqueService Serviço de Estoques
      */
-    public MenuEstoques() {
-        super("Estoque");
-        adicionarEntrada("Listar (ESTOQUE)", this::listarPorEstoque);
-        adicionarEntrada("Cadastrar", this::adicionarItem);
-        adicionarEntrada("Transferir", this::transferir);
+    public MenuEstoques(ProdutosEstoquesService service, ProdutoService produtoService, EstoqueService estoqueService) {
+        super("Movimentação de Estoque");
+        add("Listar por Estoque", this::listarPorEstoque);
+        add("Adicionar Item", this::adicionarItem);
+        add("Transferir", this::transferir);
+
+        this.service = service;
+        this.produtoService = produtoService;
+        this.estoqueService = estoqueService;
     }
 
-    private final ProdutosEstoquesService service = new ProdutosEstoquesService();
-    private final ProdutoService produtoService = new ProdutoService();
-    private final EstoqueService estoqueService = new EstoqueService();
-
     /**
-     * Lista itens de um estoque específico.
+     * Lista todos os itens vinculados a um estoque específico.
      */
     private void listarPorEstoque() {
-        try {
-            List<Estoque> estoques = estoqueService.findAll();
+        List<Estoque> estoques = estoqueService.findAll();
 
-            if (estoques.isEmpty()) {
-                Logger.warn("Nenhum estoque cadastrado!");
-                return;
-            }
-
-            for (Estoque e : estoques) {
-                System.out.println("[" + e.getIdEstoque() + "] " + e.getNmEstoque());
-            }
-
-            int idEstoque = Inputter.lerInt("Insira o ID do Estoque: ");
-
-            List<ProdutosEstoques> itens = service.findAll();
-
-            boolean encontrou = false;
-            for (ProdutosEstoques pe : itens) {
-                if (pe.getEstoque().getIdEstoque() == idEstoque) {
-                    System.out.println(pe);
-                    encontrou = true;
-                }
-            }
-
-            if (!encontrou) {
-                Logger.warn("Nenhum item encontrado neste estoque!");
-            }
-
-        } catch (Exception e) {
-            Logger.error("Erro ao listar itens do estoque: " + e.getMessage());
+        if (estoques.isEmpty()) {
+            Logger.warn("Nenhum estoque cadastrado!");
+            return;
         }
+
+        estoques.forEach(e -> System.out.printf("[%d] %s%n", e.getId(), e.getNome()));
+
+        int id = Inputter.readInt("ID do Estoque: ");
+        Optional<Estoque> estoque = estoqueService.findById(id);
+
+        if (estoque.isEmpty()) {
+            Logger.warn("Estoque não encontrado!");
+            return;
+        }
+
+        List<ProdutosEstoques> itens = service.findByEstoque(id);
+
+        if (itens.isEmpty()) {
+            Logger.warn("Nenhum item neste estoque!");
+            return;
+        }
+
+        itens.forEach(System.out::println);
     }
 
     /**
-     * Adiciona um item a um estoque.
+     * Adiciona (ou incrementa) um produto em um estoque.
      */
     private void adicionarItem() {
-        try {
-            List<Produto> produtos = produtoService.findAll();
+        List<Produto> produtos = produtoService.findAll();
 
-            if (produtos.isEmpty()) {
-                Logger.warn("Nenhum produto cadastrado!");
-                return;
-            }
-
-            for (Produto p : produtos) {
-                System.out.println("[" + p.getIdProduto() + "] " + p.getNmProduto());
-            }
-
-            int idProduto = Inputter.lerInt("Insira o ID do Produto: ");
-
-            List<Estoque> estoques = estoqueService.findAll();
-
-            if (estoques.isEmpty()) {
-                Logger.warn("Nenhum estoque cadastrado!");
-                return;
-            }
-
-            for (Estoque e : estoques) {
-                System.out.println("[" + e.getIdEstoque() + "] " + e.getNmEstoque());
-            }
-
-            int idEstoque = Inputter.lerInt("Insira o ID do Estoque: ");
-            int quantidade = Inputter.lerInt("Quantidade: ");
-            String observacao = Inputter.lerString("Observação: ");
-
-            Produto produto = produtoService.findById(idProduto);
-            if (produto == null) {
-                Logger.warn("Produto não encontrado!");
-                return;
-            }
-
-            Estoque estoque = estoqueService.findById(idEstoque);
-            if (estoque == null) {
-                Logger.warn("Estoque não encontrado!");
-                return;
-            }
-
-            try {
-                service.save(new ProdutosEstoques(0, quantidade, observacao, produto, estoque));
-                Logger.success("Item adicionado ao estoque com sucesso!");
-            } catch (ProdutosEstoquesException e) {
-                Logger.error("Erro ao adicionar item: " + e.getMessage());
-            }
-
-        } catch (Exception e) {
-            Logger.error("Erro ao cadastrar item no estoque: " + e.getMessage());
+        if (produtos.isEmpty()) {
+            Logger.warn("Nenhum produto cadastrado!");
+            return;
         }
-    }
 
-    /**
-     * Transfere itens entre estoques.
-     */
-    private void transferir() {
+        produtos.forEach(p
+                -> System.out.printf("[%d] %s%n", p.getId(), p.getNome())
+        );
+
+        int produtoId = Inputter.readInt("ID do Produto: ");
+        Optional<Produto> produto = produtoService.findById(produtoId);
+
+        if (produto.isEmpty()) {
+            Logger.warn("Produto não encontrado!");
+            return;
+        }
+
+        List<Estoque> estoques = estoqueService.findAll();
+
+        if (estoques.isEmpty()) {
+            Logger.warn("Nenhum estoque cadastrado!");
+            return;
+        }
+
+        estoques.forEach(e
+                -> System.out.printf("[%d] %s%n", e.getId(), e.getNome())
+        );
+
+        int estoqueId = Inputter.readInt("ID do Estoque: ");
+        Optional<Estoque> estoque = estoqueService.findById(estoqueId);
+
+        if (estoque.isEmpty()) {
+            Logger.warn("Estoque não encontrado!");
+            return;
+        }
+
+        int quantidade = Inputter.readInt("Quantidade: ");
+
+        if (quantidade <= 0) {
+            Logger.warn("Quantidade deve ser maior que zero!");
+            return;
+        }
+
         try {
-            List<ProdutosEstoques> itens = service.findAll();
+            Optional<ProdutosEstoques> existente = service.findUnique(produtoId, estoqueId);
 
-            if (itens.isEmpty()) {
-                Logger.warn("Nenhum item em estoque!");
-                return;
-            }
-
-            for (ProdutosEstoques pe : itens) {
-                System.out.println(
-                        "[" + pe.getIdProdutosEstoque() + "] " +
-                                pe.getProduto().getNmProduto() +
-                                " | Qtde: " + pe.getNrQuantidade() +
-                                " | Estoque: " + pe.getEstoque().getNmEstoque());
-            }
-
-            int idItem = Inputter.lerInt("Insira o ID do Item: ");
-            ProdutosEstoques origem = service.findById(idItem);
-
-            if (origem == null) {
-                Logger.warn("Item não encontrado!");
-                return;
-            }
-
-            List<Estoque> estoques = estoqueService.findAll();
-
-            for (Estoque e : estoques) {
-                if (e.getIdEstoque() != origem.getEstoque().getIdEstoque()) {
-                    System.out.println("[" + e.getIdEstoque() + "] " + e.getNmEstoque());
-                }
-            }
-
-            int idDestino = Inputter.lerInt("Insira o ID do Estoque destino: ");
-            int quantidade = Inputter.lerInt("Quantidade a transferir: ");
-
-            if (quantidade <= 0 || quantidade > origem.getNrQuantidade()) {
-                Logger.warn("Quantidade inválida! Disponível: " + origem.getNrQuantidade());
-                return;
-            }
-
-            Estoque destino = estoqueService.findById(idDestino);
-            if (destino == null) {
-                Logger.warn("Estoque destino não encontrado!");
-                return;
-            }
-
-            origem.setNrQuantidade(origem.getNrQuantidade() - quantidade);
-
-            if (origem.getNrQuantidade() == 0) {
-                service.delete(origem);
+            if (existente.isPresent()) {
+                ProdutosEstoques pe = existente.get();
+                pe.setQuantidade(pe.getQuantidade() + quantidade);
+                
+                service.update(pe);
+                Logger.success("Quantidade atualizada com sucesso!");
             } else {
-                try {
-                    service.update(origem);
-                } catch (ProdutosEstoquesException e) {
-                    Logger.error("Erro ao atualizar origem: " + e.getMessage());
-                    return;
-                }
-            }
-
-            try {
                 service.save(new ProdutosEstoques(
                         0,
                         quantidade,
-                        "Transferido de: " + origem.getEstoque().getNmEstoque(),
-                        origem.getProduto(),
-                        destino));
-            } catch (ProdutosEstoquesException e) {
-                Logger.error("Erro ao criar destino: " + e.getMessage());
-                return;
+                        produto.get(),
+                        estoque.get()
+                ));
+
+                Logger.success("Item adicionado ao estoque!");
             }
 
+        } catch (Exception e) {
+            Logger.error("Erro ao adicionar item: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Transfere quantidade de um produto entre estoques.
+     */
+    private void transferir() {
+        List<ProdutosEstoques> itens = service.findAll();
+
+        if (itens.isEmpty()) {
+            Logger.warn("Nenhum item em estoque!");
+            return;
+        }
+
+        itens.forEach(pe
+                -> System.out.printf(
+                        "[%d] %s | Qtde: %d | Estoque: %s%n",
+                        pe.getId(),
+                        pe.getProduto().getNome(),
+                        pe.getQuantidade(),
+                        pe.getEstoque().getNome()
+                )
+        );
+
+        int id = Inputter.readInt("ID do Item: ");
+        Optional<ProdutosEstoques> origemOpt = service.findById(id);
+
+        if (origemOpt.isEmpty()) {
+            Logger.warn("Item não encontrado!");
+            return;
+        }
+
+        ProdutosEstoques origem = origemOpt.get();
+
+        List<Estoque> estoques = estoqueService.findAll();
+
+        estoques.stream()
+                .filter(e -> e.getId() != origem.getEstoque().getId())
+                .forEach(e
+                        -> System.out.printf("[%d] %s%n", e.getId(), e.getNome())
+                );
+
+        int destinoId = Inputter.readInt("ID do Estoque destino: ");
+        Optional<Estoque> destinoOpt = estoqueService.findById(destinoId);
+
+        if (destinoOpt.isEmpty()) {
+            Logger.warn("Estoque destino não encontrado!");
+            return;
+        }
+
+        int quantidade = Inputter.readInt("Quantidade: ");
+
+        if (quantidade <= 0 || quantidade > origem.getQuantidade()) {
+            Logger.warn("Quantidade inválida!");
+            return;
+        }
+
+        try {
+            service.transferir(origem, destinoOpt.get(), quantidade);
             Logger.success("Transferência realizada com sucesso!");
         } catch (Exception e) {
-            Logger.error("Erro ao transferir item: " + e.getMessage());
+            Logger.error("Erro na transferência: " + e.getMessage());
         }
     }
 }

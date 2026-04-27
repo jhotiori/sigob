@@ -1,60 +1,61 @@
 package org.javapi.sigob.cli;
 
+import java.util.Optional;
+
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.service.ClienteService;
+import org.javapi.sigob.service.EstoqueService;
 import org.javapi.sigob.service.FuncionarioService;
+import org.javapi.sigob.service.ItemVendaService;
+import org.javapi.sigob.service.ProdutoService;
+import org.javapi.sigob.service.ProdutosEstoquesService;
+import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu principal responsável por autenticação e roteamento por nível de acesso.
+ */
 public class MenuMain extends Menu {
 
-    /**
-     * Inicializa o menu principal.
-     */
-    public MenuMain() {
+    private final FuncionarioService service;
+
+    public MenuMain(FuncionarioService service) {
         super("SIGOB - Seja bem-vindo(a)!");
+        this.service = service;
     }
 
-    private final FuncionarioService service = new FuncionarioService();
-
-    @Override
-    public void exibir() {
+    /**
+     * Ponto de entrada do sistema.
+     */
+    public void start() {
         Funcionario funcionario = logar();
-        String cdAcesso = funcionario.getAcesso().getCdAcesso();
-        limparEntradas();
 
-        switch (cdAcesso.toUpperCase()) {
-            case "ADMIN" -> buildMenuAdmin();
-            case "ESTOQUE" -> buildMenuEstoque();
-            case "VENDAS" -> buildMenuVendas();
-            default -> {
-                Logger.warn("Nível de acesso não reconhecido: " + cdAcesso);
-                return;
-            }
-        }
+        clear();
+        buildMenuByRole(funcionario);
 
-        setTitulo("SIGOB - Olá, " + funcionario.getNmFuncionario() + "!");
-        super.exibir();
+        setTitle("SIGOB - Olá, %s!".formatted(funcionario.getNome()));
+        show();
     }
 
     /**
      * Realiza o login do funcionário.
-     *
-     * @return funcionário autenticado
      */
     private Funcionario logar() {
-        Logger.info("<< SIGOB - LOGIN >>");
+        Logger.info("(<< SIGOB - LOGIN >>)");
 
         while (true) {
             try {
-                String login = Inputter.lerString("Insira o Login: ");
-                String senha = Inputter.lerString("Insira a Senha: ");
+                String login = Inputter.readString("Login (Nome): ");
+                String senha = Inputter.readString("Senha (Código): ");
 
-                Funcionario funcionario = service.findByCodigo(senha);
+                Optional<Funcionario> funcionario = service.findByCodigo(senha);
 
-                if (funcionario != null && funcionario.getNmFuncionario().equalsIgnoreCase(login)) {
+                if (funcionario.isPresent() && funcionario.get().getNome().equalsIgnoreCase(login)) {
                     Logger.success("Login efetuado com sucesso!");
-                    return funcionario;
+                    return funcionario.get();
                 }
+
                 Logger.warn("Login ou senha incorretos!");
             } catch (Exception e) {
                 Logger.error("Erro no login: " + e.getMessage());
@@ -62,17 +63,40 @@ public class MenuMain extends Menu {
         }
     }
 
+    /**
+     * Constrói o menu com base nos acessos do funcionário.
+     */
+    private void buildMenuByRole(Funcionario funcionario) {
+
+        if (funcionario.hasAcesso("ADMIN")) {
+            buildMenuAdmin();
+            return;
+        }
+
+        if (funcionario.hasAcesso("ESTOQUE")) {
+            buildMenuEstoque();
+            return;
+        }
+
+        if (funcionario.hasAcesso("VENDAS")) {
+            buildMenuVendas();
+            return;
+        }
+
+        Logger.warn("Funcionário não possui acessos válidos!");
+    }
+
     private void buildMenuAdmin() {
-        adicionarEntrada("Cadastros", () -> new MenuCadastros().exibir());
-        adicionarEntrada("Estoques", () -> new MenuEstoques().exibir());
-        adicionarEntrada("Vendas", () -> new MenuVendas().exibir());
+        add("Cadastros", () -> new MenuCadastros().show());
+        add("Estoques", () -> new MenuEstoques(new ProdutosEstoquesService(), new ProdutoService(), new EstoqueService()).show());
+        add("Vendas", () -> new MenuVendas(new VendaService(), new ItemVendaService(), new ProdutosEstoquesService(), new ClienteService(), new FuncionarioService()).show());
     }
 
     private void buildMenuEstoque() {
-        adicionarEntrada("Estoques", () -> new MenuEstoques().exibir());
+        add("Estoques", () -> new MenuEstoques(new ProdutosEstoquesService(), new ProdutoService(), new EstoqueService()).show());
     }
 
     private void buildMenuVendas() {
-        adicionarEntrada("Vendas", () -> new MenuVendas().exibir());
+        add("Vendas", () -> new MenuVendas(new VendaService(), new ItemVendaService(), new ProdutosEstoquesService(), new ClienteService(), new FuncionarioService()).show());
     }
 }

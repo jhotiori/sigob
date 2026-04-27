@@ -142,8 +142,7 @@ public class ItemVendaService {
         validateId(produtoEstoqueId);
 
         return TransactionExecutor.query(em -> {
-            return new ItemVendaRepository(em)
-                    .findByVendaAndProdutoEstoque(vendaId, produtoEstoqueId);
+            return new ItemVendaRepository(em).findByVendaAndProdutoEstoque(vendaId, produtoEstoqueId);
         });
     }
 

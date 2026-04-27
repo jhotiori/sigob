@@ -35,8 +35,6 @@ public class Cliente {
     public Cliente() {
     }
 
-    ;
-
     /**
      * Construtor completo para criar um novo Cliente
      *

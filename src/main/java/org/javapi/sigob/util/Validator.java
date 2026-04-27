@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.javapi.sigob.exception.ValidationException;
+
 /**
  * Classe utilitaria para validar dados e argumentos
  */
@@ -75,10 +77,12 @@ public final class Validator {
 
     /**
      * Valida o validator, caso haja algum erro, vai disparar uma exception
+     *
+     * @throws ValidationException Se o validator for inválido
      */
     public void validate() {
         if (!this.isValid()) {
-            throw new IllegalArgumentException(String.join(", ", this.errors));
+            throw new ValidationException(String.join(", ", this.errors));
         }
     }
 }

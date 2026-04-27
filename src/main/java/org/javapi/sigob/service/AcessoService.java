@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
-import org.javapi.sigob.exception.AcessoException;
 import org.javapi.sigob.repository.AcessoRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;

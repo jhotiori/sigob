@@ -3,6 +3,7 @@ package org.javapi.sigob.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.entity.ProdutosEstoques;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
@@ -83,6 +84,59 @@ public class ProdutosEstoquesService {
 
         return TransactionExecutor.query(em -> {
             return new ProdutosEstoquesRepository(em).contains(produtoEstoque.getId());
+        });
+    }
+
+    /**
+     * Transfere quantidade de um produto entre estoques.
+     *
+     * @param origem O vínculo origem (Produto + Estoque)
+     * @param destino O estoque destino
+     * @param quantidade A quantidade a transferir
+     *
+     * @throws IllegalArgumentException Se parâmetros forem inválidos
+     */
+    public void transferir(ProdutosEstoques origem, Estoque destino, int quantidade) {
+        Validator.start()
+                .expectNotNull(origem, "Origem não pode ser nula!")
+                .expectNotNull(destino, "Destino não pode ser nulo!")
+                .expect(quantidade, q -> q > 0, "Quantidade deve ser maior que zero!")
+                .expect(quantidade, q -> q <= origem.getQuantidade(),"Quantidade maior que disponível!")
+                .validate();
+
+        TransactionExecutor.executeVoid(em -> {
+            ProdutosEstoquesRepository repo = new ProdutosEstoquesRepository(em);
+            int produtoId = origem.getProduto().getId();
+            int destinoId = destino.getId();
+
+            // Verifica se já existe vínculo no destino
+            Optional<ProdutosEstoques> destinoExistente = repo.findUnique(produtoId, destinoId);
+            int novaQtdOrigem = origem.getQuantidade() - quantidade;
+
+            // Atualiza origem
+            if (novaQtdOrigem == 0) {
+                repo.deleteById(origem.getId());
+            } else {
+                origem.setQuantidade(novaQtdOrigem);
+                repo.update(origem);
+            }
+
+            // Atualiza ou cria destino
+            if (destinoExistente.isPresent()) {
+                ProdutosEstoques peDestino = destinoExistente.get();
+                peDestino.setQuantidade(
+                        peDestino.getQuantidade() + quantidade
+                );
+
+                repo.update(peDestino);
+            } else {
+                repo.save(new ProdutosEstoques(
+                        0,
+                        quantidade,
+                        origem.getProduto(),
+                        destino
+                ));
+            }
         });
     }
 

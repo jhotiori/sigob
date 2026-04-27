@@ -2,143 +2,171 @@ package org.javapi.sigob.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.Scanner;
+import java.util.function.Function;
 
+/**
+ * Utilitário para leitura de dados via CLI. Centraliza parsing, validação e
+ * repetição de entrada.
+ */
 public final class Inputter {
+
+    /**
+     * Scanner único da aplicação. Não deve ser fechado manualmente.
+     */
     private static final Scanner SC = new Scanner(System.in);
 
     private Inputter() {
     }
 
     /**
-     * Lê um inteiro do usuário.
+     * Método base para leitura com parsing e retry automático.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return valor inteiro válido
+     * @param prompt Mensagem exibida ao usuário
+     * @param parser Função de conversão String -> T
+     * @param expectedType Descrição do tipo esperado
+     * @param <T> Tipo de retorno
+     * @return T - Valor convertido com sucesso
      */
-    public static int lerInt(String prompt) {
+    private static <T> T read(String prompt, Function<String, T> parser, String expectedType) {
         while (true) {
             System.out.print(prompt);
+            String input = SC.nextLine().trim();
+
             try {
-                return Integer.parseInt(SC.nextLine().trim());
+                return parser.apply(input);
             } catch (Exception e) {
-                erro("int");
+                errorHandler(input, expectedType);
             }
         }
     }
 
     /**
-     * Lê um float do usuário.
+     * Exibe mensagem de erro padronizada.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return float - Valor float valido
+     * @param input Valor informado
+     * @param expectedType Tipo esperado
      */
-    public static float lerFloat(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return Float.parseFloat(SC.nextLine().trim());
-            } catch (Exception e) {
-                erro("float");
-            }
-        }
+    private static void errorHandler(String input, String expectedType) {
+        Logger.warn("Entrada inválida (%s) - Esperado valor do tipo %s!".formatted(input, expectedType));
     }
 
     /**
-     * Lê um double do usuário.
+     * Lê um valor inteiro.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return double - Valor double valido
+     * @param prompt Mensagem exibida ao usuário
+     * @return int - Valor inteiro válido
      */
-    public static double lerDouble(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return Double.parseDouble(SC.nextLine().trim());
-            } catch (Exception e) {
-                erro("double");
-            }
-        }
+    public static int readInt(String prompt) {
+        return read(prompt, Integer::parseInt, "Integer");
     }
 
     /**
-     * Lê um booleano do usuário (true/false).
+     * Lê um valor float.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return boolean - Valor boolean valido
+     * @param prompt Mensagem exibida ao usuário
+     * @return float - Valor float válido
      */
-    public static boolean lerBoolean(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String input = SC.nextLine().trim().toLowerCase();
-
-            if (input.equals("s")) {
-                return true;
-            }
-
-            if (input.equals("n")) {
-                return false;
-            }
-
-            if (input.equals("true") || input.equals("false")) {
-                return Boolean.parseBoolean(input);
-            }
-
-            erro("boolean (true/false ou s/n)");
-        }
+    public static float readFloat(String prompt) {
+        return read(prompt, Float::parseFloat, "Float");
     }
 
     /**
-     * Lê uma string do usuário.
+     * Lê um valor double.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return String - Valor string valido
+     * @param prompt Mensagem exibida ao usuário
+     * @return double - Valor double válido
      */
-    public static String lerString(String prompt) {
-        System.out.print(prompt);
-        return SC.nextLine();
+    public static double readDouble(String prompt) {
+        return read(prompt, Double::parseDouble, "Double");
     }
 
     /**
-     * Lê um BigInteger do usuário.
+     * Lê um valor BigInteger.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return BigInteger - Valor BigInteger valido
+     * @param prompt Mensagem exibida ao usuário
+     * @return BigInteger - Valor válido
      */
-    public static BigInteger lerBigInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return new BigInteger(SC.nextLine().trim());
-            } catch (Exception e) {
-                erro("BigInteger");
-            }
-        }
+    public static BigInteger readBigInt(String prompt) {
+        return read(prompt, BigInteger::new, "BigInteger");
     }
 
     /**
-     * Lê um BigDecimal do usuário.
+     * Lê um valor BigDecimal.
      *
-     * @param prompt mensagem exibida antes da leitura
-     * @return BigDecimal - Valor BigDecimal valido
+     * @param prompt Mensagem exibida ao usuário
+     * @return BigDecimal - Valor válido
      */
-    public static BigDecimal lerBigDecimal(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return new BigDecimal(SC.nextLine().trim());
-            } catch (Exception e) {
-                erro("BigDecimal");
-            }
-        }
+    public static BigDecimal readBigDecimal(String prompt) {
+        return read(prompt, BigDecimal::new, "BigDecimal");
     }
 
     /**
-     * Exibe mensagem padrão de erro para entrada inválida.
+     * Lê um valor booleano. Aceita true/false, t/f, y/n, yes/no, s/n, sim/nao.
      *
-     * @param tipo tipo de dado inválido
+     * @param prompt Mensagem exibida ao usuário
+     * @return boolean - Valor booleano válido
+     * @throws IllegalArgumentException Quando o valor não for reconhecido
      */
-    private static void erro(String tipo) {
-        System.out.println("Input inválida! Insira um valor do tipo " + tipo);
+    public static boolean readBoolean(String prompt) {
+        return read(prompt, Inputter::parseBoolean, "Boolean (s/n)");
+    }
+
+    /**
+     * Lê uma string (permite valor vazio).
+     *
+     * @param prompt Mensagem exibida ao usuário
+     * @return String - String informada
+     */
+    public static String readString(String prompt) {
+        return read(prompt, s -> s, "String");
+    }
+
+    /**
+     * Lê uma string que não pode ser vazia.
+     * @param prompt Mensagem exibida ao usuário
+     * @return String - String informada
+     */
+    public static String readNotBlankString(String prompt) {
+        return read(prompt, String::trim, "String (não pode ser vazia)");
+    }
+
+    /**
+     * Lê uma data no formato obrigatório dd-MM-yyyy.
+     *
+     * @param prompt Mensagem exibida ao usuário
+     * @return LocalDate - Data válida
+     */
+    public static LocalDate readLocalDate(String prompt) {
+        return read(
+            prompt,
+            input -> LocalDate.parse(
+                input,
+                DateTimeFormatter
+                    .ofPattern("dd-MM-uuuu")
+                    .withResolverStyle(ResolverStyle.STRICT)
+            ),
+            "Data (DD-MM-YYYY)"
+        );
+    }
+
+    /**
+     * Realiza parsing de boolean com múltiplos formatos aceitos.
+     *
+     * @param input Valor informado pelo usuário
+     * @return boolean - Valor convertido
+     */
+    private static boolean parseBoolean(String input) {
+        return switch (input.toLowerCase()) {
+            case "true", "t", "y", "yes", "s", "sim" ->
+                true;
+            case "false", "f", "n", "no", "nao" ->
+                false;
+            default ->
+                Boolean.parseBoolean(input);
+        };
     }
 }

@@ -1,50 +1,49 @@
 package org.javapi.sigob.cli;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Estoque;
-import org.javapi.sigob.service.CategoriaService;
 import org.javapi.sigob.service.EstoqueService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pelas operações de estoque via CLI.
+ */
 public class MenuEstoque extends Menu {
+
+    /**
+     * Serviço de Estoques do Menu
+     */
+    private final EstoqueService service;
+
     /**
      * Inicializa o menu de estoques e registra as entradas disponíveis.
+     *
+     * @param service O serviço de estoques
      */
-    public MenuEstoque() {
-        super("Estoques");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Listar (ID)", this::buscarPorId);
-        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
+    public MenuEstoque(EstoqueService service) {
+        super("Operações de Estoques");
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Listar (ID)", this::buscarPorId);
+        add("Listar (NOME)", this::buscarPorNome);
+        add("Listar (TODOS)", this::listarTodos);
+        this.service = service;
     }
-
-    private final EstoqueService service = new EstoqueService();
-    private final CategoriaService categoriaService = new CategoriaService();
 
     /**
      * Realiza o cadastro de um novo estoque.
      */
     private void cadastrar() {
-        String codigo = Inputter.lerString("Insira o Código do Estoque: ");
-        String nome = Inputter.lerString("Insira o Nome do Estoque: ");
-        String descricao = Inputter.lerString("Insira a Descrição do Estoque: ");
-        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+        String codigo = Inputter.readString("Código do Estoque: ");
+        String nome = Inputter.readString("Nome do Estoque: ");
 
         try {
-            Categoria categoria = categoriaService.findById(idCategoria);
-
-            if (categoria == null) {
-                Logger.warn("Categoria não encontrada!");
-                return;
-            }
-
-            service.save(new Estoque(0, codigo, nome, descricao, categoria));
-            Logger.success("Estoque " + nome + " cadastrado com sucesso!");
+            service.save(new Estoque(0, codigo, nome));
+            Logger.success("Estoque %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar estoque: " + e.getMessage());
         }
@@ -54,28 +53,24 @@ public class MenuEstoque extends Menu {
      * Atualiza os dados de um estoque existente.
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+        int id = Inputter.readInt("ID do Estoque: ");
+        Optional<Estoque> estoque = service.findById(id);
 
-        while (service.findById(id) == null) {
+        while (estoque.isEmpty()) {
             Logger.warn("Estoque não encontrado!");
-            id = Inputter.lerInt("Insira o ID do Estoque: ");
+            id = Inputter.readInt("ID do Estoque: ");
+            estoque = service.findById(id);
         }
 
-        String codigo = Inputter.lerString("Insira o Novo Código do Estoque: ");
-        String nome = Inputter.lerString("Insira o Novo Nome do Estoque: ");
-        String descricao = Inputter.lerString("Insira a Nova Descrição do Estoque: ");
-        int idCategoria = Inputter.lerInt("Insira o ID da Categoria: ");
+        String codigo = Inputter.readString("Novo Código [vazio para manter o mesmo]: ");
+        codigo = codigo.isBlank() ? estoque.get().getCodigo() : codigo;
+
+        String nome = Inputter.readString("Novo Nome [vazio para manter o mesmo]: ");
+        nome = nome.isBlank() ? estoque.get().getNome() : nome;
 
         try {
-            Categoria categoria = categoriaService.findById(idCategoria);
-
-            if (categoria == null) {
-                Logger.warn("Categoria não encontrada!");
-                return;
-            }
-
-            service.update(new Estoque(id, codigo, nome, descricao, categoria));
-            Logger.success("Estoque " + id + " atualizado com sucesso!");
+            service.update(new Estoque(id, codigo, nome));
+            Logger.success("Estoque %d atualizado com sucesso!".formatted(id));
         } catch (Exception e) {
             Logger.error("Erro ao atualizar estoque: " + e.getMessage());
         }
@@ -85,14 +80,15 @@ public class MenuEstoque extends Menu {
      * Busca um estoque pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+        int id = Inputter.readInt("ID do Estoque: ");
 
         try {
-            Estoque estoque = service.findById(id);
-            if (estoque == null) {
+            Optional<Estoque> estoque = service.findById(id);
+
+            if (estoque.isEmpty()) {
                 Logger.warn("Estoque não encontrado!");
             } else {
-                System.out.println(estoque);
+                System.out.println(estoque.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar estoque: " + e.getMessage());
@@ -103,7 +99,7 @@ public class MenuEstoque extends Menu {
      * Busca estoques pelo nome.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome do Estoque: ");
+        String nome = Inputter.readString("Nome do Estoque: ");
 
         try {
             List<Estoque> estoques = service.findByNome(nome);
@@ -143,16 +139,16 @@ public class MenuEstoque extends Menu {
      * Remove um estoque pelo ID.
      */
     private void excluir() {
-        int id = Inputter.lerInt("Insira o ID do Estoque: ");
+        int id = Inputter.readInt("ID do Estoque: ");
 
         try {
-            Estoque estoque = service.findById(id);
+            Optional<Estoque> estoque = service.findById(id);
 
-            if (estoque == null) {
+            if (estoque.isEmpty()) {
                 Logger.warn("Estoque não encontrado!");
             } else {
-                service.delete(estoque);
-                Logger.success("Estoque " + id + " excluido com sucesso!");
+                service.delete(estoque.get());
+                Logger.success("Estoque %d excluído com sucesso!".formatted(id));
             }
         } catch (Exception e) {
             Logger.error("Erro ao excluir estoque: " + e.getMessage());
