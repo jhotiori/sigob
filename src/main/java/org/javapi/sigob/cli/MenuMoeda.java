@@ -1,41 +1,46 @@
 package org.javapi.sigob.cli;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Moeda;
 import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pelas operações de moeda via CLI.
+ */
 public class MenuMoeda extends Menu {
+
+    private final MoedaService service;
 
     /**
      * Inicializa o menu de moedas e registra as entradas disponíveis.
      */
-    public MenuMoeda() {
-        super("Moedas");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Buscar (ID)", this::buscarPorId);
-        adicionarEntrada("Buscar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Buscar (CODIGO)", this::buscarPorCodigo);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
+    public MenuMoeda(MoedaService service) {
+        super("Operações de Moedas");
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Buscar (ID)", this::buscarPorId);
+        add("Buscar (NOME)", this::buscarPorNome);
+        add("Buscar (SIGLA)", this::buscarPorSigla);
+        add("Listar (TODOS)", this::listarTodos);
+        this.service = service;
     }
-
-    private final MoedaService service = new MoedaService();
 
     /**
      * Realiza o cadastro de uma nova moeda.
      */
     private void cadastrar() {
-        String nome = Inputter.lerString("Insira o Nome da Moeda: ");
-        String simbolo = Inputter.lerString("Insira o Símbolo: ");
-        String sigla = Inputter.lerString("Insira a Sigla: ");
+        String nome = Inputter.readString("Nome da Moeda: ");
+        String cifrao = Inputter.readString("Cifrão: ");
+        String sigla = Inputter.readString("Sigla: ");
 
         try {
-            service.save(new Moeda(0, nome, simbolo, sigla));
-            Logger.success("Moeda " + nome + " cadastrada com sucesso!");
+            service.save(new Moeda(0, nome, cifrao, sigla));
+            Logger.success("Moeda %s cadastrada com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar moeda: " + e.getMessage());
         }
@@ -45,20 +50,29 @@ public class MenuMoeda extends Menu {
      * Atualiza os dados de uma moeda existente.
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID da Moeda: ");
+        int id = Inputter.readInt("ID da Moeda: ");
+        Optional<Moeda> moeda = service.findById(id);
 
-        while (service.findById(id) == null) {
+        while (moeda.isEmpty()) {
             Logger.warn("Moeda não encontrada!");
-            id = Inputter.lerInt("Insira o ID da Moeda: ");
+            id = Inputter.readInt("ID da Moeda: ");
+            moeda = service.findById(id);
         }
 
-        String nome = Inputter.lerString("Insira o Novo Nome da Moeda: ");
-        String simbolo = Inputter.lerString("Insira o Novo Símbolo: ");
-        String sigla = Inputter.lerString("Insira a Nova Sigla: ");
+        Moeda atual = moeda.get();
+
+        String nome = Inputter.readString("Novo Nome [vazio mantém]: ");
+        nome = nome.isBlank() ? atual.getNome() : nome;
+
+        String cifrao = Inputter.readString("Novo Cifrão [vazio mantém]: ");
+        cifrao = cifrao.isBlank() ? atual.getCifrao() : cifrao;
+
+        String sigla = Inputter.readString("Nova Sigla [vazio mantém]: ");
+        sigla = sigla.isBlank() ? atual.getSigla() : sigla;
 
         try {
-            service.update(new Moeda(id, nome, simbolo, sigla));
-            Logger.success("Moeda " + id + " atualizada com sucesso!");
+            service.update(new Moeda(id, nome, cifrao, sigla));
+            Logger.success("Moeda %d atualizada com sucesso!".formatted(id));
         } catch (Exception e) {
             Logger.error("Erro ao atualizar moeda: " + e.getMessage());
         }
@@ -68,14 +82,15 @@ public class MenuMoeda extends Menu {
      * Busca uma moeda pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID da Moeda: ");
+        int id = Inputter.readInt("ID da Moeda: ");
 
         try {
-            Moeda moeda = service.findById(id);
-            if (moeda == null) {
+            Optional<Moeda> moeda = service.findById(id);
+
+            if (moeda.isEmpty()) {
                 Logger.warn("Moeda não encontrada!");
             } else {
-                System.out.println(moeda);
+                System.out.println(moeda.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar moeda: " + e.getMessage());
@@ -86,7 +101,7 @@ public class MenuMoeda extends Menu {
      * Busca moedas pelo nome.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome da Moeda: ");
+        String nome = Inputter.readString("Nome da Moeda: ");
 
         try {
             List<Moeda> moedas = service.findByNome(nome);
@@ -104,17 +119,18 @@ public class MenuMoeda extends Menu {
     }
 
     /**
-     * Busca uma moeda pelo código.
+     * Busca uma moeda pela sigla.
      */
-    private void buscarPorCodigo() {
-        String codigo = Inputter.lerString("Insira a Sigla da Moeda: ");
+    private void buscarPorSigla() {
+        String sigla = Inputter.readString("Sigla da Moeda: ");
 
         try {
-            Moeda moeda = service.findByCodigo(codigo);
-            if (moeda == null) {
+            Optional<Moeda> moeda = service.findBySigla(sigla);
+
+            if (moeda.isEmpty()) {
                 Logger.warn("Moeda não encontrada!");
             } else {
-                System.out.println(moeda);
+                System.out.println(moeda.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar moeda: " + e.getMessage());
@@ -144,16 +160,16 @@ public class MenuMoeda extends Menu {
      * Remove uma moeda pelo ID.
      */
     private void excluir() {
-        int id = Inputter.lerInt("Insira o ID da Moeda: ");
+        int id = Inputter.readInt("ID da Moeda: ");
 
         try {
-            Moeda moeda = service.findById(id);
+            Optional<Moeda> moeda = service.findById(id);
 
-            if (moeda == null) {
+            if (moeda.isEmpty()) {
                 Logger.warn("Moeda não encontrada!");
             } else {
-                service.delete(moeda);
-                Logger.success("Moeda " + id + " excluída com sucesso!");
+                service.delete(moeda.get());
+                Logger.success("Moeda %d excluída com sucesso!".formatted(id));
             }
         } catch (Exception e) {
             Logger.error("Erro ao excluir moeda: " + e.getMessage());

@@ -1,6 +1,7 @@
 package org.javapi.sigob.cli;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.service.AcessoService;
@@ -13,32 +14,36 @@ import org.javapi.sigob.util.Logger;
 public class MenuAcesso extends Menu {
 
     /**
+     * Serviço de Acessos do Menu
+     */
+    private final AcessoService service;
+
+    /**
      * Inicializa o menu de acessos e registra as entradas disponíveis.
      */
-    public MenuAcesso() {
-        super("Acessos");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Listar (ID)", this::buscarPorId);
-        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Listar (CODIGO)", this::buscarPorCodigo);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
+    public MenuAcesso(AcessoService service) {
+        super("Operações de Acessos");
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Listar (ID)", this::buscarPorId);
+        add("Listar (NOME)", this::buscarPorNome);
+        add("Listar (CODIGO)", this::buscarPorCodigo);
+        add("Listar (TODOS)", this::listarTodos);
+        this.service = service;
     }
-
-    private final AcessoService service = new AcessoService();
 
     /**
      * Realiza o cadastro de um novo acesso.
      */
     private void cadastrar() {
-        String nome = Inputter.lerString("Insira o Nome do Acesso: ");
-        String codigo = Inputter.lerString("Insira o Codigo do Acesso: ");
-        String descricao = Inputter.lerString("Insira a Descricao do Acesso: ");
+        String nome = Inputter.readString("Nome do Acesso: ");
+        String codigo = Inputter.readString("Codigo do Acesso: ");
+        String descricao = Inputter.readString("Descrição do Acesso: ");
 
         try {
             service.save(new Acesso(0, nome, codigo, descricao));
-            Logger.success("Acesso " + nome + " cadastrado com sucesso!");
+            Logger.success("Acesso %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar acesso: " + e.getMessage());
         }
@@ -48,16 +53,23 @@ public class MenuAcesso extends Menu {
      * Atualiza os dados de um acesso existente.
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID do Acesso: ");
+        int id = Inputter.readInt("ID do Acesso: ");
+        Optional<Acesso> acesso = service.findById(id);
 
-        while (service.findById(id) == null) {
+        while (acesso.isEmpty()) {
             Logger.warn("Acesso não encontrado!");
-            id = Inputter.lerInt("Insira o ID do Acesso: ");
+            id = Inputter.readInt("ID do Acesso: ");
+            acesso = service.findById(id);
         }
 
-        String nome = Inputter.lerString("Insira o Novo nome do Acesso: ");
-        String codigo = Inputter.lerString("Insira o Novo Codigo do Acesso: ");
-        String descricao = Inputter.lerString("Insira a Nova Descricao do Acesso: ");
+        String nome = Inputter.readString("Novo Nome do Acesso [vazio para manter o mesmo]: ");
+        nome = nome.isBlank() ? acesso.get().getNome() : nome;
+
+        String codigo = Inputter.readString("Novo Codigo do Acesso [vazio para manter o mesmo]: ");
+        codigo = codigo.isBlank() ? acesso.get().getCodigo() : codigo;
+
+        String descricao = Inputter.readString("Nova Descricao do Acesso [vazio para manter o mesmo]: ");
+        descricao = descricao.isBlank() ? acesso.get().getDescricao() : descricao;
 
         try {
             service.update(new Acesso(id, nome, codigo, descricao));
@@ -71,14 +83,14 @@ public class MenuAcesso extends Menu {
      * Busca um acesso pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID do Acesso: ");
+        int id = Inputter.readInt("ID do Acesso para buscar: ");
 
         try {
-            Acesso acesso = service.findById(id);
-            if (acesso == null) {
+            Optional<Acesso> acesso = service.findById(id);
+            if (acesso.isEmpty()) {
                 Logger.warn("Acesso não encontrado!");
             } else {
-                System.out.println(acesso);
+                System.out.println(acesso.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar acesso: " + e.getMessage());
@@ -89,7 +101,7 @@ public class MenuAcesso extends Menu {
      * Busca acessos pelo nome.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome do Acesso: ");
+        String nome = Inputter.readString("Nome do Acesso: ");
 
         try {
             List<Acesso> acessos = service.findByNome(nome);
@@ -110,14 +122,14 @@ public class MenuAcesso extends Menu {
      * Busca um acesso pelo código.
      */
     private void buscarPorCodigo() {
-        String codigo = Inputter.lerString("Insira o Codigo do Acesso: ");
+        String codigo = Inputter.readString("Codigo do Acesso: ");
 
         try {
-            Acesso acesso = service.findByCodigo(codigo);
-            if (acesso == null) {
+            Optional<Acesso> acesso = service.findByCodigo(codigo);
+            if (acesso.isEmpty()) {
                 Logger.warn("Acesso não encontrado!");
             } else {
-                System.out.println(acesso);
+                System.out.println(acesso.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar acesso: " + e.getMessage());
@@ -146,14 +158,14 @@ public class MenuAcesso extends Menu {
      * Remove um acesso pelo ID.
      */
     private void excluir() {
-        int id = Inputter.lerInt("Insira o ID do Acesso: ");
+        int id = Inputter.readInt("ID do Acesso para excluir: ");
         try {
-            Acesso acesso = service.findById(id);
+            Optional<Acesso> acesso = service.findById(id);
 
-            if (acesso == null) {
+            if (acesso.isEmpty()) {
                 Logger.warn("Acesso não encontrado!");
             } else {
-                service.delete(acesso);
+                service.delete(acesso.get());
                 Logger.success("Acesso excluido com sucesso!");
             }
         } catch (Exception e) {

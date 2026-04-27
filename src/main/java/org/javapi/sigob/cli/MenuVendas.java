@@ -1,40 +1,51 @@
 package org.javapi.sigob.cli;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.entity.ItemVenda;
 import org.javapi.sigob.entity.ProdutosEstoques;
-import org.javapi.sigob.entity.ItemVendas;
 import org.javapi.sigob.entity.Venda;
-import org.javapi.sigob.exception.ProdutosEstoquesException;
 import org.javapi.sigob.service.ClienteService;
 import org.javapi.sigob.service.FuncionarioService;
-import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.ItemVendaService;
+import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
 public class MenuVendas extends Menu {
 
-    private final VendaService vendaService = new VendaService();
-    private final ItemVendaService pvService = new ItemVendaService();
-    private final ProdutosEstoquesService peService = new ProdutosEstoquesService();
-    private final ClienteService clienteService = new ClienteService();
-    private final FuncionarioService funcionarioService = new FuncionarioService();
+    private final VendaService vendaService;
+    private final ItemVendaService itemService;
+    private final ProdutosEstoquesService estoqueService;
+    private final ClienteService clienteService;
+    private final FuncionarioService funcionarioService;
 
-    public MenuVendas() {
-        super("Vendas");
-        adicionarEntrada("Listar (TODOS)", this::listarVendas);
-        adicionarEntrada("Cadastrar", this::iniciarVenda);
-        adicionarEntrada("Atualizar", this::editarCarrinho);
-        adicionarEntrada("Finalizar", this::fecharVenda);
+    public MenuVendas(
+            VendaService vendaService,
+            ItemVendaService itemService,
+            ProdutosEstoquesService estoqueService,
+            ClienteService clienteService,
+            FuncionarioService funcionarioService
+    ) {
+        super("Operações de Vendas");
+        add("Listar (TODOS)", this::listar);
+        add("Abrir Venda", this::abrir);
+        add("Editar Carrinho", this::editarCarrinho);
+        add("Finalizar Venda", this::finalizar);
+        this.vendaService = vendaService;
+        this.itemService = itemService;
+        this.estoqueService = estoqueService;
+        this.clienteService = clienteService;
+        this.funcionarioService = funcionarioService;
     }
 
-    private void listarVendas() {
+    private void listar() {
         try {
             List<Venda> vendas = vendaService.findAll();
 
@@ -44,204 +55,187 @@ public class MenuVendas extends Menu {
             }
 
             for (Venda v : vendas) {
-                System.out.printf(
-                        "[%d] Data: %s | Valor: %.2f | Pago: %s | Cliente: %s | Funcionário: %s%n",
-                        v.getIdVenda(),
-                        v.getDtVenda() != null ? v.getDtVenda().toLocalDate() : "Em aberto",
-                        v.getVlVenda() != null ? v.getVlVenda() : BigDecimal.ZERO,
-                        v.isFlPago() ? "Sim" : "Não",
-                        v.getCliente().getNmCliente(),
-                        v.getFuncionario().getNmFuncionario());
+                System.out.println(v);
             }
+
         } catch (Exception e) {
             Logger.error("Erro ao listar vendas: " + e.getMessage());
         }
     }
 
-    private void iniciarVenda() {
+    private void abrir() {
         try {
             Cliente cliente = resolverCliente();
-            if (cliente == null)
+            if (cliente == null) {
                 return;
-
-            List<Funcionario> funcionarios = funcionarioService.findAll();
-            for (Funcionario f : funcionarios) {
-                System.out.printf("[%d] %s%n", f.getIdFuncionario(), f.getNmFuncionario());
             }
 
-            int idFuncionario = Inputter.lerInt("ID do funcionário: ");
-            Funcionario funcionario = funcionarioService.findById(idFuncionario);
-
+            Funcionario funcionario = resolverFuncionario();
             if (funcionario == null) {
-                Logger.warn("Funcionário não encontrado!");
                 return;
             }
 
             Venda venda = new Venda();
             venda.setCliente(cliente);
             venda.setFuncionario(funcionario);
-            venda.setFlPago(false);
+            venda.setStatus("ABERTA");
+            venda.setDataAbertura(OffsetDateTime.now());
+            venda.setValorTotal(BigDecimal.ZERO);
 
             vendaService.save(venda);
             Logger.success("Venda aberta com sucesso!");
+            editarCarrinho(venda);
         } catch (Exception e) {
-            Logger.error("Erro ao iniciar venda: " + e.getMessage());
+            Logger.error("Erro ao abrir venda: " + e.getMessage());
         }
     }
 
     private void editarCarrinho() {
         try {
-            List<Venda> abertas = vendaService.findAll()
-                    .stream()
-                    .filter(v -> !v.isFlPago())
-                    .toList();
-
-            if (abertas.isEmpty()) {
-                Logger.warn("Nenhuma venda em aberto!");
+            Venda venda = resolverVendaAberta();
+            if (venda == null) {
                 return;
             }
 
-            for (Venda v : abertas) {
-                System.out.printf("[%d] Cliente: %s%n",
-                        v.getIdVenda(),
-                        v.getCliente().getNmCliente());
-            }
-
-            int idVenda = Inputter.lerInt("ID da venda: ");
-            Venda venda = vendaService.findById(idVenda);
-
-            if (venda == null || venda.isFlPago()) {
-                Logger.warn("Venda inválida!");
-                return;
-            }
-
-            boolean continuar = true;
-
-            while (continuar) {
-                List<ItemVendas> itens = pvService.findByVendaId(venda);
-
-                if (itens.isEmpty()) {
-                    Logger.warn("Carrinho vazio!");
-                } else {
-                    for (ItemVendas pv : itens) {
-                        System.out.printf("[%d] %s | Qtde: %d | Valor: %.2f%n",
-                                pv.getIdProdutoVenda(),
-                                pv.getProduto().getNmProduto(),
-                                pv.getNrQuantidade(),
-                                pv.getVlSaldo());
-                    }
-                }
-
-                int op = Inputter.lerInt("[1] Adicionar | [2] Remover | [0] Voltar: ");
-
-                switch (op) {
-                    case 1 -> adicionarItemCarrinho(venda);
-                    case 2 -> removerItemCarrinho(venda);
-                    case 0 -> continuar = false;
-                    default -> Logger.warn("Opção inválida!");
-                }
-            }
-
+            editarCarrinho(venda);
         } catch (Exception e) {
             Logger.error("Erro ao editar carrinho: " + e.getMessage());
         }
     }
 
-    private void adicionarItemCarrinho(Venda venda) {
-        List<ProdutosEstoques> estoque = peService.findAll()
+    private void editarCarrinho(Venda venda) {
+        boolean loop = true;
+
+        while (loop) {
+            renderCarrinho(venda);
+
+            int op = Inputter.readInt(
+                    "[1] Adicionar | [2] Remover | [0] Voltar: "
+            );
+
+            switch (op) {
+                case 1 ->
+                    adicionarItem(venda);
+                case 2 ->
+                    removerItem(venda);
+                case 0 ->
+                    loop = false;
+                default ->
+                    Logger.warn("Opção inválida!");
+            }
+        }
+    }
+
+    private void adicionarItem(Venda venda) {
+        List<ProdutosEstoques> lista = estoqueService.findAll()
                 .stream()
-                .filter(pe -> pe.getNrQuantidade() > 0)
+                .filter(p -> p.getQuantidade() > 0)
                 .toList();
 
-        if (estoque.isEmpty()) {
-            Logger.warn("Nenhum produto em estoque!");
+        if (lista.isEmpty()) {
+            Logger.warn("Nenhum produto disponível!");
             return;
         }
 
-        for (ProdutosEstoques pe : estoque) {
-            System.out.printf("[%d] %s | Qtde: %d%n",
-                    pe.getIdProdutosEstoque(),
-                    pe.getProduto().getNmProduto(),
-                    pe.getNrQuantidade());
+        for (ProdutosEstoques pe : lista) {
+            System.out.printf("[%d] %s | Quantidade: %d%n",
+                    pe.getId(),
+                    pe.getProduto().getNome(),
+                    pe.getQuantidade());
         }
 
-        int idPe = Inputter.lerInt("ID do item: ");
-        ProdutosEstoques pe = peService.findById(idPe);
+        int id = Inputter.readInt("ID do ProdutoEstoque: ");
 
-        if (pe == null) {
+        Optional<ProdutosEstoques> opt = estoqueService.findById(id);
+        if (opt.isEmpty()) {
             Logger.warn("Item não encontrado!");
             return;
         }
 
-        int qtde = Inputter.lerInt("Quantidade: ");
+        ProdutosEstoques pe = opt.get();
 
-        if (qtde <= 0 || qtde > pe.getNrQuantidade()) {
+        int qtd = Inputter.readInt("Quantidade: ");
+
+        if (qtd <= 0 || qtd > pe.getQuantidade()) {
             Logger.warn("Quantidade inválida!");
             return;
         }
 
-        BigDecimal total = pe.getProduto().getVlProduto()
-                .multiply(BigDecimal.valueOf(qtde));
+        try {
+            Optional<ItemVenda> existing = itemService.findByVendaAndProdutoEstoque(
+                    venda.getId(),
+                    pe.getId()
+            );
 
-        ItemVendas pv = new ItemVendas(0, qtde, total, pe.getProduto(), venda);
-        pvService.save(pv);
+            if (existing.isPresent()) {
+                ItemVenda i = existing.get();
+                i.setQuantidade(i.getQuantidade() + qtd);
 
-        Logger.success("Item adicionado ao carrinho!");
+                BigDecimal novoTotal = pe.getProduto()
+                        .getValorVenda()
+                        .multiply(BigDecimal.valueOf(i.getQuantidade()));
+
+                i.setValorUnitario(novoTotal);
+                itemService.update(i);
+                Logger.success("Quantidade atualizada!");
+
+            } else {
+                BigDecimal total = pe.getProduto()
+                        .getValorVenda()
+                        .multiply(BigDecimal.valueOf(qtd));
+
+                ItemVenda item = new ItemVenda(0, qtd, total, pe, venda);
+
+                itemService.save(item);
+
+                Logger.success("Item adicionado!");
+            }
+
+        } catch (Exception e) {
+            Logger.error("Erro ao adicionar item: " + e.getMessage());
+        }
     }
 
-    private void removerItemCarrinho(Venda venda) {
-        List<ItemVendas> itens = pvService.findByVendaId(venda);
+    private void removerItem(Venda venda) {
+        List<ItemVenda> itens = itemService.findByVenda(venda.getId());
 
         if (itens.isEmpty()) {
             Logger.warn("Carrinho vazio!");
             return;
         }
 
-        for (ItemVendas pv : itens) {
+        for (ItemVenda i : itens) {
             System.out.printf("[%d] %s%n",
-                    pv.getIdProdutoVenda(),
-                    pv.getProduto().getNmProduto());
+                    i.getId(),
+                    i.getProdutoEstoque().getProduto().getNome());
         }
 
-        int id = Inputter.lerInt("ID do item: ");
-        ItemVendas pv = pvService.findById(id);
+        int id = Inputter.readInt("ID do item: ");
 
-        if (pv == null || pv.getVenda().getIdVenda() != venda.getIdVenda()) {
+        Optional<ItemVenda> opt = itemService.findById(id);
+
+        if (opt.isEmpty() || opt.get().getVenda().getId() != venda.getId()) {
             Logger.warn("Item inválido!");
             return;
         }
 
-        pvService.delete(pv);
-        Logger.success("Item removido!");
+        try {
+            itemService.delete(opt.get());
+            Logger.success("Item removido!");
+
+        } catch (Exception e) {
+            Logger.error("Erro ao remover item: " + e.getMessage());
+        }
     }
 
-    private void fecharVenda() {
+    private void finalizar() {
         try {
-            List<Venda> abertas = vendaService.findAll()
-                    .stream()
-                    .filter(v -> !v.isFlPago())
-                    .toList();
-
-            if (abertas.isEmpty()) {
-                Logger.warn("Nenhuma venda em aberto!");
+            Venda venda = resolverVendaAberta();
+            if (venda == null) {
                 return;
             }
 
-            for (Venda v : abertas) {
-                System.out.printf("[%d] %s%n",
-                        v.getIdVenda(),
-                        v.getCliente().getNmCliente());
-            }
-
-            int id = Inputter.lerInt("ID da venda: ");
-            Venda venda = vendaService.findById(id);
-
-            if (venda == null || venda.isFlPago()) {
-                Logger.warn("Venda inválida!");
-                return;
-            }
-
-            List<ItemVendas> itens = pvService.findByVendaId(venda);
+            List<ItemVenda> itens = itemService.findByVenda(venda.getId());
 
             if (itens.isEmpty()) {
                 Logger.warn("Carrinho vazio!");
@@ -249,49 +243,81 @@ public class MenuVendas extends Menu {
             }
 
             BigDecimal total = itens.stream()
-                    .map(ItemVendas::getVlSaldo)
+                    .map(ItemVenda::getValorUnitario)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            boolean confirmar = Inputter.lerBoolean("Confirmar pagamento?");
+            boolean confirmar = Inputter.readBoolean("Confirmar pagamento? [S/N]: ");
 
             if (!confirmar) {
-                pvService.findByVendaId(venda).forEach(pvService::delete);
-                vendaService.delete(venda);
                 Logger.warn("Venda cancelada!");
                 return;
             }
 
-            for (ItemVendas pv : itens) {
-                peService.findAll().stream()
-                        .filter(pe -> pe.getProduto().getIdProduto() == pv.getProduto().getIdProduto())
-                        .findFirst()
-                        .ifPresent(pe -> {
-                            pe.setNrQuantidade(pe.getNrQuantidade() - pv.getNrQuantidade());
-                            if (pe.getNrQuantidade() == 0) {
-                                peService.delete(pe);
-                            } else {
-                                try {
-                                    peService.update(pe);
-                                } catch (ProdutosEstoquesException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        });
+            for (ItemVenda i : itens) {
+                ProdutosEstoques pe = i.getProdutoEstoque();
+                pe.setQuantidade(pe.getQuantidade() - i.getQuantidade());
+                estoqueService.update(pe);
             }
 
-            venda.setVlVenda(total);
-            venda.setDtVenda(ZonedDateTime.now());
-            venda.setFlPago(true);
+            venda.setStatus("FINALIZADA");
+            venda.setDataFinalizada(OffsetDateTime.now());
+            venda.setValorTotal(total);
 
-            vendaService.save(venda);
-            Logger.success("Venda finalizada com sucesso!");
+            vendaService.update(venda);
+
+            Logger.success("Venda finalizada!");
+
         } catch (Exception e) {
             Logger.error("Erro ao finalizar venda: " + e.getMessage());
         }
     }
 
+    private void renderCarrinho(Venda venda) {
+        List<ItemVenda> itens = itemService.findByVenda(venda.getId());
+
+        if (itens.isEmpty()) {
+            Logger.warn("Carrinho vazio!");
+            return;
+        }
+
+        for (ItemVenda i : itens) {
+            System.out.printf("[%d] %s | Qtde: %d | Total: %s%n",
+                    i.getId(),
+                    i.getProdutoEstoque().getProduto().getNome(),
+                    i.getQuantidade(),
+                    i.getValorUnitario());
+        }
+    }
+
+    private Venda resolverVendaAberta() {
+        List<Venda> abertas = vendaService.findAbertas();
+
+        if (abertas.isEmpty()) {
+            Logger.warn("Nenhuma venda aberta!");
+            return null;
+        }
+
+        for (Venda v : abertas) {
+            System.out.printf("[%d] Cliente: %s%n",
+                    v.getId(),
+                    v.getCliente().getNome());
+        }
+
+        int id = Inputter.readInt("ID da venda: ");
+
+        Optional<Venda> opt = vendaService.findById(id);
+
+        if (opt.isEmpty() || !"ABERTA".equals(opt.get().getStatus())) {
+            Logger.warn("Venda inválida!");
+            return null;
+        }
+
+        return opt.get();
+    }
+
     private Cliente resolverCliente() {
-        String nome = Inputter.lerString("Nome do cliente: ");
+        String nome = Inputter.readString("Nome do cliente: ");
+
         List<Cliente> lista = clienteService.findByNome(nome);
 
         if (!lista.isEmpty()) {
@@ -299,10 +325,34 @@ public class MenuVendas extends Menu {
         }
 
         Cliente c = new Cliente();
-        c.setNmCliente(nome);
-        c.setNrDocumento("000000000");
+        c.setNome(nome);
 
         clienteService.save(c);
+
         return c;
+    }
+
+    private Funcionario resolverFuncionario() {
+        List<Funcionario> lista = funcionarioService.findAll();
+
+        if (lista.isEmpty()) {
+            Logger.warn("Nenhum funcionário encontrado!");
+            return null;
+        }
+
+        for (Funcionario f : lista) {
+            System.out.printf("[%d] %s%n", f.getId(), f.getNome());
+        }
+
+        int id = Inputter.readInt("ID do funcionário: ");
+
+        Optional<Funcionario> opt = funcionarioService.findById(id);
+
+        if (opt.isEmpty()) {
+            Logger.warn("Funcionário não encontrado!");
+            return null;
+        }
+
+        return opt.get();
     }
 }

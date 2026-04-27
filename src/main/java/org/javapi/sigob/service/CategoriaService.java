@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Categoria;
-import org.javapi.sigob.exception.CategoriaException;
 import org.javapi.sigob.repository.CategoriaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;

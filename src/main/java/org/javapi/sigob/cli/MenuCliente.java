@@ -1,63 +1,156 @@
 package org.javapi.sigob.cli;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.entity.Documento;
 import org.javapi.sigob.service.ClienteService;
+import org.javapi.sigob.service.DocumentoService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
 
+/**
+ * Menu responsável pelas operações de cliente via CLI.
+ */
 public class MenuCliente extends Menu {
-    /**
-     * Inicializa o menu de clientes e registra as entradas disponíveis.
-     */
-    public MenuCliente() {
-        super("Clientes");
-        adicionarEntrada("Cadastrar", this::cadastrar);
-        adicionarEntrada("Atualizar", this::atualizar);
-        adicionarEntrada("Excluir", this::excluir);
-        adicionarEntrada("Listar (ID)", this::buscarPorId);
-        adicionarEntrada("Listar (NOME)", this::buscarPorNome);
-        adicionarEntrada("Listar (DOCUMENTO)", this::buscarPorDoc);
-        adicionarEntrada("Listar (TODOS)", this::listarTodos);
+
+    private final ClienteService service;
+    private final DocumentoService documentoService;
+
+    public MenuCliente(ClienteService service, DocumentoService documentoService) {
+        super("Operações de Clientes");
+        add("Cadastrar", this::cadastrar);
+        add("Atualizar", this::atualizar);
+        add("Excluir", this::excluir);
+        add("Listar (ID)", this::buscarPorId);
+        add("Listar (NOME)", this::buscarPorNome);
+        add("Listar (DOCUMENTO)", this::buscarPorDocumento);
+        add("Listar (TODOS)", this::listarTodos);
+        this.service = service;
+        this.documentoService = documentoService;
     }
 
-    private final ClienteService service = new ClienteService();
-
     /**
-     * Realiza o cadastro de um novo cliente.
+     * Realiza o cadastro de um novo cliente. Fluxo: - 1. Pergunta o nome do
+     * cliente - 2. Pergunta se deseja adicionar uma data de nascimento - 3.
+     * Pergunta se deseja anexar um documento - 4. Cadastra o cliente
      */
     private void cadastrar() {
-        String nome = Inputter.lerString("Insira o Nome do Cliente: ");
-        String documento = Inputter.lerString("Insira o Documento do Cliente: ");
+        String nome = Inputter.readString("Nome do Cliente: ");
+
+        LocalDate dataNascimento = null;
+        if (Inputter.readBoolean("Deseja adicionar Data de Nascimento? [S/N]: ")) {
+            dataNascimento = Inputter.readLocalDate("Data de Nascimento: ");
+        }
+
+        Documento documento = null;
+
+        if (Inputter.readBoolean("Deseja anexar um Documento? [S/N]: ")) {
+            String tipo = Inputter.readNotBlankString("Tipo do Documento: ");
+            String valor = Inputter.readNotBlankString("Documento: ");
+
+            documento = new Documento(0, valor, tipo);
+
+            try {
+                documentoService.save(documento);
+            } catch (Exception e) {
+                Logger.error("Erro ao cadastrar documento: " + e.getMessage());
+            }
+        }
 
         try {
-            service.save(new Cliente(0, nome, documento));
-            Logger.success("Cliente " + nome + " cadastrado com sucesso!");
+            service.save(new Cliente(0, nome, dataNascimento, documento));
+            Logger.success("Cliente %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar cliente: " + e.getMessage());
         }
     }
 
     /**
-     * Atualiza os dados de um cliente existente.
+     * Atualiza os dados de um cliente existente. Fluxo: - 1. Busca o cliente
+     * pelo ID - 2. Pergunta se deseja atualizar o nome - 3. Pergunta se deseja
+     * atualizar a data de nascimento - 4. Pergunta se deseja atualizar o
+     * documento - 5. Atualiza o cliente
      */
     private void atualizar() {
-        int id = Inputter.lerInt("Insira o ID do Cliente: ");
+        int id = Inputter.readInt("ID do Cliente: ");
+        Optional<Cliente> cliente = service.findById(id);
 
-        while (service.findById(id) == null) {
+        while (cliente.isEmpty()) {
             Logger.warn("Cliente não encontrado!");
-            id = Inputter.lerInt("Insira o ID do Cliente: ");
+            id = Inputter.readInt("ID do Cliente: ");
+            cliente = service.findById(id);
         }
 
-        String nome = Inputter.lerString("Insira o Novo Nome do Cliente: ");
-        String documento = Inputter.lerString("Insira o Novo Documento do Cliente: ");
+        String nome = Inputter.readString("Novo Nome [vazio para manter]: ");
+        nome = nome.isBlank() ? cliente.get().getNome() : nome;
+        cliente.get().setNome(nome);
+
+        if (Inputter.readBoolean("Deseja atualizar Data de Nascimento? [S/N]: ")) {
+            LocalDate data = Inputter.readLocalDate("Nova Data [vazio mantém]: ");
+            data = data == null ? cliente.get().getDataNascimento() : data;
+            cliente.get().setDataNascimento(data);
+        }
+
+        if (Inputter.readBoolean("Deseja atualizar Documento? [S/N]: ")) {
+            Documento documento = cliente.get().getDocumento();
+
+            if (documento == null) {
+                String tipo = Inputter.readNotBlankString("Tipo do Documento: ");
+                String valor = Inputter.readNotBlankString("Documento: ");
+
+                documento = new Documento(0, valor, tipo);
+
+                try {
+                    documentoService.save(documento);
+                } catch (Exception e) {
+                    Logger.error("Erro ao cadastrar documento: " + e.getMessage());
+                }
+
+            } else {
+                String tipo = Inputter.readNotBlankString("Novo Tipo: ");
+                documento.setTipo(tipo);
+
+                String valor = Inputter.readNotBlankString("Novo Documento: ");
+                documento.setDocumento(valor);
+
+                try {
+                    documentoService.update(documento);
+                } catch (Exception e) {
+                    Logger.error("Erro ao atualizar documento: " + e.getMessage());
+                }
+            }
+
+            cliente.get().setDocumento(documento);
+        }
 
         try {
-            service.save(new Cliente(id, nome, documento));
-            Logger.success("Cliente " + id + " atualizado com sucesso!");
+            service.update(cliente.get());
+            Logger.success("Cliente %d atualizado com sucesso!".formatted(id));
         } catch (Exception e) {
             Logger.error("Erro ao atualizar cliente: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remove um cliente pelo ID.
+     */
+    private void excluir() {
+        int id = Inputter.readInt("ID do Cliente: ");
+
+        try {
+            Optional<Cliente> cliente = service.findById(id);
+
+            if (cliente.isEmpty()) {
+                Logger.warn("Cliente não encontrado!");
+            } else {
+                service.delete(cliente.get());
+                Logger.success("Cliente %d excluído com sucesso!".formatted(id));
+            }
+        } catch (Exception e) {
+            Logger.error("Erro ao excluir cliente: " + e.getMessage());
         }
     }
 
@@ -65,14 +158,15 @@ public class MenuCliente extends Menu {
      * Busca um cliente pelo ID.
      */
     private void buscarPorId() {
-        int id = Inputter.lerInt("Insira o ID do Cliente: ");
+        int id = Inputter.readInt("ID do Cliente: ");
 
         try {
-            Cliente cliente = service.findById(id);
-            if (cliente == null) {
+            Optional<Cliente> cliente = service.findById(id);
+
+            if (cliente.isEmpty()) {
                 Logger.warn("Cliente não encontrado!");
             } else {
-                System.out.println(cliente);
+                System.out.println(cliente.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar cliente: " + e.getMessage());
@@ -80,10 +174,10 @@ public class MenuCliente extends Menu {
     }
 
     /**
-     * Busca clientes pelo nome.
+     * Busca um cliente pelo nome. Pode retornar vários clientes.
      */
     private void buscarPorNome() {
-        String nome = Inputter.lerString("Insira o Nome do Cliente: ");
+        String nome = Inputter.readString("Nome do Cliente: ");
 
         try {
             List<Cliente> clientes = service.findByNome(nome);
@@ -101,20 +195,18 @@ public class MenuCliente extends Menu {
     }
 
     /**
-     * Busca clientes pelo documento.
+     * Busca um cliente pelo documento.
      */
-    private void buscarPorDoc() {
-        String documento = Inputter.lerString("Insira o Documento do Cliente: ");
+    private void buscarPorDocumento() {
+        String documento = Inputter.readString("Documento do Cliente: ");
 
         try {
-            List<Cliente> clientes = service.findByDocumento(documento);
+            Optional<Cliente> cliente = service.findByDocumento(documento);
 
-            if (clientes.isEmpty()) {
+            if (cliente.isEmpty()) {
                 Logger.warn("Cliente não encontrado!");
             } else {
-                for (Cliente c : clientes) {
-                    System.out.println(c);
-                }
+                System.out.println(cliente.get());
             }
         } catch (Exception e) {
             Logger.error("Erro ao buscar cliente: " + e.getMessage());
@@ -137,26 +229,6 @@ public class MenuCliente extends Menu {
             }
         } catch (Exception e) {
             Logger.error("Erro ao listar clientes: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Remove um cliente pelo ID.
-     */
-    private void excluir() {
-        int id = Inputter.lerInt("Insira o ID do Cliente: ");
-
-        try {
-            Cliente cliente = service.findById(id);
-
-            if (cliente == null) {
-                Logger.warn("Cliente não encontrado!");
-            } else {
-                service.delete(cliente);
-                Logger.success("Cliente " + id + " excluido com sucesso!");
-            }
-        } catch (Exception e) {
-            Logger.error("Erro ao excluir cliente: " + e.getMessage());
         }
     }
 }
