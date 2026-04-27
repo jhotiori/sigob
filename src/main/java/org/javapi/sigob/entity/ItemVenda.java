@@ -12,9 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-@Entity
+@Entity(name = "item_vendas")
 @Table(
-        name = "item_vendas",
         uniqueConstraints = {
             @UniqueConstraint(columnNames = {"venda_id", "produtoEstoque_id"})
         }
@@ -28,8 +27,8 @@ public class ItemVenda {
     @Column(name = "quantidade", nullable = false)
     private int quantidade;
 
-    @Column(name = "valor_unitario", nullable = false)
-    private BigDecimal valorUnitario;
+    @Column(name = "valor_saldo", nullable = false)
+    private BigDecimal valorSaldo;
 
     @ManyToOne
     @JoinColumn(name = "produtoEstoque_id", nullable = false)
@@ -50,14 +49,14 @@ public class ItemVenda {
      *
      * @param id O ID do ItemVenda
      * @param quantidade A Quantidade do ItemVenda
-     * @param valorUnitario O Valor Unitário do ItemVenda
+     * @param valorSaldo O Valor Unitário do ItemVenda
      * @param produtoEstoque O ProdutoEstoque do ItemVenda
      * @param venda A Venda do ItemVenda
      */
-    public ItemVenda(int id, int quantidade, BigDecimal valorUnitario, ProdutosEstoques produtoEstoque, Venda venda) {
+    public ItemVenda(int id, int quantidade, BigDecimal valorSaldo, ProdutosEstoques produtoEstoque, Venda venda) {
         this.id = id;
         this.quantidade = quantidade;
-        this.valorUnitario = valorUnitario;
+        this.valorSaldo = valorSaldo;
         this.produtoEstoque = produtoEstoque;
         this.venda = venda;
     }
@@ -83,10 +82,10 @@ public class ItemVenda {
     /**
      * Atribui o Valor Unitário do ItemVenda
      *
-     * @param valorUnitario O Valor Unitário do ItemVenda
+     * @param valorSaldo O Valor Unitário do ItemVenda
      */
-    public void setValorUnitario(BigDecimal valorUnitario) {
-        this.valorUnitario = valorUnitario;
+    public void setValorSaldo(BigDecimal valorSaldo) {
+        this.valorSaldo = valorSaldo;
     }
 
     /**
@@ -128,10 +127,10 @@ public class ItemVenda {
     /**
      * Retorna o Valor Unitário do ItemVenda
      *
-     * @return valorUnitario - O Valor Unitário do ItemVenda
+     * @return valorSaldo - O Valor Unitário do ItemVenda
      */
-    public BigDecimal getValorUnitario() {
-        return valorUnitario;
+    public BigDecimal getValorSaldo() {
+        return valorSaldo;
     }
 
     /**
@@ -154,7 +153,7 @@ public class ItemVenda {
 
     @Override
     public String toString() {
-        return "ItemVenda(Id = %d, Quantidade = %d, ValorUnitario = %s)"
-                .formatted(this.getId(), this.getQuantidade(), this.getValorUnitario());
+        return "ItemVenda(Id = %d, Quantidade = %d, valorSaldo = %s)"
+                .formatted(this.getId(), this.getQuantidade(), this.getValorSaldo());
     }
 }

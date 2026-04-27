@@ -83,6 +83,7 @@ public class MenuVendas extends Menu {
             venda.setValorTotal(BigDecimal.ZERO);
 
             vendaService.save(venda);
+
             Logger.success("Venda aberta com sucesso!");
             editarCarrinho(venda);
         } catch (Exception e) {
@@ -175,7 +176,7 @@ public class MenuVendas extends Menu {
                         .getValorVenda()
                         .multiply(BigDecimal.valueOf(i.getQuantidade()));
 
-                i.setValorUnitario(novoTotal);
+                i.setValorSaldo(novoTotal);
                 itemService.update(i);
                 Logger.success("Quantidade atualizada!");
 
@@ -243,7 +244,7 @@ public class MenuVendas extends Menu {
             }
 
             BigDecimal total = itens.stream()
-                    .map(ItemVenda::getValorUnitario)
+                    .map(ItemVenda::getValorSaldo)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             boolean confirmar = Inputter.readBoolean("Confirmar pagamento? [S/N]: ");
@@ -285,7 +286,7 @@ public class MenuVendas extends Menu {
                     i.getId(),
                     i.getProdutoEstoque().getProduto().getNome(),
                     i.getQuantidade(),
-                    i.getValorUnitario());
+                    i.getValorSaldo());
         }
     }
 
