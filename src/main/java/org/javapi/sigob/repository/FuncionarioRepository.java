@@ -57,4 +57,13 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
                         .getSingleResultOrNull()
         );
     }
+
+    public List<Funcionario> findByAcessoId (int idAcesso){
+        return em.createQuery("""
+                        SELECT f FROM funcionarios f
+                        WHERE f.acesso.id = :id
+                        """, Funcionario.class)
+                .setParameter("id", idAcesso)
+                .getResultList();
+    }
 }

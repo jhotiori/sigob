@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.AcessoRepository;
+import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -48,10 +50,16 @@ public class AcessoService {
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
-        validateAcesso(acesso);
-        TransactionExecutor.executeVoid(em -> {
-            new AcessoRepository(em).deleteById(acesso.getId());
-        });
+        //validateAcesso(acesso); --acredito nao ser necessario, pois o já tem validação antes
+
+        if(validateDeleteAcesso(acesso)){
+            TransactionExecutor.executeVoid(em -> {
+                new AcessoRepository(em).deleteById(acesso.getId());
+            });
+        } else {
+            throw new SigobException("O Acesso possuí vínculo com Funcionário, não podendo ser removido!");
+        }
+
     }
 
     /**
@@ -166,5 +174,12 @@ public class AcessoService {
         Validator.start()
                 .expectNotNull(id, "ID não pode ser nulo!")
                 .validate();
+    }
+
+
+    private boolean validateDeleteAcesso(Acesso acesso){
+        return TransactionExecutor.query(em -> {
+            return (new FuncionarioRepository(em).findByAcessoId(acesso.getId()).isEmpty() ? true : false);
+        });
     }
 }
