@@ -59,8 +59,9 @@ public class CategoriaService {
             TransactionExecutor.executeVoid(em -> {
                 new CategoriaRepository(em).deleteById(categoria.getId());
             });
+        } else{
+            throw new SigobException("A Categoria possuí vínculo com Produto, não podendo ser removida!");
         }
-        throw new SigobException("A Categoria possuí vínculo com Produto, não podendo ser removida!");
     }
 
     /**
@@ -144,12 +145,6 @@ public class CategoriaService {
         //validateCodigo(categoria.getCodigo()); codigo eh opcional
     }
 
-    private boolean validateDeleteCategoria(Categoria categoria){
-        return TransactionExecutor.query(em -> {
-            return (new ProdutoRepository(em).findByCategoriaId(categoria.getId()).isEmpty() ? true : false);
-        });
-    }
-
     /**
      * Valida o nome de uma Categoria
      *
@@ -184,5 +179,11 @@ public class CategoriaService {
         Validator.start()
                 .expectNotNull(id, "ID da Categoria não pode ser nulo")
                 .validate();
+    }
+
+    private boolean validateDeleteCategoria(Categoria categoria){
+        return TransactionExecutor.query(em -> {
+            return (new ProdutoRepository(em).findByCategoriaId(categoria.getId()).isEmpty() ? true : false);
+        });
     }
 }

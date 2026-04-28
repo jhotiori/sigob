@@ -46,4 +46,19 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
         return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
                 .getResultList();
     }
+
+    /**
+     * Busca todas as Vendas de um Cliente pelo ID (único)
+     *
+     * @param idCliente O ID da Cliente
+     * @return List<Venda> - Os Vendas encontradas
+     */
+    public List<Venda> findByClienteId(int idCliente) {
+        return em.createQuery("""
+                        SELECT v FROM vendas v
+                        WHERE v.cliente.id = :id
+                        """, Venda.class)
+                .setParameter("id", idCliente)
+                .getResultList();
+    }
 }
