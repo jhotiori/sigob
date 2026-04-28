@@ -69,4 +69,19 @@ public class ProdutoRepository extends BaseRepository<Produto, Integer> {
                 .setParameter("nome", nomeCategoria)
                 .getResultList();
     }
+
+    /**
+     * Busca todos os Produtos de uma Categoria pelo ID (único)
+     *
+     * @param idCategoria O ID da Categoria
+     * @return List<Produto> - Os Produtos encontrados
+     */
+    public List<Produto> findByCategoriaId(int idCategoria) {
+        return em.createQuery("""
+                        SELECT p FROM produtos p
+                        WHERE p.categoria.id = :id
+                        """, Produto.class)
+                .setParameter("id", idCategoria)
+                .getResultList();
+    }
 }
