@@ -13,7 +13,6 @@ public class AcessoService {
     /**
      * Cria um novo AcessoService
      *
-     * @return AcessoService - O servico
      */
     public AcessoService() {
     }
@@ -22,11 +21,10 @@ public class AcessoService {
      * Salva um acesso
      *
      * @param acesso O acesso a ser salvo
-     * @throws AcessoException Se o acesso for invalido
      */
     public void save(Acesso acesso) {
         validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
+        //validateCodigo(acesso.getCodigo()); codigo eh opcional
         TransactionExecutor.executeVoid(em -> {
             new AcessoRepository(em).save(acesso);
         });
@@ -36,7 +34,6 @@ public class AcessoService {
      * Atualiza um acesso
      *
      * @param acesso O acesso a ser atualizado
-     * @throws AcessoException Se o acesso for invalido
      */
     public void update(Acesso acesso) {
         validateAcesso(acesso);
@@ -132,7 +129,7 @@ public class AcessoService {
                 .expectNotNull(acesso, "Acesso nao pode ser nulo!")
                 .validate();
         validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
+        //validateCodigo(acesso.getCodigo()); -- codigo eh opcional
     }
 
     /**
