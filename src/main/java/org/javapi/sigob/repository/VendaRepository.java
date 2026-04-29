@@ -33,17 +33,17 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findAbertas() {
-        return em.createQuery("select v from vendas v where v.status = 'ABERTA'", Venda.class)
+        return em.createQuery("select v from vendas v where v.status = 'aberta'", Venda.class)
                 .getResultList();
     }
 
     /**
      * Busca Venda que tenham status 'FINALIZADA'
-     *
+     *finalizada
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findFinalizadas() {
-        return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
+        return em.createQuery("select v from vendas v where v.status = 'finalizada'", Venda.class)
                 .getResultList();
     }
 
