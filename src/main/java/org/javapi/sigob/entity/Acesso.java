@@ -131,6 +131,10 @@ public class Acesso {
         return Set.copyOf(funcionarios);
     }
 
+    public void addFuncionario(Funcionario funcionario) {
+        this.funcionarios.add(funcionario);
+    }
+
     @Override
     public String toString() {
         return "Acesso(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"

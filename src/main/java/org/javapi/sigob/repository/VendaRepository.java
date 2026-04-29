@@ -61,4 +61,19 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
                 .setParameter("id", idCliente)
                 .getResultList();
     }
+
+    /**
+     * Busca todas as Vendas de um Cliente pelo ID (único)
+     *
+     * @param idFuncionario O ID da Cliente
+     * @return List<Venda> - Os Vendas encontradas
+     */
+    public List<Venda> findByFuncionarioId(int idFuncionario) {
+        return em.createQuery("""
+                        SELECT v FROM vendas v
+                        WHERE v.funcionario.id = :id
+                        """, Venda.class)
+                .setParameter("id", idFuncionario)
+                .getResultList();
+    }
 }

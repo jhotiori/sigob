@@ -3,6 +3,7 @@ package org.javapi.sigob.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
 
 import jakarta.persistence.EntityManager;
@@ -65,5 +66,17 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
                         """, Funcionario.class)
                 .setParameter("id", idAcesso)
                 .getResultList();
+    }
+
+    @Override
+    public Optional<Funcionario> findById(Integer id) {
+        return em.createQuery("""
+            SELECT f FROM funcionarios f
+            LEFT JOIN FETCH f.acessos
+            WHERE f.id = :id
+            """, Funcionario.class)
+                .setParameter("id", id)
+                .getResultStream()
+                .findFirst();
     }
 }
