@@ -6,7 +6,10 @@ import java.util.Set;
 
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.exception.SigobException;
+import org.javapi.sigob.repository.DocumentoRepository;
 import org.javapi.sigob.repository.FuncionarioRepository;
+import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -15,7 +18,6 @@ public class FuncionarioService {
     /**
      * Cria uma novo FuncionarioService
      *
-     * @return FuncionarioService - O servico de funcionarios
      */
     public FuncionarioService() {
     }
@@ -55,8 +57,25 @@ public class FuncionarioService {
      * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public void delete(Funcionario funcionario) {
-        validateFuncionario(funcionario);
+        //validateFuncionario(funcionario); nao eh necessario validar logo apos recuperar o objeto
 
+        if (validateDeleteFuncionario(funcionario)){
+            int documento_id = funcionario.getDocumento().getId();
+
+            TransactionExecutor.executeVoid(em -> {
+                new FuncionarioRepository(em).deleteById(funcionario.getId());
+            });
+
+            //após deletar o funcionario tem que deletar o documento que ele tinha
+            if(documento_id > 0){
+                TransactionExecutor.executeVoid(em -> {
+                    new DocumentoRepository(em).deleteById(documento_id);
+                });
+            }
+
+        } else{
+            throw new SigobException("O Funcionario possui vínculo com Vendas, não podendo ser removido!");
+        }
         TransactionExecutor.executeVoid(em -> {
             new FuncionarioRepository(em).deleteById(funcionario.getId());
         });
@@ -196,5 +215,11 @@ public class FuncionarioService {
         Validator.start()
                 .expectNotNull(id, "ID não pode ser nulo")
                 .validate();
+    }
+
+    private boolean validateDeleteFuncionario(Funcionario funcionario){
+        return TransactionExecutor.query(em -> {
+            return (new VendaRepository(em).findByFuncionarioId(funcionario.getId()).isEmpty() ? true : false);
+        });
     }
 }

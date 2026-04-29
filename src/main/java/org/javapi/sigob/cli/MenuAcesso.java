@@ -42,7 +42,7 @@ public class MenuAcesso extends Menu {
         String descricao = Inputter.readString("Descrição do Acesso: ");
 
         try {
-            service.save(new Acesso(0, nome, codigo, descricao));
+            service.save(new Acesso(0, codigo, nome, descricao));
             Logger.success("Acesso %s cadastrado com sucesso!".formatted(nome));
         } catch (Exception e) {
             Logger.error("Erro ao cadastrar acesso: " + e.getMessage());
@@ -72,7 +72,7 @@ public class MenuAcesso extends Menu {
         descricao = descricao.isBlank() ? acesso.get().getDescricao() : descricao;
 
         try {
-            service.update(new Acesso(id, nome, codigo, descricao));
+            service.update(new Acesso(id, codigo, nome, descricao));
             Logger.success("Acesso " + id + " atualizado com sucesso!");
         } catch (Exception e) {
             Logger.error("Erro ao atualizar acesso: " + e.getMessage());
