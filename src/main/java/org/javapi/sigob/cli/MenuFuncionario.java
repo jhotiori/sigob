@@ -95,9 +95,10 @@ public class MenuFuncionario extends Menu {
             // 1. salva documento
             documentoService.save(documento);
 
+            //FUNCIONALIDADE TEMPORARIAMENTE REMOVIDA
             // 2. cria cliente automaticamente
-            Cliente cliente = new Cliente(0, nome, null, documento);
-            clienteService.save(cliente);
+            //Cliente cliente = new Cliente(0, nome, null, documento);
+            //clienteService.save(cliente);
 
             // 3. cria funcionario
             Funcionario funcionario = new Funcionario(0, nome, codigo, documento);

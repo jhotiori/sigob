@@ -33,17 +33,47 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findAbertas() {
-        return em.createQuery("select v from vendas v where v.status = 'ABERTA'", Venda.class)
+        return em.createQuery("select v from vendas v where v.status = 'aberta'", Venda.class)
                 .getResultList();
     }
 
     /**
      * Busca Venda que tenham status 'FINALIZADA'
-     *
+     *finalizada
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findFinalizadas() {
-        return em.createQuery("select v from vendas v where v.status = 'FINALIZADA'", Venda.class)
+        return em.createQuery("select v from vendas v where v.status = 'finalizada'", Venda.class)
+                .getResultList();
+    }
+
+    /**
+     * Busca todas as Vendas de um Cliente pelo ID (único)
+     *
+     * @param idCliente O ID da Cliente
+     * @return List<Venda> - Os Vendas encontradas
+     */
+    public List<Venda> findByClienteId(int idCliente) {
+        return em.createQuery("""
+                        SELECT v FROM vendas v
+                        WHERE v.cliente.id = :id
+                        """, Venda.class)
+                .setParameter("id", idCliente)
+                .getResultList();
+    }
+
+    /**
+     * Busca todas as Vendas de um Cliente pelo ID (único)
+     *
+     * @param idFuncionario O ID da Cliente
+     * @return List<Venda> - Os Vendas encontradas
+     */
+    public List<Venda> findByFuncionarioId(int idFuncionario) {
+        return em.createQuery("""
+                        SELECT v FROM vendas v
+                        WHERE v.funcionario.id = :id
+                        """, Venda.class)
+                .setParameter("id", idFuncionario)
                 .getResultList();
     }
 }

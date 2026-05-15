@@ -53,4 +53,16 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
                         .getSingleResultOrNull()
         );
     }
+
+    @Override
+    public Optional<Acesso> findById(Integer id) {
+        return em.createQuery("""
+            SELECT a FROM acessos a
+            LEFT JOIN FETCH a.funcionarios
+            WHERE a.id = :id
+            """, Acesso.class)
+                .setParameter("id", id)
+                .getResultStream()
+                .findFirst();
+    }
 }

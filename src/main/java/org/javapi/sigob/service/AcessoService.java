@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.AcessoRepository;
+import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -13,7 +15,6 @@ public class AcessoService {
     /**
      * Cria um novo AcessoService
      *
-     * @return AcessoService - O servico
      */
     public AcessoService() {
     }
@@ -22,11 +23,10 @@ public class AcessoService {
      * Salva um acesso
      *
      * @param acesso O acesso a ser salvo
-     * @throws AcessoException Se o acesso for invalido
      */
     public void save(Acesso acesso) {
         validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
+        //validateCodigo(acesso.getCodigo()); codigo eh opcional
         TransactionExecutor.executeVoid(em -> {
             new AcessoRepository(em).save(acesso);
         });
@@ -36,7 +36,6 @@ public class AcessoService {
      * Atualiza um acesso
      *
      * @param acesso O acesso a ser atualizado
-     * @throws AcessoException Se o acesso for invalido
      */
     public void update(Acesso acesso) {
         validateAcesso(acesso);
@@ -51,10 +50,16 @@ public class AcessoService {
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
-        validateAcesso(acesso);
-        TransactionExecutor.executeVoid(em -> {
-            new AcessoRepository(em).deleteById(acesso.getId());
-        });
+        //validateAcesso(acesso); --acredito nao ser necessario, pois o já tem validação antes
+
+        if(validateDeleteAcesso(acesso)){
+            TransactionExecutor.executeVoid(em -> {
+                new AcessoRepository(em).deleteById(acesso.getId());
+            });
+        } else {
+            throw new SigobException("O Acesso possuí vínculo com Funcionário, não podendo ser removido!");
+        }
+
     }
 
     /**
@@ -132,7 +137,7 @@ public class AcessoService {
                 .expectNotNull(acesso, "Acesso nao pode ser nulo!")
                 .validate();
         validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
+        //validateCodigo(acesso.getCodigo()); -- codigo eh opcional
     }
 
     /**
@@ -169,5 +174,12 @@ public class AcessoService {
         Validator.start()
                 .expectNotNull(id, "ID não pode ser nulo!")
                 .validate();
+    }
+
+
+    private boolean validateDeleteAcesso(Acesso acesso){
+        return TransactionExecutor.query(em -> {
+            return (new FuncionarioRepository(em).findByAcessoId(acesso.getId()).isEmpty() ? true : false);
+        });
     }
 }
