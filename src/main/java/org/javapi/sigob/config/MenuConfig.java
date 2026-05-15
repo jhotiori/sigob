@@ -1,7 +1,9 @@
 package org.javapi.sigob.config;
 
 public final class MenuConfig {
-    private MenuConfig() {}
+
+    private MenuConfig() {
+    }
 
     public static final String LINE_SYMBOL = "─";
     public static final String LABEL_EXIT = "Sair";
@@ -15,6 +17,7 @@ public final class MenuConfig {
 
     /**
      * Formata um banner com o titulo providenciado
+     *
      * @param title Titulo do banner
      * @param width Largura do banner
      * @return String - Banner formatado
@@ -28,6 +31,7 @@ public final class MenuConfig {
 
     /**
      * Formata uma linha com o tamanho providenciado
+     *
      * @param size Tamanho da linha
      * @return String - Linha formatada
      */
@@ -37,6 +41,7 @@ public final class MenuConfig {
 
     /**
      * Formata uma entrada de menu
+     *
      * @param index Indice da entrada
      * @param name Nome da entrada
      * @return String - Entrada formatada
@@ -47,6 +52,7 @@ public final class MenuConfig {
 
     /**
      * Formata uma entrada de menu de sair
+     *
      * @return String - Entrada formatada
      */
     public static String entryExit() {

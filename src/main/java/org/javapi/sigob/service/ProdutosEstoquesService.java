@@ -101,7 +101,7 @@ public class ProdutosEstoquesService {
                 .expectNotNull(origem, "Origem não pode ser nula!")
                 .expectNotNull(destino, "Destino não pode ser nulo!")
                 .expect(quantidade, q -> q > 0, "Quantidade deve ser maior que zero!")
-                .expect(quantidade, q -> q <= origem.getQuantidade(),"Quantidade maior que disponível!")
+                .expect(quantidade, q -> q <= origem.getQuantidade(), "Quantidade maior que disponível!")
                 .validate();
 
         TransactionExecutor.executeVoid(em -> {
