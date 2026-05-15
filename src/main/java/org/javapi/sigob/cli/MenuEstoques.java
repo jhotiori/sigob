@@ -125,7 +125,7 @@ public class MenuEstoques extends Menu {
             if (existente.isPresent()) {
                 ProdutosEstoques pe = existente.get();
                 pe.setQuantidade(pe.getQuantidade() + quantidade);
-                
+
                 service.update(pe);
                 Logger.success("Quantidade atualizada com sucesso!");
             } else {

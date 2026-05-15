@@ -3,6 +3,7 @@ package org.javapi.sigob.util;
 import java.time.LocalTime;
 
 public final class Logger {
+
     private Logger() {
     }
 
@@ -56,9 +57,9 @@ public final class Logger {
     /**
      * Método interno responsável por formatar e imprimir o log.
      *
-     * @param level   Nível do log (INFO, WARN, ERROR, etc.)
-     * @param symbol  Símbolo representativo do nível
-     * @param color   Código ANSI da cor
+     * @param level Nível do log (INFO, WARN, ERROR, etc.)
+     * @param symbol Símbolo representativo do nível
+     * @param color Código ANSI da cor
      * @param message Mensagem a ser exibida
      */
     private static void log(String level, String symbol, String color, String message) {

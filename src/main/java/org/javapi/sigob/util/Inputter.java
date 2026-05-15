@@ -127,6 +127,7 @@ public final class Inputter {
 
     /**
      * Lê uma string que não pode ser vazia.
+     *
      * @param prompt Mensagem exibida ao usuário
      * @return String - String informada
      */
@@ -142,14 +143,14 @@ public final class Inputter {
      */
     public static LocalDate readLocalDate(String prompt) {
         return read(
-            prompt,
-            input -> LocalDate.parse(
-                input,
-                DateTimeFormatter
-                    .ofPattern("dd-MM-uuuu")
-                    .withResolverStyle(ResolverStyle.STRICT)
-            ),
-            "Data (DD-MM-YYYY)"
+                prompt,
+                input -> LocalDate.parse(
+                        input,
+                        DateTimeFormatter
+                                .ofPattern("dd-MM-uuuu")
+                                .withResolverStyle(ResolverStyle.STRICT)
+                ),
+                "Data (DD-MM-YYYY)"
         );
     }
 

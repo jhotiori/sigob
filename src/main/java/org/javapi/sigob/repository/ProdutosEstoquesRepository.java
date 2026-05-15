@@ -67,14 +67,14 @@ public class ProdutosEstoquesRepository extends BaseRepository<ProdutosEstoques,
      */
     public Optional<ProdutosEstoques> findUnique(int produtoId, int estoqueId) {
         return Optional.ofNullable(
-            em.createQuery("""
+                em.createQuery("""
                 SELECT pe FROM produtos_estoques pe
                 WHERE pe.produto.id = :produtoId
                   AND pe.estoque.id = :estoqueId
                 """, ProdutosEstoques.class)
-                .setParameter("produtoId", produtoId)
-                .setParameter("estoqueId", estoqueId)
-                .getSingleResultOrNull()
+                        .setParameter("produtoId", produtoId)
+                        .setParameter("estoqueId", estoqueId)
+                        .getSingleResultOrNull()
         );
     }
 }

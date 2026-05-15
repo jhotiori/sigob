@@ -10,6 +10,7 @@ import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.service.ProdutoService;
 
 public class MenuCadastros extends Menu {
+
     public MenuCadastros() {
         super("Operações de Cadastro");
         add("Cadastrar Acessos", () -> new MenuAcesso(new AcessoService()).show());

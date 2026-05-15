@@ -48,9 +48,9 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      */
     public Optional<Moeda> findBySigla(String sigla) {
         return Optional.ofNullable(
-            em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
-                .setParameter("str", sigla + "%")
-                .getSingleResultOrNull()
-            );
+                em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
+                        .setParameter("str", sigla + "%")
+                        .getSingleResultOrNull()
+        );
     }
 }

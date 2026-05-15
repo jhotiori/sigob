@@ -38,10 +38,10 @@ public class Cliente {
     /**
      * Construtor completo para criar um novo Cliente
      *
-     * @param id             O ID do Cliente
-     * @param nome           O Nome do Cliente
+     * @param id O ID do Cliente
+     * @param nome O Nome do Cliente
      * @param dataNascimento A Data de Nascimento do Cliente
-     * @param documento      O Documento do Cliente (opcional)
+     * @param documento O Documento do Cliente (opcional)
      */
     public Cliente(int id, String nome, LocalDate dataNascimento, Documento documento) {
         this.id = id;

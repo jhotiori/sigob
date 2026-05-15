@@ -9,6 +9,7 @@ import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
 public class DocumentoService {
+
     /**
      * Cria um novo DocumentoService
      *
@@ -108,9 +109,9 @@ public class DocumentoService {
      */
     private void validateDocumento(Documento documento) {
         Validator.start()
-            .expectNotNull(documento, "Documento não pode ser nulo")
-            .expectNotBlank(documento.getDocumento(), "Documento do documento não pode ser nulo ou vazio")
-            .expectNotBlank(documento.getTipo(), "Tipo do Documento não pode ser nulo ou vazio")
-            .validate();
+                .expectNotNull(documento, "Documento não pode ser nulo")
+                .expectNotBlank(documento.getDocumento(), "Documento do documento não pode ser nulo ou vazio")
+                .expectNotBlank(documento.getTipo(), "Tipo do Documento não pode ser nulo ou vazio")
+                .validate();
     }
 }

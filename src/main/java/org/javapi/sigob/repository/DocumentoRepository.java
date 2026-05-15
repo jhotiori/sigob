@@ -36,9 +36,9 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer> {
      */
     public Optional<Documento> findByDocumento(String valor) {
         return Optional.ofNullable(
-            em.createQuery("select d from documentos d where d.documento like :prefix", Documento.class)
-                .setParameter("prefix", valor + "%")
-                .getSingleResultOrNull()
+                em.createQuery("select d from documentos d where d.documento like :prefix", Documento.class)
+                        .setParameter("prefix", valor + "%")
+                        .getSingleResultOrNull()
         );
     }
 
