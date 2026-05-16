@@ -6,14 +6,19 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.table.TableModel;
+import javax.swing.text.JTextComponent;
 
 import org.javapi.sigob.view.builders.MenuBarBuilder;
 import org.javapi.sigob.view.components.ButtonComponent;
 import org.javapi.sigob.view.components.CheckBoxComponent;
 import org.javapi.sigob.view.components.ComboBoxComponent;
 import org.javapi.sigob.view.components.LabelComponent;
+import org.javapi.sigob.view.components.ListComponent;
 import org.javapi.sigob.view.components.MenuBarComponent;
 import org.javapi.sigob.view.components.PasswordFieldComponent;
+import org.javapi.sigob.view.components.ScrollComponent;
+import org.javapi.sigob.view.components.TableComponent;
 import org.javapi.sigob.view.components.TextAreaComponent;
 import org.javapi.sigob.view.components.TextFieldComponent;
 import org.javapi.sigob.view.layouts.BorderBuilder;
@@ -23,6 +28,8 @@ import org.javapi.sigob.view.layouts.FlowBuilder;
 import org.javapi.sigob.view.layouts.FrameBuilder;
 import org.javapi.sigob.view.layouts.GridBuilder;
 import org.javapi.sigob.view.layouts.RowBuilder;
+import org.javapi.sigob.view.styles.Fonts;
+import org.javapi.sigob.view.styles.Palette;
 
 /**
  * Fábrica centralizada de componentes visuais.
@@ -306,6 +313,43 @@ public final class UI {
     }
 
     /**
+     * Cria label padrão para campos.
+     *
+     * @param text - Texto do label
+     * @return LabelComponent - Label criado
+     */
+    public static LabelComponent fieldLabel(String text) {
+        return UI.label(text, label -> {
+            label.setFont(Fonts.MEDIUM_ITALIC);
+        });
+    }
+
+    /**
+     * Cria subtítulo padrão.
+     *
+     * @param text - Texto do subtítulo
+     * @return LabelComponent - Label criado
+     */
+    public static LabelComponent subtitle(String text) {
+        return UI.label(text, label -> {
+            label.setForeground(Palette.FG_MUTED);
+            label.setFont(Fonts.TITLE_SMALL);
+        });
+    }
+
+    /**
+     * Cria painel padrão de ações.
+     *
+     * @param components - Componentes das ações
+     * @return JPanel - Painel criado
+     */
+    public static JPanel actions(JComponent... components) {
+        return UI.row()
+                .add(components)
+                .build();
+    }
+
+    /**
      * Cria builder de barra de menus.
      *
      * @return MenuBarBuilder - Builder criado
@@ -452,6 +496,81 @@ public final class UI {
     }
 
     /**
+     * Cria lista vazia.
+     *
+     * @param <T> - Tipo dos itens
+     * @return ListComponent<T> - Lista criada
+     */
+    public static <T> ListComponent<T> list() {
+        return new ListComponent<>();
+    }
+
+    /**
+     * Cria lista configurável.
+     *
+     * @param config - Configuração da lista
+     * @param <T> - Tipo dos itens
+     * @return ListComponent<T> - Lista criada
+     */
+    public static <T> ListComponent<T> list(
+            Consumer<ListComponent<T>> config
+    ) {
+        return build(new ListComponent<>(), config);
+    }
+
+    /**
+     * Cria lista com itens.
+     *
+     * @param items - Itens da lista
+     * @param <T> - Tipo dos itens
+     * @return ListComponent<T> - Lista criada
+     */
+    @SafeVarargs
+    public static <T> ListComponent<T> list(T... items) {
+        return list(null, items);
+    }
+
+    /**
+     * Cria lista configurável com itens.
+     *
+     * @param config - Configuração da lista
+     * @param items - Itens da lista
+     * @param <T> - Tipo dos itens
+     * @return ListComponent<T> - Lista criada
+     */
+    @SafeVarargs
+    public static <T> ListComponent<T> list(
+            Consumer<ListComponent<T>> config,
+            T... items
+    ) {
+        return build(new ListComponent<>(items), config);
+    }
+
+    /**
+     * Cria painel de rolagem.
+     *
+     * @param component - Componente alvo
+     * @return ScrollComponent - Scroll criado
+     */
+    public static ScrollComponent scroll(JComponent component) {
+        return scroll(component, null);
+    }
+
+    /**
+     * Cria painel de rolagem configurável.
+     *
+     * @param component - Componente alvo
+     * @param config - Configuração do scroll
+     * @return ScrollComponent - Scroll criado
+     */
+    public static ScrollComponent scroll(
+            JComponent component,
+            Consumer<ScrollComponent> config
+    ) {
+        return build(new ScrollComponent(component), config);
+    }
+
+    /**
      * Cria builder de cards usando painel existente.
      *
      * @param panel - Painel existente
@@ -459,5 +578,59 @@ public final class UI {
      */
     public static CardBuilder cards(JPanel panel) {
         return new CardBuilder(panel);
+    }
+
+    /**
+     * Cria tabela vazia.
+     *
+     * @return TableComponent - Tabela criada
+     */
+    public static TableComponent table() {
+        return new TableComponent();
+    }
+
+    /**
+     * Cria tabela configurável.
+     *
+     * @param config - Configuração da tabela
+     * @return TableComponent - Tabela criada
+     */
+    public static TableComponent table(Consumer<TableComponent> config) {
+        return build(new TableComponent(), config);
+    }
+
+    /**
+     * Cria tabela com modelo.
+     *
+     * @param model - Modelo da tabela
+     * @return TableComponent - Tabela criada
+     */
+    public static TableComponent table(TableModel model) {
+        return new TableComponent(model);
+    }
+
+    /**
+     * Cria tabela configurável com modelo.
+     *
+     * @param model - Modelo da tabela
+     * @param config - Configuração da tabela
+     * @return TableComponent - Tabela criada
+     */
+    public static TableComponent table(
+            TableModel model,
+            Consumer<TableComponent> config
+    ) {
+        return build(new TableComponent(model), config);
+    }
+
+    /**
+     * Limpa campos de texto.
+     *
+     * @param fields - Campos alvo
+     */
+    public static void clearFields(JTextComponent... fields) {
+        for (JTextComponent field : fields) {
+            field.setText("");
+        }
     }
 }

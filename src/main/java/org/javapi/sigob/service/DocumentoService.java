@@ -68,6 +68,18 @@ public class DocumentoService {
     }
 
     /**
+     * Busca um Documento pelo seu ID
+     *
+     * @param id O ID do Documento
+     * @return Optional<Documento> - O Documento buscado
+     */
+    public Optional<Documento> findById(int id) {
+        return TransactionExecutor.query(em -> {
+            return new DocumentoRepository(em).findById(id);
+        });
+    }
+
+    /**
      * Busca todos os Documento disponíveis
      *
      * @return List<Documento> - Todos os Documento

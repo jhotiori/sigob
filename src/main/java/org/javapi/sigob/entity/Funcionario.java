@@ -143,9 +143,9 @@ public class Funcionario {
             return false;
         }
         boolean adicionado = this.acessos.add(acesso);
-        if (adicionado) {
+        /*if (adicionado) {
             acesso.getFuncionarios().add(this);
-        }
+        }*/
         return adicionado;
     }
 
@@ -159,11 +159,8 @@ public class Funcionario {
         if (acesso == null) {
             return false;
         }
-        boolean removido = this.acessos.remove(acesso);
-        if (removido) {
-            acesso.getFuncionarios().remove(this);
-        }
-        return removido;
+
+        return this.acessos.remove(acesso);
     }
 
     /**

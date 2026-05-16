@@ -1,11 +1,8 @@
 package org.javapi.sigob.view.screens;
 
-import java.awt.GridLayout;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.UI;
 import org.javapi.sigob.view.styles.Fonts;
 import org.javapi.sigob.view.styles.Palette;
@@ -39,7 +36,7 @@ public final class DashboardScreen extends BaseScreen {
 
     private JLabel buildTitle() {
         return UI.label(
-            "Olá, seja bem-vindo(a) %s!".formatted(ApplicationContext.getFuncionarioLogado().getNome()),
+            "Olá, seja bem-vindo(a)!",
             label -> {
                 label.setFont(Fonts.TITLE_BIG);
             }
@@ -48,9 +45,9 @@ public final class DashboardScreen extends BaseScreen {
 
     private JLabel buildSubtitle() {
         return UI.label(
-            "Selecione o modulo desejado acima na barra de menus.",
+            "Selecione a operação desejada na barra de menus.",
             label -> {
-                label.setForeground(Palette.FG_SECONDARY);
+                label.setForeground(Palette.FG_MUTED);
                 label.setFont(Fonts.TITLE_SMALL);
             }
         );
@@ -65,27 +62,14 @@ public final class DashboardScreen extends BaseScreen {
                     para Distribuidoras de Bebidas) é um sistema básico feito
                     como um projeto universitário, visando utilizar tecnologias
                     como PostgreSQL, Hibernate, JPA e Java Swing.
-                    Atualmente, este sistema é um protótipo de teste.
+                    Atualmente, este sistema é um protótipo de teste, podendo haver varias mudanças ao decorrer do desenvolvimento.
                 </body>
             </html>
             """,
                 label -> {
-                    label.setForeground(Palette.FG_SECONDARY);
-                    label.setFont(Fonts.TITLE_SMALL);
+                    label.setForeground(Palette.FG_MUTED);
+                    label.setFont(Fonts.MEDIUM_ITALIC);
                 }
         );
-    }
-
-    private JPanel buildGridLayout() {
-        return UI.grid(2, 3)
-            .add(
-                UI.button("1"),
-                UI.button("2"),
-                UI.button("3"),
-                UI.button("4"),
-                UI.button("5"),
-                UI.button("6")
-            )
-            .build();
     }
 }

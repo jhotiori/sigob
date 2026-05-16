@@ -27,7 +27,7 @@ public class Acesso {
     private String descricao;
 
     @ManyToMany(mappedBy = "acessos")
-    private final Set<Funcionario> funcionarios = new HashSet<>();
+    private Set<Funcionario> funcionarios = new HashSet<>();
 
     /**
      * Construtor padrão JPA
@@ -128,7 +128,7 @@ public class Acesso {
      * @return funcionarios - Os Funcionários
      */
     public Set<Funcionario> getFuncionarios() {
-        return Set.copyOf(funcionarios);
+        return funcionarios;
     }
 
     @Override

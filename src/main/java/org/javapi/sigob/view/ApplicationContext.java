@@ -12,6 +12,8 @@ import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.VendaService;
+import org.javapi.sigob.view.windows.ApplicationWindow;
+import org.javapi.sigob.view.windows.BaseWindow;
 
 /**
  * Contexto central da aplicação.
@@ -23,6 +25,13 @@ public final class ApplicationContext {
      * @see {@link Funcionario}
      */
     private static Funcionario funcionarioLogado;
+
+    /**
+     * Janela principal.
+     *
+     * @see {@link ApplicationWindow}
+     */
+    private static ApplicationWindow window;
 
     /**
      * Serviço de acesso.
@@ -123,6 +132,24 @@ public final class ApplicationContext {
      */
     public static Funcionario getFuncionarioLogado() {
         return funcionarioLogado;
+    }
+
+    /**
+     * Define janela principal.
+     *
+     * @param window - Janela principal
+     */
+    public static void setWindow(ApplicationWindow window) {
+        ApplicationContext.window = window;
+    }
+
+    /**
+     * Retorna janela principal.
+     *
+     * @return BaseWindow - Janela principal
+     */
+    public static ApplicationWindow getWindow() {
+        return window;
     }
 
     /**

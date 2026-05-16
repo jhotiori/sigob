@@ -41,6 +41,11 @@ public abstract class BaseScreen {
     protected void setup() {}
 
     /**
+     * Realiza update de forma interna.
+     */
+    public void update() {}
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz

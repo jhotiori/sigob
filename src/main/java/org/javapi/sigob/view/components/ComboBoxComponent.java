@@ -1,5 +1,7 @@
 package org.javapi.sigob.view.components;
 
+import java.awt.Dimension;
+
 import javax.swing.JComboBox;
 
 import org.javapi.sigob.view.styles.Fonts;
@@ -41,6 +43,13 @@ public class ComboBoxComponent<T> extends JComboBox<T> {
         setForeground(Palette.FG_PRIMARY);
 
         setFocusable(false);
+        /*setMaximumSize(getPreferredSize());*/
+        setMaximumSize(
+                new Dimension(
+                        Integer.MAX_VALUE,
+                        getPreferredSize().height
+                )
+        );
     }
 
 }

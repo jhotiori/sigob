@@ -1,5 +1,7 @@
 package org.javapi.sigob.view.components;
 
+import java.awt.Dimension;
+
 import javax.swing.JTextArea;
 
 import org.javapi.sigob.view.styles.Fonts;
@@ -40,6 +42,15 @@ public class TextAreaComponent extends JTextArea {
 
         setLineWrap(true);
         setWrapStyleWord(true);
+
+        setAlignmentX(LEFT_ALIGNMENT);
+
+        setMaximumSize(
+                new Dimension(
+                        Integer.MAX_VALUE,
+                        getPreferredSize().height
+                )
+        );
     }
 
 }

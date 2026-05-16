@@ -43,7 +43,6 @@ public class MenuButtonComponent extends JButton {
 
         setBorderPainted(false);
         setContentAreaFilled(false);
-
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
