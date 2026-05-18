@@ -7,6 +7,7 @@ import org.javapi.sigob.view.windows.LoginWindow;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 public class Main {
+
     public static void main(String[] args) {
         FlywayConfig.migrate();
         Async.ui(() -> {

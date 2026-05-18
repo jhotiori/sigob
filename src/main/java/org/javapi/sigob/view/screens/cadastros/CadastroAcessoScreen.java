@@ -13,8 +13,8 @@ import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
 import org.javapi.sigob.view.base.BaseScreen;
 import org.javapi.sigob.view.models.AcessoTableModel;
-import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.popups.PopupValues;
+import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
 import org.javapi.sigob.view.ui.UIForm;
@@ -400,4 +400,3 @@ public final class CadastroAcessoScreen extends BaseScreen {
     }
 
 }
-
