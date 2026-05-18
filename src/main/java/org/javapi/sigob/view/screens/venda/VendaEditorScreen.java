@@ -1,4 +1,4 @@
-package org.javapi.sigob.view.screens;
+package org.javapi.sigob.view.screens.venda;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -11,8 +11,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 
 import org.javapi.sigob.entity.ItemVenda;
 import org.javapi.sigob.entity.ProdutosEstoques;
@@ -22,19 +24,24 @@ import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.Messages;
-import org.javapi.sigob.view.UI;
-import org.javapi.sigob.view.components.ScrollComponent;
-import org.javapi.sigob.view.components.TableComponent;
+import org.javapi.sigob.view.base.BaseScreen;
 import org.javapi.sigob.view.models.ItemVendaTableModel;
+import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Fonts;
-import org.javapi.sigob.view.styles.Palette;
 import org.javapi.sigob.view.styles.Spacing;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIForm;
+import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de edição de venda.
  */
-public class VendaEditorScreen extends BaseScreen {
+public final class VendaEditorScreen extends BaseScreen {
+
+    /**
+     * Formatter de data.
+     */
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /**
      * Venda editada.
@@ -74,64 +81,57 @@ public class VendaEditorScreen extends BaseScreen {
     /**
      * Tabela do carrinho.
      *
-     * @see {@link TableComponent}
+     * @see {@link JTable}
      */
-    private final TableComponent carrinhoTable = UI.table(carrinhoModel);
+    private final JTable carrinhoTable = UI.table(carrinhoModel);
 
     /**
-     * Scroll da tabela.
-     *
-     * @see {@link ScrollComponent}
-     */
-    private final ScrollComponent carrinhoScroll = UI.scroll(carrinhoTable);
-
-    /**
-     * Campo de produtos disponíveis.
+     * Campo de produtos.
      *
      * @see {@link JComboBox}
      */
-    private final JComboBox<String> produtosBox = UI.comboBox();
+    private final JComboBox<String> produtosBox = UI.comboBox(combo -> {
+        combo.setMaximumRowCount(12);
+    });
 
     /**
      * Campo de quantidade.
      *
      * @see {@link JTextField}
      */
-    private final JTextField quantidadeField = UI.textField();
+    private final JTextField quantidadeField = UI.textField(field -> {
+        field.setColumns(12);
+    });
 
     /**
-     * Label de total atual.
+     * Label do total.
      *
      * @see {@link JLabel}
      */
-    private final JLabel totalLabel = UI.label("Total atual: R$ 0");
+    private final JLabel totalLabel = UI.label("Total: R$0.00", label -> {
+        label.setFont(Fonts.DEFAULT_BOLD);
+    });
 
     /**
      * Botão de adicionar item.
      *
      * @see {@link JButton}
      */
-    private final JButton adicionarButton = UI.button("Adicionar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton adicionarButton = UI.button("Adicionar");
 
     /**
      * Botão de remover item.
      *
      * @see {@link JButton}
      */
-    private final JButton removerButton = UI.button("Remover", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton removerButton = UI.button("Remover");
 
     /**
      * Botão de finalizar venda.
      *
      * @see {@link JButton}
      */
-    private final JButton finalizarButton = UI.button("Finalizar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton finalizarButton = UI.button("Finalizar");
 
     /**
      * Mapa de produtos disponíveis.
@@ -150,32 +150,59 @@ public class VendaEditorScreen extends BaseScreen {
 
         this.venda = venda;
 
-        init();
-        setup();
+        initialize();
     }
 
+    /**
+     * Constrói interface da tela.
+     *
+     * @return JPanel - Painel construído
+     */
     @Override
     protected JPanel build() {
         configureTable();
-
-        return UI.border()
-                .center(buildPanel())
-                .padding(Spacing.MD)
-                .build();
+        return UIScreen.page(
+                UI.column()
+                        .add(UIScreen.title("Edição de Venda"))
+                        .add(
+                                UIScreen.subtitle(
+                                        "Gerencie itens do carrinho, estoque e finalização da venda."
+                                )
+                        )
+                        .glue()
+                        .gap(Spacing.XS)
+                        .add(buildMetadataSection())
+                        .glue()
+                        .gap(Spacing.XS)
+                        .add(buildAdicionarSection())
+                        .glue()
+                        .gap(Spacing.XS)
+                        .add(buildCarrinhoSection())
+                        .glue()
+                        .gap(Spacing.XS)
+                        .add(totalLabel)
+                        .glue()
+                        .gap(Spacing.XS)
+                        .add(UIScreen.actions(removerButton, finalizarButton))
+                        .build()
+        );
     }
 
+    /**
+     * Realiza setup interno da tela.
+     */
     @Override
     protected void setup() {
-        adicionarButton.addActionListener(event -> {
-            adicionarItem();
+        Events.mouse(adicionarButton, mouse -> {
+            mouse.onClicked(this::adicionarItem);
         });
 
-        removerButton.addActionListener(event -> {
-            removerItemSelecionado();
+        Events.mouse(removerButton, mouse -> {
+            mouse.onClicked(this::removerItemSelecionado);
         });
 
-        finalizarButton.addActionListener(event -> {
-            finalizarVenda();
+        Events.mouse(finalizarButton, mouse -> {
+            mouse.onClicked(this::finalizarVenda);
         });
 
         Events.mouse(carrinhoTable, mouse -> {
@@ -187,101 +214,91 @@ public class VendaEditorScreen extends BaseScreen {
         });
     }
 
+    /**
+     * Atualiza dados dinâmicos da tela.
+     */
     @Override
-    public void update() {
+    public void refresh() {
         updateProdutos();
         updateCarrinho();
         updateReadonlyState();
     }
 
-    private JPanel buildPanel() {
-        return UI.column()
-                .add(buildTitle())
-                .add(buildSubtitle())
-                .glue()
-                .add(buildMetadataPanel())
-                .glue()
-                .add(buildAdicionarPanel())
-                .glue()
-                .add(buildCarrinhoPanel())
-                .glue()
-                .add(totalLabel)
-                .glue()
-                .add(UI.actions(removerButton, finalizarButton))
-                .build();
-    }
-
-    private JLabel buildTitle() {
-        return UI.label("Editor de Venda", label -> {
-            label.setFont(Fonts.TITLE_MEDIUM);
-        });
-    }
-
-    private JLabel buildSubtitle() {
-        return UI.label(
-                "Gerencie itens, estoque e finalização da venda.",
-                label -> {
-                    label.setForeground(Palette.FG_MUTED);
-                    label.setFont(Fonts.TITLE_SMALL);
-                }
+    /**
+     * Constrói seção de metadados.
+     *
+     * @return JPanel - Painel construído
+     */
+    private JPanel buildMetadataSection() {
+        return UIScreen.section(
+                "Informações da Venda",
+                UI.grid(2, 2)
+                        .add(
+                                UIForm.field(
+                                        UIForm.fieldLabel("Funcionário"),
+                                        UI.label(venda.getFuncionario().getNome())
+                                ),
+                                UIForm.field(
+                                        UIForm.fieldLabel("Cliente"),
+                                        UI.label(venda.getCliente().getNome())
+                                ),
+                                UIForm.field(
+                                        UIForm.fieldLabel("Status"),
+                                        UI.label(venda.getStatus())
+                                ),
+                                UIForm.field(
+                                        UIForm.fieldLabel("Data Abertura"),
+                                        UI.label(venda.getDataAbertura().format(DATE_FORMATTER))
+                                )
+                        )
+                        .build()
         );
     }
 
-    private JPanel buildMetadataPanel() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-        return UI.grid(2, 2)
-                .hgap(Spacing.MD)
-                .vgap(Spacing.SM)
-                .add(
-                        UI.field(
-                                UI.fieldLabel("Funcionário"),
-                                UI.label(venda.getFuncionario().getNome())
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Cliente"),
-                                UI.label(venda.getCliente().getNome())
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Status"),
-                                UI.label(venda.getStatus())
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Data de abertura"),
-                                UI.label(venda.getDataAbertura().format(formatter))
+    /**
+     * Constrói seção de adição.
+     *
+     * @return JPanel - Painel construído
+     */
+    private JPanel buildAdicionarSection() {
+        return UIScreen.section(
+                "Adicionar Item",
+                UI.column()
+                        .add(
+                                UIForm.field(
+                                        UIForm.fieldLabel("Produto"),
+                                        produtosBox
+                                )
                         )
-                )
-                .build();
-    }
-
-    private JPanel buildAdicionarPanel() {
-        return UI.column()
-                .add(UI.subtitle("Adicionar item ao carrinho"))
-                .add(
-                        UI.field(
-                                UI.fieldLabel("Produto"),
-                                produtosBox
+                        .gap(Spacing.XS)
+                        .add(
+                                UIForm.field(
+                                        UIForm.fieldLabel("Quantidade"),
+                                        quantidadeField
+                                )
                         )
-                )
-                .add(
-                        UI.field(
-                                UI.fieldLabel("Quantidade"),
-                                quantidadeField
-                        )
-                )
-                .add(UI.actions(adicionarButton))
-                .build();
-    }
-
-    private JPanel buildCarrinhoPanel() {
-        return UI.column()
-                .add(UI.subtitle("Carrinho"))
-                .add(carrinhoScroll)
-                .build();
+                        .gap(Spacing.XS)
+                        .add(UIScreen.actions(adicionarButton))
+                        .build()
+        );
     }
 
     /**
-     * Configura tabela do carrinho.
+     * Constrói seção do carrinho.
+     *
+     * @return JPanel - Painel construído
+     */
+    private JPanel buildCarrinhoSection() {
+        return UIScreen.section(
+                "Carrinho",
+                UI.scroll(carrinhoTable, scroll -> {
+                    scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+                })
+        );
+    }
+
+    /**
+     * Configura tabela.
      */
     private void configureTable() {
         carrinhoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -294,48 +311,41 @@ public class VendaEditorScreen extends BaseScreen {
     private void adicionarItem() {
         try {
             String produtoSelecionado = (String) produtosBox.getSelectedItem();
-
             if (produtoSelecionado == null || produtoSelecionado.isBlank()) {
-                Messages.warn("Selecione um produto!");
+                Popups.warn("Selecione um produto!");
                 return;
             }
 
             String quantidadeTexto = quantidadeField.getText();
-
             if (quantidadeTexto == null || quantidadeTexto.isBlank()) {
-                Messages.warn("Informe a quantidade!");
+                Popups.warn("Informe a quantidade!");
                 return;
             }
 
             int quantidade = Integer.parseInt(quantidadeTexto);
-
             if (quantidade <= 0) {
-                Messages.warn("Quantidade inválida!");
+                Popups.warn("Quantidade inválida!");
                 return;
             }
 
             Integer produtoEstoqueId = produtosMap.get(produtoSelecionado);
-
             if (produtoEstoqueId == null) {
-                Messages.warn("Produto inválido!");
+                Popups.warn("Produto inválido!");
                 return;
             }
 
             Optional<ProdutosEstoques> produtoOpt = estoqueService.findById(produtoEstoqueId);
-
             if (produtoOpt.isEmpty()) {
-                Messages.warn("Produto não encontrado!");
+                Popups.warn("Produto não encontrado!");
                 return;
             }
 
             ProdutosEstoques produtoEstoque = produtoOpt.get();
-
             if (quantidade > produtoEstoque.getQuantidade()) {
-                Messages.warn(
-                        "Quantidade indisponível! Máximo disponível: %d"
+                Popups.warn(
+                        "Quantidade indisponível!\nMáximo disponível: %d"
                                 .formatted(produtoEstoque.getQuantidade())
                 );
-
                 return;
             }
 
@@ -355,15 +365,15 @@ public class VendaEditorScreen extends BaseScreen {
                 criarNovoItem(produtoEstoque, quantidade);
             }
 
-            quantidadeField.setText("");
+            UIForm.clearFields(quantidadeField);
 
-            update();
+            refresh();
 
         } catch (NumberFormatException e) {
-            Messages.warn("Quantidade inválida!");
+            Popups.warn("Quantidade inválida!");
 
         } catch (Exception e) {
-            Messages.error("Erro ao adicionar item: " + e.getMessage());
+            Popups.error("Erro ao adicionar item: " + e.getMessage());
         }
     }
 
@@ -372,7 +382,7 @@ public class VendaEditorScreen extends BaseScreen {
      *
      * @param item - Item existente
      * @param produtoEstoque - Produto do estoque
-     * @param quantidadeAdicional - Quantidade adicionada
+     * @param quantidadeAdicional - Quantidade adicional
      */
     private void atualizarQuantidadeExistente(
             ItemVenda item,
@@ -382,8 +392,8 @@ public class VendaEditorScreen extends BaseScreen {
         int novaQuantidade = item.getQuantidade() + quantidadeAdicional;
 
         if (novaQuantidade > produtoEstoque.getQuantidade()) {
-            Messages.warn(
-                    "Quantidade total excede estoque disponível! Máximo: %d"
+            Popups.warn(
+                    "Quantidade total excede estoque disponível!\nMáximo disponível: %d"
                             .formatted(produtoEstoque.getQuantidade())
             );
 
@@ -398,12 +408,10 @@ public class VendaEditorScreen extends BaseScreen {
         item.setValorSaldo(total);
 
         itemVendaService.update(item);
-
-        Messages.success("Quantidade atualizada!");
     }
 
     /**
-     * Cria novo item no carrinho.
+     * Cria novo item.
      *
      * @param produtoEstoque - Produto do estoque
      * @param quantidade - Quantidade adicionada
@@ -425,25 +433,23 @@ public class VendaEditorScreen extends BaseScreen {
         );
 
         itemVendaService.save(item);
-
-        Messages.success("Item adicionado!");
     }
 
     /**
-     * Remove item selecionado da tabela.
+     * Remove item selecionado.
      */
     private void removerItemSelecionado() {
         try {
             int linha = carrinhoTable.getSelectedRow();
 
             if (linha < 0) {
-                Messages.warn("Selecione um item!");
+                Popups.warn("Selecione um item!");
                 return;
             }
 
             ItemVenda item = carrinhoModel.getItem(linha);
 
-            boolean confirmar = Messages.confirm(
+            boolean confirmar = Popups.confirm(
                     "Deseja remover o item \"%s\"?"
                             .formatted(item.getProdutoEstoque().getProduto().getNome())
             );
@@ -454,12 +460,12 @@ public class VendaEditorScreen extends BaseScreen {
 
             itemVendaService.delete(item);
 
-            update();
+            refresh();
 
-            Messages.success("Item removido!");
+            Popups.success("Item removido!");
 
         } catch (Exception e) {
-            Messages.error("Erro ao remover item: " + e.getMessage());
+            Popups.error("Erro ao remover item: " + e.getMessage());
         }
     }
 
@@ -471,7 +477,7 @@ public class VendaEditorScreen extends BaseScreen {
             List<ItemVenda> itens = itemVendaService.findByVenda(venda.getId());
 
             if (itens.isEmpty()) {
-                Messages.warn("Carrinho vazio!");
+                Popups.warn("Carrinho vazio!");
                 return;
             }
 
@@ -479,8 +485,8 @@ public class VendaEditorScreen extends BaseScreen {
                     .map(ItemVenda::getValorSaldo)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            boolean confirmar = Messages.confirm(
-                    "Confirmar pagamento da venda no valor de R$ %s?"
+            boolean confirmar = Popups.confirm(
+                    "Confirmar pagamento da venda no valor de R$%s?"
                             .formatted(total)
             );
 
@@ -504,12 +510,12 @@ public class VendaEditorScreen extends BaseScreen {
 
             vendaService.update(venda);
 
-            update();
+            refresh();
 
-            Messages.success("Venda finalizada!");
+            Popups.success("Venda finalizada!");
 
         } catch (Exception e) {
-            Messages.error("Erro ao finalizar venda: " + e.getMessage());
+            Popups.error("Erro ao finalizar venda: " + e.getMessage());
         }
     }
 
@@ -527,7 +533,7 @@ public class VendaEditorScreen extends BaseScreen {
                 .toList();
 
         for (ProdutosEstoques produto : produtos) {
-            String nome = "%s | %s | Disponível: %d"
+            String nome = "%s (Estoque: %s) [%d disponível]"
                     .formatted(
                             produto.getProduto().getNome(),
                             produto.getEstoque().getNome(),
@@ -541,7 +547,7 @@ public class VendaEditorScreen extends BaseScreen {
     }
 
     /**
-     * Atualiza tabela do carrinho.
+     * Atualiza carrinho.
      */
     private void updateCarrinho() {
         try {
@@ -554,11 +560,11 @@ public class VendaEditorScreen extends BaseScreen {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             totalLabel.setText(
-                    "Total atual: R$ %s".formatted(total)
+                    "Total: R$%s".formatted(total)
             );
 
         } catch (Exception e) {
-            Messages.error(e.getMessage());
+            Popups.error("Erro ao atualizar carrinho: " + e.getMessage());
         }
     }
 
@@ -569,13 +575,10 @@ public class VendaEditorScreen extends BaseScreen {
         boolean aberta = "aberta".equalsIgnoreCase(venda.getStatus());
 
         produtosBox.setEnabled(aberta);
-
         quantidadeField.setEnabled(aberta);
 
         adicionarButton.setEnabled(aberta);
-
         removerButton.setEnabled(aberta);
-
         finalizarButton.setEnabled(aberta);
     }
 

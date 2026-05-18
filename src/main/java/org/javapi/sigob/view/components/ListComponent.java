@@ -47,14 +47,10 @@ public class ListComponent<T> extends JList<T> {
         setSelectionBackground(Palette.ACCENT_PRIMARY);
         setSelectionForeground(Palette.FG_PRIMARY);
 
-        setSelectionMode(
-                ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
-        );
-
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setLayoutOrientation(VERTICAL);
 
         setVisibleRowCount(8);
-
         setFixedCellHeight(28);
 
         DefaultListSelectionModel selectionModel = (DefaultListSelectionModel) getSelectionModel();

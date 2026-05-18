@@ -1,7 +1,6 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
 
@@ -38,19 +37,5 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
         return em.createQuery("select a from acessos a where a.nome like :str", Acesso.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
-    }
-
-    /**
-     * Busca um Acesso cujo codigo inicia com o valor informado
-     *
-     * @param codigo Codigo para procurar
-     * @return Optional<Acesso> - O Acesso encontrado (pode ser vazio)
-     */
-    public Optional<Acesso> findByCodigo(String codigo) {
-        return Optional.ofNullable(
-                em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
-                        .setParameter("str", codigo + "%")
-                        .getSingleResultOrNull()
-        );
     }
 }

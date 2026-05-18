@@ -2,6 +2,7 @@ package org.javapi.sigob.view.screens;
 
 import java.util.Optional;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -9,53 +10,62 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.Messages;
 import org.javapi.sigob.view.Settings;
-import org.javapi.sigob.view.UI;
+import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Fonts;
 import org.javapi.sigob.view.styles.Spacing;
-import org.javapi.sigob.view.windows.ApplicationWindow;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIForm;
+import org.javapi.sigob.view.ui.UIScreen;
 
-/**
- * Tela de login.
- */
-public class LoginScreen extends BaseScreen {
+public final class LoginScreen extends BaseScreen {
+    /**
+     * Serviço de funcionários.
+     *
+     * @see FuncionarioService
+     */
+    private final FuncionarioService funcionarioService = ApplicationContext.getFuncionarioService();
 
     /**
      * Campo de usuário.
      *
-     * @see {@link JTextField}
+     * @see JTextField
      */
     private final JTextField usernameField = UI.textField(field -> {
-        field.setFont(Fonts.DEFAULT_ITALIC);
         field.setColumns(20);
     });
 
     /**
      * Campo de senha.
      *
-     * @see {@link JPasswordField}
+     * @see JPasswordField
      */
     private final JPasswordField passwordField = UI.passwordField(field -> {
-        field.setFont(Fonts.DEFAULT_ITALIC);
         field.setColumns(20);
     });
 
     /**
      * Botão de entrada.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
-    private final JButton enterButton = UI.button("Entrar", entrar -> {
-        entrar.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton enterButton = UI.button("Entrar");
+
+    /**
+     * Botão de saída.
+     *
+     * @see JButton
+     */
+    private final JButton exitButton = UI.button("Sair");
 
     /**
      * Callback de login realizado.
      *
-     * @see {@link Runnable}
+     * @see Runnable
      */
     private Runnable onLoginSuccess;
 
@@ -64,8 +74,8 @@ public class LoginScreen extends BaseScreen {
      */
     public LoginScreen() {
         super("login");
-        init();
-        setup();
+
+        initialize();
     }
 
     /**
@@ -78,35 +88,54 @@ public class LoginScreen extends BaseScreen {
     }
 
     /**
-     * Realiza setup de forma interna.
+     * Realiza setup interno da tela.
      */
     @Override
     protected void setup() {
         Events.mouse(enterButton, mouse -> {
             mouse.onClicked(() -> {
-                enterButton.setEnabled(false);
+                UIForm.disableFields(enterButton, exitButton);
+
                 String usuario = usernameField.getText();
+                if (usuario.isBlank()) {
+                    Popups.warn("Informe um nome de usuário!");
+                    UIForm.enableFields(enterButton, exitButton);
+                    return;
+                }
+
                 String senha = new String(passwordField.getPassword());
+                if (senha.isBlank()) {
+                    Popups.warn("Informe uma senha!");
+                    UIForm.enableFields(enterButton, exitButton);
+                    return;
+                }
+
                 Optional<Funcionario> funcionario;
 
                 try {
-                    funcionario = ApplicationContext.getFuncionarioService().findByCodigo(senha);
+                    funcionario = funcionarioService.findByCodigo(senha);
                 } catch (Exception e) {
-                    Messages.error(e.getMessage());
-                    enterButton.setEnabled(true);
+                    Popups.error("Erro ao logar: " + e.getMessage());
+                    UIForm.enableFields(enterButton, exitButton);
                     return;
                 }
 
                 if (funcionario.isPresent() && funcionario.get().getNome().equalsIgnoreCase(usuario)) {
                     ApplicationContext.setFuncionarioLogado(funcionario.get());
-                    System.out.println("Login efetuado com sucesso!");
                     if (onLoginSuccess != null) {
                         onLoginSuccess.run();
                     }
                 } else {
-                    Messages.warn("Login ou senha incorretos!");
+                    Popups.warn("Nome ou senha incorretos!");
                 }
-                enterButton.setEnabled(true);
+
+                UIForm.enableFields(enterButton, exitButton);
+            });
+        });
+
+        Events.mouse(exitButton, mouse -> {
+            mouse.onClicked(() -> {
+                System.exit(0);
             });
         });
     }
@@ -131,15 +160,31 @@ public class LoginScreen extends BaseScreen {
      */
     private JPanel buildForm() {
         return UI.column()
-                .add(buildTitle())
+                .add(
+                    buildTitle(),
+                    buildSubtitle()
+                )
                 .glue()
                 .add(
                         buildUsernameField(),
                         buildPasswordField()
                 )
                 .glue()
-                .add(enterButton)
+                .add(buildActions())
                 .build();
+    }
+
+    private JPanel buildActions() {
+        return UIScreen.actions(enterButton, exitButton);
+    }
+
+    /**
+     * Constrói icone da tela.
+     *
+     * @return Image - Icone construido
+     */
+    private ImageIcon buildIcon() {
+        return UI.icon(Settings.APP_ICON_PATH, 36);
     }
 
     /**
@@ -147,10 +192,25 @@ public class LoginScreen extends BaseScreen {
      *
      * @return JPanel - Título construído
      */
-    private JLabel buildTitle() {
-        return UI.label(Settings.APP_WINDOW_LOGIN_TITLE, label -> {
-            label.setFont(Fonts.TITLE_MEDIUM);
-        });
+    private JPanel buildTitle() {
+        JLabel icon = UI.label(buildIcon());
+        JLabel title = UIScreen.title("SIGOB");
+
+        return UI.row()
+            .add(icon, title)
+            .gap(Spacing.XL)
+            .build();
+    }
+
+    /**
+     * Constrói subtítulo da tela.
+     *
+     * @return JLabel - Subtítulo construido
+     */
+    private JLabel buildSubtitle() {
+        JLabel subtitle = UIScreen.subtitle("Sistema Integrado de Gestão Comercial e Operacional para Distribuidoras de Bebidas");
+        subtitle.setFont(Fonts.SMALL_ITALIC);
+        return subtitle;
     }
 
     /**
@@ -159,10 +219,8 @@ public class LoginScreen extends BaseScreen {
      * @return JPanel - Campo construído
      */
     private JPanel buildUsernameField() {
-        return UI.field(
-                UI.label("Nome", label -> {
-                    label.setFont(Fonts.MEDIUM_ITALIC);
-                }),
+        return UIForm.field(
+                UIForm.fieldLabel("Nome"),
                 usernameField
         );
     }
@@ -173,11 +231,10 @@ public class LoginScreen extends BaseScreen {
      * @return JPanel - Campo construído
      */
     private JPanel buildPasswordField() {
-        return UI.field(
-                UI.label("Senha", label -> {
-                    label.setFont(Fonts.MEDIUM_ITALIC);
-                }),
+        return UIForm.field(
+                UIForm.fieldLabel("Senha"),
                 passwordField
         );
     }
+
 }

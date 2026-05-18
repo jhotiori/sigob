@@ -1,13 +1,6 @@
 package org.javapi.sigob.cli;
 
-import org.javapi.sigob.service.AcessoService;
-import org.javapi.sigob.service.CategoriaService;
-import org.javapi.sigob.service.ClienteService;
-import org.javapi.sigob.service.DocumentoService;
-import org.javapi.sigob.service.EstoqueService;
-import org.javapi.sigob.service.FuncionarioService;
-import org.javapi.sigob.service.MoedaService;
-import org.javapi.sigob.service.ProdutoService;
+import org.javapi.sigob.service.*;
 
 public class MenuCadastros extends Menu {
 

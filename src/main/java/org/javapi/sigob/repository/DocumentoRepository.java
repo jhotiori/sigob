@@ -1,11 +1,10 @@
 package org.javapi.sigob.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.Documento;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
 
 public class DocumentoRepository extends BaseRepository<Documento, Integer> {
 
@@ -34,12 +33,10 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer> {
      * @param prefixo O prefixo do nome
      * @return List<Documento> - As Documento encontradas
      */
-    public Optional<Documento> findByDocumento(String valor) {
-        return Optional.ofNullable(
-                em.createQuery("select d from documentos d where d.documento like :prefix", Documento.class)
+    public List<Documento> findByDocumento(String valor) {
+        return em.createQuery("select d from documentos d where d.documento like :prefix", Documento.class)
                         .setParameter("prefix", valor + "%")
-                        .getSingleResultOrNull()
-        );
+                        .getResultList();
     }
 
     /**

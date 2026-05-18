@@ -3,13 +3,18 @@ package org.javapi.sigob.view.screens.cadastros;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.table.TableRowSorter;
 
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Moeda;
@@ -17,205 +22,405 @@ import org.javapi.sigob.entity.Produto;
 import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.Messages;
-import org.javapi.sigob.view.UI;
-import org.javapi.sigob.view.screens.BaseScreen;
-import org.javapi.sigob.view.styles.Fonts;
+import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.models.ProdutoTableModel;
+import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIForm;
+import org.javapi.sigob.view.ui.UIScreen;
 
 /**
- * Tela de cadastro de produtos.
+ * Tela de cadastro e gerenciamento de produtos.
  */
 public final class CadastroProdutoScreen extends BaseScreen {
 
     /**
+     * Campo de busca.
+     */
+    private final JTextField buscaField = UI.textField(field -> {
+        field.setColumns(32);
+    });
+
+    /**
      * Campo de código do produto.
-     *
-     * @see {@link JTextField}
      */
     private final JTextField codigoField = UI.textField(field -> {
-        field.setColumns(64);
+        field.setColumns(32);
     });
 
     /**
      * Campo de nome do produto.
-     *
-     * @see {@link JTextField}
      */
     private final JTextField nomeField = UI.textField(field -> {
-        field.setColumns(128);
+        field.setColumns(64);
     });
 
     /**
      * Campo de valor de compra.
-     *
-     * @see {@link JTextField}
      */
     private final JTextField valorCompraField = UI.textField();
 
     /**
      * Campo de valor de venda.
-     *
-     * @see {@link JTextField}
      */
     private final JTextField valorVendaField = UI.textField();
 
     /**
      * ComboBox de categorias.
-     *
-     * @see {@link JComboBox}
      */
     private final JComboBox<String> categoriasBox = UI.comboBox();
 
     /**
      * ComboBox de moedas.
-     *
-     * @see {@link JComboBox}
      */
     private final JComboBox<String> moedasBox = UI.comboBox();
 
     /**
-     * Mapa de categorias.
-     *
-     * @see {@link LinkedHashMap}
+     * Tabela de produtos.
      */
-    private final LinkedHashMap<String, Integer> categoriasMap = new LinkedHashMap<>();
+    private final JTable produtosTable = UI.table();
 
     /**
-     * Mapa de moedas.
-     *
-     * @see {@link LinkedHashMap}
+     * Modelo da tabela.
      */
-    private final LinkedHashMap<String, Integer> moedasMap = new LinkedHashMap<>();
+    private final ProdutoTableModel tableModel
+            = new ProdutoTableModel();
+
+    /**
+     * Ordenador/filtro da tabela.
+     */
+    private final TableRowSorter<ProdutoTableModel> tableSorter
+            = new TableRowSorter<>(tableModel);
 
     /**
      * Botão de cadastro.
-     *
-     * @see {@link JButton}
      */
-    private final JButton cadastrarButton = UI.button("Cadastrar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton cadastrarButton = UI.button("Cadastrar");
+
+    /**
+     * Botão de atualização.
+     */
+    private final JButton atualizarButton = UI.button("Atualizar");
+
+    /**
+     * Botão de remoção.
+     */
+    private final JButton removerButton = UI.button("Remover");
 
     /**
      * Botão de limpeza.
-     *
-     * @see {@link JButton}
      */
-    private final JButton limparButton = UI.button("Limpar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton limparButton = UI.button("Limpar");
+
+    /**
+     * Mapa de categorias.
+     */
+    private final LinkedHashMap<String, Integer> categoriasMap
+            = new LinkedHashMap<>();
+
+    /**
+     * Mapa de moedas.
+     */
+    private final LinkedHashMap<String, Integer> moedasMap
+            = new LinkedHashMap<>();
+
+    /**
+     * Produto atualmente selecionado.
+     */
+    private Produto selectedProduto;
 
     /**
      * Cria tela de cadastro de produtos.
      */
     public CadastroProdutoScreen() {
         super("cadastro-produto");
-        init();
-        setup();
+
+        initialize();
     }
 
     /**
-     * Realiza setup da tela.
+     * {@inheritDoc}
      */
     @Override
     protected void setup() {
-        update();
+        configureTable();
 
+        refresh();
+
+        setupSearch();
+        setupTableSelection();
+        setupCadastrar();
+        setupAtualizar();
+        setupRemover();
+        setupLimpar();
+    }
+
+    /**
+     * Configura tabela.
+     */
+    private void configureTable() {
+        produtosTable.setModel(tableModel);
+        produtosTable.setRowSorter(tableSorter);
+        produtosTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
+        produtosTable.getTableHeader()
+                .setReorderingAllowed(false);
+    }
+
+    /**
+     * Configura busca dinâmica.
+     */
+    private void setupSearch() {
+        Events.text(buscaField, document -> {
+            document.onChanged(() -> {
+                String busca = buscaField.getText();
+
+                if (busca == null || busca.isBlank()) {
+                    tableSorter.setRowFilter(null);
+                    return;
+                }
+
+                tableSorter.setRowFilter(
+                        RowFilter.regexFilter(
+                                "(?i)" + busca.trim()
+                        )
+                );
+            });
+        });
+    }
+
+    /**
+     * Configura seleção da tabela.
+     */
+    private void setupTableSelection() {
+        produtosTable.getSelectionModel()
+                .addListSelectionListener(event -> {
+                    if (event.getValueIsAdjusting()) {
+                        return;
+                    }
+
+                    int selectedRow = produtosTable.getSelectedRow();
+
+                    if (selectedRow < 0) {
+                        selectedProduto = null;
+                        return;
+                    }
+
+                    int modelRow = produtosTable
+                            .convertRowIndexToModel(selectedRow);
+
+                    Produto produto = tableModel
+                            .getProduto(modelRow);
+
+                    selectedProduto = produto;
+
+                    fillForm(produto);
+                });
+    }
+
+    /**
+     * Configura ação de cadastro.
+     */
+    private void setupCadastrar() {
         Events.mouse(cadastrarButton, mouse -> {
             mouse.onClicked(() -> {
                 try {
-                    String codigo = codigoField.getText();
-                    String nome = nomeField.getText();
+                    Produto produto = buildProdutoFromForm(false);
 
-                    BigDecimal compraValor = BigDecimal.valueOf(
-                            Double.parseDouble(valorCompraField.getText())
-                    );
+                    ProdutoService service = ApplicationContext
+                            .getProdutoService();
 
-                    BigDecimal vendaValor = BigDecimal.valueOf(
-                            Double.parseDouble(valorVendaField.getText())
-                    );
+                    Optional<Produto> existente = service
+                            .findByCodigo(produto.getCodigo());
 
-                    Integer categoriaId = categoriasMap.get(
-                            categoriasBox.getSelectedItem().toString()
-                    );
+                    if (existente.isPresent()) {
+                        Popups.warn(
+                                "Já existe um produto com este código!"
+                        );
 
-                    Integer moedaId = moedasMap.get(
-                            moedasBox.getSelectedItem().toString()
-                    );
-
-                    Categoria categoria = ApplicationContext
-                            .getCategoriaService()
-                            .findById(categoriaId)
-                            .get();
-
-                    Moeda moeda = ApplicationContext
-                            .getMoedaService()
-                            .findById(moedaId)
-                            .get();
-
-                    Produto produto = new Produto(
-                            0,
-                            codigo,
-                            nome,
-                            compraValor,
-                            vendaValor,
-                            categoria,
-                            moeda
-                    );
-
-                    ProdutoService service = ApplicationContext.getProdutoService();
+                        return;
+                    }
 
                     service.save(produto);
 
-                    Messages.success(
+                    Popups.success(
                             "Produto '%s' cadastrado com sucesso!"
-                                    .formatted(nome)
+                                    .formatted(produto.getNome())
                     );
 
+                    refreshTable();
                     clearForm();
+                } catch (IllegalArgumentException e) {
+                    Popups.warn(e.getMessage());
                 } catch (Exception e) {
-                    Messages.error(
+                    Popups.error(
                             "Erro ao cadastrar produto: %s"
                                     .formatted(e.getMessage())
                     );
                 }
             });
         });
+    }
 
+    /**
+     * Configura ação de atualização.
+     */
+    private void setupAtualizar() {
+        Events.mouse(atualizarButton, mouse -> {
+            mouse.onClicked(() -> {
+                try {
+                    if (selectedProduto == null) {
+                        Popups.warn(
+                                "Selecione um produto para atualizar!"
+                        );
+
+                        return;
+                    }
+
+                    Produto atualizado = buildProdutoFromForm(true);
+
+                    ProdutoService service = ApplicationContext
+                            .getProdutoService();
+
+                    String novoCodigo = atualizado.getCodigo();
+
+                    if (!novoCodigo.equalsIgnoreCase(
+                            selectedProduto.getCodigo()
+                    )) {
+                        Optional<Produto> existente = service
+                                .findByCodigo(novoCodigo);
+
+                        if (existente.isPresent()) {
+                            Popups.warn(
+                                    "Já existe um produto com este código!"
+                            );
+
+                            return;
+                        }
+                    }
+
+                    selectedProduto.setCodigo(
+                            atualizado.getCodigo()
+                    );
+
+                    selectedProduto.setNome(
+                            atualizado.getNome()
+                    );
+
+                    selectedProduto.setValorCompra(
+                            atualizado.getValorCompra()
+                    );
+
+                    selectedProduto.setValorVenda(
+                            atualizado.getValorVenda()
+                    );
+
+                    selectedProduto.setCategoria(
+                            atualizado.getCategoria()
+                    );
+
+                    selectedProduto.setMoeda(
+                            atualizado.getMoeda()
+                    );
+
+                    service.update(selectedProduto);
+
+                    Popups.success(
+                            "Produto atualizado com sucesso!"
+                    );
+
+                    refreshTable();
+                    restoreSelection(selectedProduto.getId());
+                } catch (IllegalArgumentException e) {
+                    Popups.warn(e.getMessage());
+                } catch (Exception e) {
+                    Popups.error(
+                            "Erro ao atualizar produto: %s"
+                                    .formatted(e.getMessage())
+                    );
+                }
+            });
+        });
+    }
+
+    /**
+     * Configura ação de remoção.
+     */
+    private void setupRemover() {
+        Events.mouse(removerButton, mouse -> {
+            mouse.onClicked(() -> {
+                try {
+                    if (selectedProduto == null) {
+                        Popups.warn(
+                                "Selecione um produto para remover!"
+                        );
+
+                        return;
+                    }
+
+                    String nome = selectedProduto.getNome();
+
+                    ApplicationContext
+                            .getProdutoService()
+                            .delete(selectedProduto);
+
+                    Popups.success(
+                            "Produto '%s' removido com sucesso!"
+                                    .formatted(nome)
+                    );
+
+                    refreshTable();
+                    clearForm();
+                } catch (Exception e) {
+                    Popups.error(
+                            "Erro ao remover produto: %s"
+                                    .formatted(e.getMessage())
+                    );
+                }
+            });
+        });
+    }
+
+    /**
+     * Configura limpeza do formulário.
+     */
+    private void setupLimpar() {
         Events.mouse(limparButton, mouse -> {
             mouse.onClicked(this::clearForm);
         });
     }
 
     /**
-     * Constrói interface da tela.
-     *
-     * @return JPanel - Painel raiz
+     * {@inheritDoc}
      */
     @Override
-    protected JPanel build() {
-        return UI.border()
-                .center(buildForm())
-                .padding(Spacing.MD)
-                .build();
+    public void refresh() {
+        refreshCategorias();
+        refreshMoedas();
+        refreshTable();
     }
 
     /**
-     * Atualiza dados da tela.
+     * Atualiza tabela.
      */
-    @Override
-    public void update() {
-        updateCategorias();
-        updateMoedas();
+    private void refreshTable() {
+        List<Produto> produtos = ApplicationContext
+                .getProdutoService()
+                .findAll();
+
+        tableModel.setProdutos(produtos);
     }
 
     /**
-     * Atualiza lista de categorias.
+     * Atualiza categorias.
      */
-    private void updateCategorias() {
-        List<Categoria> categorias
-                = ApplicationContext.getCategoriaService().findAll();
+    private void refreshCategorias() {
+        List<Categoria> categorias = ApplicationContext
+                .getCategoriaService()
+                .findAll();
 
         categoriasMap.clear();
 
@@ -228,17 +433,19 @@ public final class CadastroProdutoScreen extends BaseScreen {
 
         categoriasBox.setModel(
                 new DefaultComboBoxModel<>(
-                        categoriasMap.keySet().toArray(new String[0])
+                        categoriasMap.keySet()
+                                .toArray(new String[0])
                 )
         );
     }
 
     /**
-     * Atualiza lista de moedas.
+     * Atualiza moedas.
      */
-    private void updateMoedas() {
-        List<Moeda> moedas
-                = ApplicationContext.getMoedaService().findAll();
+    private void refreshMoedas() {
+        List<Moeda> moedas = ApplicationContext
+                .getMoedaService()
+                .findAll();
 
         moedasMap.clear();
 
@@ -251,80 +458,303 @@ public final class CadastroProdutoScreen extends BaseScreen {
 
         moedasBox.setModel(
                 new DefaultComboBoxModel<>(
-                        moedasMap.keySet().toArray(new String[0])
+                        moedasMap.keySet()
+                                .toArray(new String[0])
                 )
         );
     }
 
     /**
-     * Constrói formulário principal.
+     * Preenche formulário com produto.
      *
-     * @return JPanel - Formulário construído
+     * @param produto Produto selecionado
      */
-    private JPanel buildForm() {
-        return UI.column()
-                .add(buildTitle(), buildSubtitle())
-                .glue()
-                .add(
-                        UI.field(
-                                UI.fieldLabel(
-                                        "Código [ex: PROD123, FRUT001, ENERG000]"
-                                ),
-                                codigoField
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Nome"),
-                                nomeField
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Valor de Compra"),
-                                valorCompraField
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Valor de Venda"),
-                                valorVendaField
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Categoria"),
-                                categoriasBox
-                        ),
-                        UI.field(
-                                UI.fieldLabel("Moeda"),
-                                moedasBox
-                        )
+    private void fillForm(
+            Produto produto
+    ) {
+        codigoField.setText(produto.getCodigo());
+        nomeField.setText(produto.getNome());
+
+        valorCompraField.setText(
+                produto.getValorCompra().toPlainString()
+        );
+
+        valorVendaField.setText(
+                produto.getValorVenda().toPlainString()
+        );
+
+        if (produto.getCategoria() != null) {
+            categoriasBox.setSelectedItem(
+                    produto.getCategoria().getNome()
+            );
+        }
+
+        if (produto.getMoeda() != null) {
+            moedasBox.setSelectedItem(
+                    produto.getMoeda().getSigla()
+            );
+        }
+    }
+
+    /**
+     * Cria produto baseado no formulário.
+     *
+     * @param allowKeepValues true para manter campos vazios
+     * @return Produto Produto criado
+     */
+    private Produto buildProdutoFromForm(
+            boolean allowKeepValues
+    ) {
+        Produto produto = new Produto();
+
+        String codigo = codigoField.getText();
+        String nome = nomeField.getText();
+
+        String compraText = valorCompraField.getText();
+        String vendaText = valorVendaField.getText();
+
+        if (!allowKeepValues || !isBlank(codigo)) {
+            produto.setCodigo(codigo.trim());
+        } else {
+            produto.setCodigo(selectedProduto.getCodigo());
+        }
+
+        if (!allowKeepValues || !isBlank(nome)) {
+            produto.setNome(nome.trim());
+        } else {
+            produto.setNome(selectedProduto.getNome());
+        }
+
+        if (!allowKeepValues || !isBlank(compraText)) {
+            produto.setValorCompra(parseMoney(
+                    compraText,
+                    "valor de compra"
+            ));
+        } else {
+            produto.setValorCompra(
+                    selectedProduto.getValorCompra()
+            );
+        }
+
+        if (!allowKeepValues || !isBlank(vendaText)) {
+            produto.setValorVenda(parseMoney(
+                    vendaText,
+                    "valor de venda"
+            ));
+        } else {
+            produto.setValorVenda(
+                    selectedProduto.getValorVenda()
+            );
+        }
+
+        String categoriaNome = (String) categoriasBox
+                .getSelectedItem();
+
+        Integer categoriaId = categoriasMap.get(categoriaNome);
+
+        Categoria categoria = ApplicationContext
+                .getCategoriaService()
+                .findById(categoriaId)
+                .orElseThrow(()
+                        -> new IllegalArgumentException(
+                        "Categoria inválida!"
                 )
-                .glue()
-                .add(UI.actions(cadastrarButton, limparButton))
+                );
+
+        produto.setCategoria(categoria);
+
+        String moedaSigla = (String) moedasBox
+                .getSelectedItem();
+
+        Integer moedaId = moedasMap.get(moedaSigla);
+
+        Moeda moeda = ApplicationContext
+                .getMoedaService()
+                .findById(moedaId)
+                .orElseThrow(()
+                        -> new IllegalArgumentException(
+                        "Moeda inválida!"
+                )
+                );
+
+        produto.setMoeda(moeda);
+
+        return produto;
+    }
+
+    /**
+     * Converte texto monetário.
+     *
+     * @param text Texto
+     * @param field Campo
+     * @return BigDecimal Valor convertido
+     */
+    private BigDecimal parseMoney(
+            String text,
+            String field
+    ) {
+        try {
+            return new BigDecimal(
+                    text.trim()
+                            .replace(",", ".")
+            );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Informe um %s válido!"
+                            .formatted(field)
+            );
+        }
+    }
+
+    /**
+     * Restaura seleção após atualização.
+     *
+     * @param produtoId ID do produto
+     */
+    private void restoreSelection(
+            int produtoId
+    ) {
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            Produto produto = tableModel.getProduto(i);
+
+            if (produto.getId() == produtoId) {
+                int viewIndex = produtosTable
+                        .convertRowIndexToView(i);
+
+                produtosTable.setRowSelectionInterval(
+                        viewIndex,
+                        viewIndex
+                );
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Verifica se texto está vazio.
+     *
+     * @param value Valor
+     * @return boolean true se vazio
+     */
+    private boolean isBlank(
+            String value
+    ) {
+        return value == null || value.isBlank();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected JPanel build() {
+        return UI.border()
+                .center(buildContent())
+                .padding(Spacing.MD)
                 .build();
     }
 
     /**
-     * Constrói título da tela.
+     * Constrói conteúdo principal.
      *
-     * @return JLabel - Título construído
+     * @return JPanel Painel principal
      */
-    private JLabel buildTitle() {
-        return UI.label("Cadastro de Produtos", label -> {
-            label.setFont(Fonts.TITLE_MEDIUM);
-        });
+    private JPanel buildContent() {
+        return UI.column()
+                .add(
+                        UIScreen.title("Cadastro de Produtos"),
+                        UIScreen.subtitle(
+                                "Gerencia produtos, categorias e valores comerciais do sistema."
+                        )
+                )
+                .glue()
+                .add(
+                        UIForm.field(
+                                UIForm.fieldLabel(
+                                        "Buscar produtos"
+                                ),
+                                buscaField
+                        )
+                )
+                .glue()
+                .add(
+                        buildTable()
+                )
+                .glue()
+                .add(
+                        UIForm.field(
+                                UIForm.fieldLabel(
+                                        "Código [obrigatorio]"
+                                ),
+                                codigoField
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel(
+                                        "Nome [obrigatorio]"
+                                ),
+                                nomeField
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel(
+                                        "Valor de Compra [obrigatorio]"
+                                ),
+                                valorCompraField
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel(
+                                        "Valor de Venda [obrigatorio]"
+                                ),
+                                valorVendaField
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel("Categoria"),
+                                categoriasBox
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel("Moeda"),
+                                moedasBox
+                        )
+                )
+                .glue()
+                .add(
+                        UIScreen.actions(
+                                cadastrarButton,
+                                atualizarButton,
+                                removerButton,
+                                limparButton
+                        )
+                )
+                .build();
     }
 
     /**
-     * Constrói subtítulo da tela.
+     * Constrói tabela.
      *
-     * @return JLabel - Subtítulo construído
+     * @return JScrollPane Scroll da tabela
      */
-    private JLabel buildSubtitle() {
-        return UI.subtitle(
-                "Gerencia produtos, categorias e valores comerciais do sistema."
+    private JScrollPane buildTable() {
+        JScrollPane scroll = UI.scroll(produtosTable);
+
+        scroll.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         );
+
+        scroll.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+
+        return scroll;
     }
 
     /**
      * Limpa formulário.
      */
     private void clearForm() {
-        UI.clearFields(
+        selectedProduto = null;
+
+        produtosTable.clearSelection();
+
+        UIForm.clearFields(
                 codigoField,
                 nomeField,
                 valorCompraField,

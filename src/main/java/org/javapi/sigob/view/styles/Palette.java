@@ -148,7 +148,7 @@ public final class Palette {
      * @param amount - Intensidade aplicada
      * @return Color - Cor clareada
      */
-    private static Color brighter(Color color, int amount) {
+    public static Color brighter(Color color, int amount) {
         return new Color(
                 clamp(color.getRed() + amount),
                 clamp(color.getGreen() + amount),
@@ -163,7 +163,7 @@ public final class Palette {
      * @param amount - Intensidade aplicada
      * @return Color - Cor escurecida
      */
-    private static Color darker(Color color, int amount) {
+    public static Color darker(Color color, int amount) {
         return new Color(
                 clamp(color.getRed() - amount),
                 clamp(color.getGreen() - amount),
@@ -178,7 +178,7 @@ public final class Palette {
      * @param alpha - Transparência aplicada
      * @return Color - Cor resultante
      */
-    private static Color alpha(Color color, int alpha) {
+    public static Color alpha(Color color, int alpha) {
         return new Color(
                 color.getRed(),
                 color.getGreen(),
@@ -193,7 +193,7 @@ public final class Palette {
      * @param value - Valor analisado
      * @return int - Valor ajustado
      */
-    private static int clamp(int value) {
+    public static int clamp(int value) {
         return Math.max(0, Math.min(255, value));
     }
 

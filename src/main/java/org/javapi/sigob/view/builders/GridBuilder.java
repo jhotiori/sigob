@@ -1,18 +1,12 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
-import java.awt.Component;
-import java.awt.Dimension;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
- * Builder fluente para layouts em coluna.
+ * Builder fluente para GridLayout.
  */
-public class ColumnBuilder {
+public class GridBuilder {
 
     /**
      * Painel interno do builder.
@@ -22,43 +16,46 @@ public class ColumnBuilder {
     private final JPanel panel;
 
     /**
-     * Cria builder com painel vazio.
+     * Layout interno do builder.
+     *
+     * @see {@link GridLayout}
      */
-    public ColumnBuilder() {
-        this(new JPanel());
+    private final GridLayout layout;
+
+    /**
+     * Cria builder de grid.
+     *
+     * @param rows - Quantidade de linhas
+     * @param cols - Quantidade de colunas
+     */
+    public GridBuilder(int rows, int cols) {
+        this(new JPanel(), rows, cols);
     }
 
     /**
      * Cria builder usando painel existente.
      *
      * @param panel - Painel existente
+     * @param rows - Quantidade de linhas
+     * @param cols - Quantidade de colunas
      */
-    public ColumnBuilder(JPanel panel) {
+    public GridBuilder(JPanel panel, int rows, int cols) {
         this.panel = panel != null
                 ? panel
                 : new JPanel();
 
-        this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.Y_AXIS));
-    }
+        this.layout = new GridLayout(rows, cols);
 
-    /**
-     * Adiciona espaçamento flexível vertical.
-     *
-     * @return ColumnBuilder - Instância atual
-     */
-    public ColumnBuilder glue() {
-        panel.add(Box.createVerticalGlue());
-
-        return this;
+        this.panel.setLayout(layout);
     }
 
     /**
      * Define preenchimento interno uniforme.
      *
      * @param padding - Tamanho do preenchimento
-     * @return ColumnBuilder - Instância atual
+     * @return GridBuilder - Instância atual
      */
-    public ColumnBuilder padding(int padding) {
+    public GridBuilder padding(int padding) {
         panel.setBorder(
                 BorderFactory.createEmptyBorder(
                         padding,
@@ -76,9 +73,9 @@ public class ColumnBuilder {
      *
      * @param vertical - Preenchimento vertical
      * @param horizontal - Preenchimento horizontal
-     * @return ColumnBuilder - Instância atual
+     * @return GridBuilder - Instância atual
      */
-    public ColumnBuilder padding(int vertical, int horizontal) {
+    public GridBuilder padding(int vertical, int horizontal) {
         panel.setBorder(
                 BorderFactory.createEmptyBorder(
                         vertical,
@@ -92,38 +89,45 @@ public class ColumnBuilder {
     }
 
     /**
+     * Define espaçamento horizontal.
+     *
+     * @param gap - Espaçamento horizontal
+     * @return GridBuilder - Instância atual
+     */
+    public GridBuilder hgap(int gap) {
+        layout.setHgap(gap);
+
+        return this;
+    }
+
+    /**
+     * Define espaçamento vertical.
+     *
+     * @param gap - Espaçamento vertical
+     * @return GridBuilder - Instância atual
+     */
+    public GridBuilder vgap(int gap) {
+        layout.setVgap(gap);
+
+        return this;
+    }
+
+    /**
      * Adiciona componentes ao painel.
      *
      * @param components - Componentes adicionados
-     * @return ColumnBuilder - Instância atual
+     * @return GridBuilder - Instância atual
      */
-    public ColumnBuilder add(Component... components) {
+    public GridBuilder add(Component... components) {
         if (components == null) {
             return this;
         }
 
         for (Component component : components) {
             if (component != null) {
-
-                if (component instanceof JComponent swingComponent) {
-                    swingComponent.setAlignmentX(Component.LEFT_ALIGNMENT);
-                }
-
                 panel.add(component);
             }
         }
-
-        return this;
-    }
-
-    /**
-     * Adiciona espaçamento vertical.
-     *
-     * @param size - Tamanho do espaçamento
-     * @return ColumnBuilder - Instância atual
-     */
-    public ColumnBuilder gap(int size) {
-        panel.add(Box.createRigidArea(new Dimension(0, size)));
 
         return this;
     }

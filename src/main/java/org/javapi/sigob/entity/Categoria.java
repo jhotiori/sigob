@@ -1,10 +1,6 @@
 package org.javapi.sigob.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity(name = "categorias")
 public class Categoria {
@@ -12,9 +8,6 @@ public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @Column(name = "codigo")
-    private String codigo;
 
     @Column(name = "nome")
     private String nome;
@@ -35,9 +28,8 @@ public class Categoria {
      * @param nome O Nome da categoria
      * @return Categoria - A categoria que foi criada
      */
-    public Categoria(Integer id, String codigo, String nome) {
+    public Categoria(Integer id, String nome) {
         this.id = id;
-        this.codigo = codigo;
         this.nome = nome;
     }
 
@@ -48,15 +40,6 @@ public class Categoria {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    /**
-     * Atribui o Codigo da categoria
-     *
-     * @param codigo O Codigo da categoria
-     */
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     /**
@@ -78,15 +61,6 @@ public class Categoria {
     }
 
     /**
-     * Retorna o Codigo da categoria
-     *
-     * @return cdCategoria - O Codigo da categoria
-     */
-    public String getCodigo() {
-        return codigo;
-    }
-
-    /**
      * Retorna o Nome da categoria
      *
      * @return nmCategoria - O nome da categoria
@@ -97,7 +71,7 @@ public class Categoria {
 
     @Override
     public String toString() {
-        return "Categoria(Id = %d, Codigo = %s, Nome = %s)"
-                .formatted(this.getId(), this.getCodigo(), this.getNome());
+        return "Categoria(Id = %d, Nome = %s)"
+                .formatted(this.getId(), this.getNome());
     }
 }

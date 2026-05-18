@@ -24,7 +24,7 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
      * @return List<Funcionario> - Todos os Funcionarios
      */
     public List<Funcionario> findAll() {
-        return em.createQuery("select f from funcionarios f", Funcionario.class)
+        return em.createQuery("select f from funcionarios f join fetch f.acessos", Funcionario.class)
                 .getResultList();
     }
 
@@ -35,7 +35,7 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
      * @return List<Funcionario> - Os Funcionarios encontrados
      */
     public List<Funcionario> findByNome(String nome) {
-        return em.createQuery("select f from funcionarios f where f.nome like :str", Funcionario.class)
+        return em.createQuery("select f from funcionarios f join fetch f.acessos where f.nome like :str", Funcionario.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }

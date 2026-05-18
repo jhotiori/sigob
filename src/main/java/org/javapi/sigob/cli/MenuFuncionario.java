@@ -1,10 +1,5 @@
 package org.javapi.sigob.cli;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Documento;
@@ -15,6 +10,11 @@ import org.javapi.sigob.service.DocumentoService;
 import org.javapi.sigob.service.FuncionarioService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Menu responsável pelas operações de funcionários via CLI.

@@ -25,7 +25,6 @@ public class CategoriaService {
      */
     public void save(Categoria categoria) {
         validateNome(categoria.getNome());
-        validateCodigo(categoria.getCodigo());
 
         TransactionExecutor.executeVoid(em -> {
             new CategoriaRepository(em).save(categoria);
@@ -92,8 +91,6 @@ public class CategoriaService {
      * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
     public Optional<Categoria> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new CategoriaRepository(em).findById(id);
         });
@@ -114,20 +111,6 @@ public class CategoriaService {
     }
 
     /**
-     * Busca por uma Categoria pelo seu codigo
-     *
-     * @param codigo O codigo da categoria
-     * @return Optional<Categoria> - A categoria buscada
-     */
-    public Optional<Categoria> findByCodigo(String codigo) {
-        validateCodigo(codigo);
-
-        return TransactionExecutor.query(em -> {
-            return new CategoriaRepository(em).findByCodigo(codigo);
-        });
-    }
-
-    /**
      * Valida uma Categoria por completa
      *
      * @param categoria A Categoria para ser validada
@@ -138,7 +121,6 @@ public class CategoriaService {
                 .expectNotNull(categoria, "Categoria não pode ser nula")
                 .validate();
         validateNome(categoria.getNome());
-        validateCodigo(categoria.getCodigo());
     }
 
     /**
@@ -150,30 +132,6 @@ public class CategoriaService {
     private void validateNome(String nome) {
         Validator.start()
                 .expectNotBlank(nome, "Nome da Categoria não pode ser nulo ou vazio")
-                .validate();
-    }
-
-    /**
-     * Valida o codigo de uma Categoria
-     *
-     * @param codigo O codigo a ser validado
-     * @throws IllegalArgumentException Se o codigo for invalido
-     */
-    private void validateCodigo(String codigo) {
-        Validator.start()
-                .expectNotBlank(codigo, "Código da Categoria não pode ser nulo ou vazio")
-                .validate();
-    }
-
-    /**
-     * Valida o ID de uma Categoria
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID da Categoria não pode ser nulo")
                 .validate();
     }
 }

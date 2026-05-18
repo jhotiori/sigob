@@ -1,5 +1,7 @@
 package org.javapi.sigob.view.components;
 
+import java.awt.Dimension;
+
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
@@ -52,6 +54,8 @@ public class TableComponent extends JTable {
         setFillsViewportHeight(true);
 
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setIntercellSpacing(new Dimension(0, 0));
+        setRowMargin(0);
 
         setupHeader();
     }

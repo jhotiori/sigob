@@ -42,8 +42,7 @@ public class ComboBoxComponent<T> extends JComboBox<T> {
         setBackground(Palette.BG_SECONDARY);
         setForeground(Palette.FG_PRIMARY);
 
-        setFocusable(false);
-        /*setMaximumSize(getPreferredSize());*/
+        setFocusable(true);
         setMaximumSize(
                 new Dimension(
                         Integer.MAX_VALUE,

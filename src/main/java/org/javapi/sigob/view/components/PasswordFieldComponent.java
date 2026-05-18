@@ -34,12 +34,14 @@ public class PasswordFieldComponent extends JPasswordField {
      * Configura padrões visuais do componente.
      */
     private void setup() {
-        setFont(Fonts.DEFAULT);
+        setFont(Fonts.DEFAULT_ITALIC);
 
         setBackground(Palette.BG_SECONDARY);
         setForeground(Palette.FG_PRIMARY);
         setCaretColor(Palette.FG_PRIMARY);
         setAlignmentX(LEFT_ALIGNMENT);
+        setSelectionColor(Palette.ACCENT_PRIMARY);
+        setSelectedTextColor(Palette.FG_PRIMARY);
 
         setMaximumSize(
                 new Dimension(

@@ -1,18 +1,23 @@
 package org.javapi.sigob.view.screens.cadastros;
 
+import java.util.List;
+
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.Messages;
-import org.javapi.sigob.view.UI;
-import org.javapi.sigob.view.screens.BaseScreen;
-import org.javapi.sigob.view.styles.Fonts;
+import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.models.CategoriaTableModel;
+import org.javapi.sigob.view.popups.Popups;
+import org.javapi.sigob.view.popups.PopupValues;
 import org.javapi.sigob.view.styles.Spacing;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIForm;
+import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de cadastro de categorias.
@@ -20,133 +25,336 @@ import org.javapi.sigob.view.styles.Spacing;
 public final class CadastroCategoriaScreen extends BaseScreen {
 
     /**
-     * Campo de código.
-     *
-     * @see {@link JTextField}
-     */
-    private final JTextField codigoField = UI.textField();
-
-    /**
      * Campo de nome.
      *
      * @see {@link JTextField}
      */
-    private final JTextField nomeField = UI.textField();
+    private final JTextField nomeField
+            = UI.textField();
+
+    /**
+     * Campo de pesquisa.
+     *
+     * @see {@link JTextField}
+     */
+    private final JTextField pesquisaField
+            = UI.textField();
+
+    /**
+     * Modelo da tabela de categorias.
+     *
+     * @see {@link CategoriaTableModel}
+     */
+    private final CategoriaTableModel tableModel
+            = new CategoriaTableModel();
+
+    /**
+     * Tabela de categorias.
+     *
+     * @see {@link JTable}
+     */
+    private final JTable table
+            = UI.table(tableModel);
 
     /**
      * Botão de cadastro.
      *
      * @see {@link JButton}
      */
-    private final JButton cadastrarButton = UI.button("Cadastrar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton cadastrarButton
+            = UI.button("Cadastrar");
 
     /**
      * Botão de limpeza.
      *
      * @see {@link JButton}
      */
-    private final JButton limparButton = UI.button("Limpar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton limparButton
+            = UI.button("Limpar");
+
+    /**
+     * Botão de pesquisa.
+     *
+     * @see {@link JButton}
+     */
+    private final JButton pesquisarButton
+            = UI.button("Pesquisar");
 
     /**
      * Cria tela de cadastro de categorias.
      */
     public CadastroCategoriaScreen() {
         super("cadastro-categoria");
-        init();
-        setup();
+
+        initialize();
     }
 
     /**
-     * Realiza setup da tela.
+     * Realiza setup interno da tela.
      */
     @Override
     protected void setup() {
+        listarTodos();
+
+        registerEvents();
+    }
+
+    /**
+     * Registra eventos da tela.
+     */
+    private void registerEvents() {
         Events.mouse(cadastrarButton, mouse -> {
-            mouse.onClicked(() -> {
-                try {
-                    Categoria categoria = new Categoria();
-
-                    categoria.setCodigo(codigoField.getText());
-                    categoria.setNome(nomeField.getText());
-
-                    ApplicationContext.getCategoriaService().save(categoria);
-
-                    Messages.info("Categoria cadastrada com sucesso!");
-                    clearForm();
-                } catch (Exception e) {
-                    Messages.error(e.getMessage());
-                }
-            });
+            mouse.onClicked(this::cadastrar);
         });
 
         Events.mouse(limparButton, mouse -> {
             mouse.onClicked(this::clearForm);
+        });
+
+        Events.mouse(pesquisarButton, mouse -> {
+            mouse.onClicked(this::pesquisar);
+        });
+
+        Events.mouse(table, mouse -> {
+            mouse.onClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    editarSelecionado();
+                }
+            });
         });
     }
 
     /**
      * Constrói interface da tela.
      *
-     * @return JPanel - Painel raiz
+     * @return JPanel - Painel raiz da tela
      */
     @Override
     protected JPanel build() {
         return UI.border()
-                .center(buildForm())
+                .center(buildContent())
                 .padding(Spacing.XL)
                 .build();
     }
 
     /**
-     * Constrói formulário principal.
+     * Constrói conteúdo principal.
      *
-     * @return JPanel - Formulário construído
+     * @return JPanel - Conteúdo construído
      */
-    private JPanel buildForm() {
+    private JPanel buildContent() {
         return UI.column()
-                .add(buildTitle(), buildSubtitle())
-                .glue()
                 .add(
-                        UI.field(UI.fieldLabel("Código"), codigoField),
-                        UI.field(UI.fieldLabel("Nome"), nomeField)
+                        UIScreen.title("Cadastro de Categorias"),
+                        UIScreen.subtitle(
+                                "Gerencia categorias utilizadas para classificação de produtos."
+                        )
                 )
                 .glue()
-                .add(UI.actions(cadastrarButton, limparButton))
+                .add(
+                        UIScreen.section(
+                                "Cadastro",
+                                buildCadastroSection()
+                        )
+                )
+                .glue()
+                .add(
+                        UIScreen.section(
+                                "Atualizar",
+                                buildAtualizacaoSection()
+                        )
+                )
                 .build();
     }
 
     /**
-     * Constrói título da tela.
+     * Constrói seção de cadastro.
      *
-     * @return JLabel - Título construído
+     * @return JPanel - Seção construída
      */
-    private JLabel buildTitle() {
-        return UI.label("Cadastro de Categorias", label -> {
-            label.setFont(Fonts.TITLE_MEDIUM);
-        });
+    private JPanel buildCadastroSection() {
+        return UI.column()
+                .add(
+                        UIForm.field(
+                                UIForm.fieldLabel("Nome [obrigatorio]"),
+                                nomeField
+                        )
+                )
+                .glue()
+                .add(
+                        UIScreen.actions(
+                                cadastrarButton,
+                                limparButton
+                        )
+                )
+                .build();
     }
 
     /**
-     * Constrói subtítulo da tela.
+     * Constrói seção de atualização.
      *
-     * @return JLabel - Subtítulo construído
+     * @return JPanel - Seção construída
      */
-    private JLabel buildSubtitle() {
-        return UI.subtitle(
-                "Gerencia categorias utilizadas para classificação de produtos."
+    private JPanel buildAtualizacaoSection() {
+        return UI.column()
+                .add(
+                        UI.row()
+                                .add(
+                                        pesquisaField
+                                )
+                                .glue()
+                                .add(
+                                        pesquisarButton
+                                )
+                                .build(),
+                        UI.scroll(table)
+                )
+                .build();
+    }
+
+    /**
+     * Cadastra uma nova categoria.
+     */
+    private void cadastrar() {
+        try {
+            Categoria categoria = new Categoria();
+
+            categoria.setNome(nomeField.getText());
+
+            ApplicationContext
+                    .getCategoriaService()
+                    .save(categoria);
+
+            Popups.success("Categoria cadastrada com sucesso!");
+
+            clearForm();
+
+            listarTodos();
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Pesquisa categorias pelo nome informado.
+     */
+    private void pesquisar() {
+        try {
+            String nome = pesquisaField.getText();
+
+            if (nome.isBlank()) {
+                listarTodos();
+                return;
+            }
+
+            List<Categoria> categorias = ApplicationContext
+                    .getCategoriaService()
+                    .findByNome(nome);
+
+            setResultados(categorias);
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Lista todas as categorias.
+     */
+    private void listarTodos() {
+        try {
+            List<Categoria> categorias = ApplicationContext
+                    .getCategoriaService()
+                    .findAll();
+
+            setResultados(categorias);
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Edita categoria selecionada.
+     */
+    private void editarSelecionado() {
+        int row = table.getSelectedRow();
+
+        if (row < 0) {
+            Popups.warn("Selecione uma categoria.");
+
+            return;
+        }
+
+        Categoria categoria = tableModel.getCategoria(row);
+
+        boolean confirmacao = Popups.confirm(
+                "Você deseja editar essa categoria?"
         );
+
+        if (!confirmacao) {
+            return;
+        }
+
+        try {
+            String nome = Popups.input(
+                    "Editar Categoria",
+                    """
+                    Novo nome
+                    Atual: %s
+
+                    [vazio = manter]
+                    """
+                            .formatted(categoria.getNome())
+            );
+
+            if (PopupValues.wasCancelled(nome)) {
+                return;
+            }
+
+            if (!PopupValues.shouldKeep(nome)) {
+                categoria.setNome(nome);
+            }
+
+            ApplicationContext
+                    .getCategoriaService()
+                    .update(categoria);
+
+            Popups.success("Categoria atualizada com sucesso!");
+
+            pesquisar();
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Define resultados da tabela.
+     *
+     * @param categorias - Lista de categorias
+     */
+    private void setResultados(List<Categoria> categorias) {
+        if (categorias.isEmpty()) {
+            clearResults();
+
+            Popups.warn("Nenhuma categoria encontrada.");
+
+            return;
+        }
+
+        tableModel.setCategorias(categorias);
+    }
+
+    /**
+     * Limpa resultados da tabela.
+     */
+    private void clearResults() {
+        tableModel.setCategorias(List.of());
     }
 
     /**
      * Limpa formulário.
      */
     private void clearForm() {
-        UI.clearFields(
-                codigoField,
+        UIForm.clearFields(
                 nomeField
         );
     }

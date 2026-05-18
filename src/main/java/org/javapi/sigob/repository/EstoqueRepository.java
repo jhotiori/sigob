@@ -1,10 +1,9 @@
 package org.javapi.sigob.repository;
 
-import java.util.List;
-
+import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.Estoque;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
 
 public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
 
@@ -36,6 +35,18 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
     public List<Estoque> findByNome(String nome) {
         return em.createQuery("select e from estoques e where e.nome like :prefix", Estoque.class)
                 .setParameter("prefix", nome + "%")
+                .getResultList();
+    }
+
+    /**
+     * Busca Estoques cujo codigo inicia com o valor informado
+     *
+     * @param codigo O prefixo do codigo
+     * @return List<Estoque> - Os Estoques encontrados
+     */
+    public List<Estoque> findByCodigo(String codigo) {
+        return em.createQuery("select e from estoques e where e.codigo like :prefix", Estoque.class)
+                .setParameter("prefix", codigo + "%")
                 .getResultList();
     }
 }

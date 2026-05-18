@@ -1,4 +1,4 @@
-package org.javapi.sigob.view;
+package org.javapi.sigob.view.popups;
 
 import java.awt.Component;
 
@@ -6,15 +6,17 @@ import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
+import org.javapi.sigob.view.ui.UI;
+
 /**
  * Utilitário centralizado para mensagens da aplicação.
  */
-public final class Messages {
+public final class Popups {
 
     /**
      * Impede instanciação utilitária.
      */
-    private Messages() {
+    private Popups() {
     }
 
     /**
@@ -165,6 +167,55 @@ public final class Messages {
                 title,
                 type,
                 icon
+        );
+    }
+
+    /**
+     * Exibe diálogo simples de entrada textual.
+     *
+     * @param message - Mensagem exibida
+     * @return String - Valor informado
+     */
+    public static String input(String message) {
+        return JOptionPane.showInputDialog(message);
+    }
+
+    /**
+     * Exibe diálogo simples de entrada textual.
+     *
+     * @param parent - Componente pai
+     * @param message - Mensagem exibida
+     * @return String - Valor informado
+     */
+    public static String input(
+            Component parent,
+            String message
+    ) {
+        return JOptionPane.showInputDialog(
+                parent,
+                message
+        );
+    }
+
+    /**
+     * Exibe diálogo simples de entrada textual.
+     *
+     * @param title - Título do diálogo
+     * @param message - Mensagem exibida
+     * @return String - Valor informado
+     */
+    public static String input(
+            String title,
+            String message
+    ) {
+        return (String) JOptionPane.showInputDialog(
+                null,
+                message,
+                title,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                null
         );
     }
 

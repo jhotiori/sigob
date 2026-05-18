@@ -1,17 +1,11 @@
 package org.javapi.sigob.cli;
 
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.service.ClienteService;
-import org.javapi.sigob.service.EstoqueService;
-import org.javapi.sigob.service.FuncionarioService;
-import org.javapi.sigob.service.ItemVendaService;
-import org.javapi.sigob.service.ProdutoService;
-import org.javapi.sigob.service.ProdutosEstoquesService;
-import org.javapi.sigob.service.VendaService;
+import org.javapi.sigob.service.*;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
+
+import java.util.Optional;
 
 /**
  * Menu principal responsável por autenticação e roteamento por nível de acesso.

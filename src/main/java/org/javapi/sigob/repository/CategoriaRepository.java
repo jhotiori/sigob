@@ -1,7 +1,6 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.javapi.sigob.entity.Categoria;
 
@@ -38,19 +37,5 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
         return em.createQuery("select c from categorias c where c.nome like :prefix", Categoria.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
-    }
-
-    /**
-     * Busca uma Categoria cujo codigo inicia com o valor informado
-     *
-     * @param codigo O codigo da Categoria
-     * @return Optional<Categoria> - A Categoria encontrada (pode ser vazio)
-     */
-    public Optional<Categoria> findByCodigo(String codigo) {
-        return Optional.ofNullable(
-                em.createQuery("select c from categorias c where c.codigo like :str", Categoria.class)
-                        .setParameter("str", codigo + "%")
-                        .getSingleResultOrNull()
-        );
     }
 }

@@ -25,8 +25,7 @@ public class AcessoService {
      * @throws AcessoException Se o acesso for invalido
      */
     public void save(Acesso acesso) {
-        validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
+        validateAcesso(acesso);
         TransactionExecutor.executeVoid(em -> {
             new AcessoRepository(em).save(acesso);
         });
@@ -89,7 +88,6 @@ public class AcessoService {
      * @return Optional<Acesso> - O Acesso buscado
      */
     public Optional<Acesso> findById(int id) {
-        validateId(id);
         return TransactionExecutor.query(em -> {
             return new AcessoRepository(em).findById(id);
         });
@@ -109,19 +107,6 @@ public class AcessoService {
     }
 
     /**
-     * Busca um Acesso pelo seu codigo
-     *
-     * @param codigo O codigo do Acesso
-     * @return Optional<Acesso> - O Acesso buscado
-     */
-    public Optional<Acesso> findByCodigo(String codigo) {
-        validateCodigo(codigo);
-        return TransactionExecutor.query(em -> {
-            return new AcessoRepository(em).findByCodigo(codigo);
-        });
-    }
-
-    /**
      * Valida um acesso por completo
      *
      * @param acesso O acesso a ser validado
@@ -132,7 +117,6 @@ public class AcessoService {
                 .expectNotNull(acesso, "Acesso nao pode ser nulo!")
                 .validate();
         validateNome(acesso.getNome());
-        validateCodigo(acesso.getCodigo());
     }
 
     /**
@@ -156,18 +140,6 @@ public class AcessoService {
     private void validateCodigo(String codigo) {
         Validator.start()
                 .expectNotBlank(codigo, "Código do acesso não pode ser nulo ou vazio!")
-                .validate();
-    }
-
-    /**
-     * Valida o ID de um acesso
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo!")
                 .validate();
     }
 }

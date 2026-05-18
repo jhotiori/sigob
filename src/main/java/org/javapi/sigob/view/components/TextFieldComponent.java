@@ -34,14 +34,15 @@ public class TextFieldComponent extends JTextField {
      * Configura padrões visuais do componente.
      */
     private void setup() {
-        setFont(Fonts.DEFAULT);
+        setFont(Fonts.DEFAULT_ITALIC);
 
         setBackground(Palette.BG_SECONDARY);
         setForeground(Palette.FG_PRIMARY);
         setCaretColor(Palette.FG_PRIMARY);
+        setSelectionColor(Palette.ACCENT_PRIMARY);
+        setSelectedTextColor(Palette.FG_PRIMARY);
 
         setAlignmentX(LEFT_ALIGNMENT);
-
         setMaximumSize(
                 new Dimension(
                         Integer.MAX_VALUE,

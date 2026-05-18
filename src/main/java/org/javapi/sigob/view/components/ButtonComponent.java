@@ -34,7 +34,7 @@ public class ButtonComponent extends JButton {
      * Configura padrões visuais do componente.
      */
     private void setup() {
-        setFont(Fonts.DEFAULT);
+        setFont(Fonts.DEFAULT_BOLD);
 
         setBackground(Palette.ACCENT_PRIMARY);
         setForeground(Palette.FG_PRIMARY);

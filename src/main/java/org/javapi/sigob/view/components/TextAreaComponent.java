@@ -39,6 +39,8 @@ public class TextAreaComponent extends JTextArea {
         setBackground(Palette.BG_SECONDARY);
         setForeground(Palette.FG_PRIMARY);
         setCaretColor(Palette.FG_PRIMARY);
+        setSelectionColor(Palette.ACCENT_PRIMARY);
+        setSelectedTextColor(Palette.FG_PRIMARY);
 
         setLineWrap(true);
         setWrapStyleWord(true);

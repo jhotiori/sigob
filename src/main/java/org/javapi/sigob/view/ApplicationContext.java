@@ -1,5 +1,8 @@
 package org.javapi.sigob.view;
 
+import java.util.List;
+
+import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.service.AcessoService;
 import org.javapi.sigob.service.CategoriaService;
@@ -13,12 +16,12 @@ import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.service.ProdutosEstoquesService;
 import org.javapi.sigob.service.VendaService;
 import org.javapi.sigob.view.windows.ApplicationWindow;
-import org.javapi.sigob.view.windows.BaseWindow;
 
 /**
  * Contexto central da aplicação.
  */
 public final class ApplicationContext {
+
     /**
      * Funcionario atualmente logado.
      *
@@ -132,6 +135,32 @@ public final class ApplicationContext {
      */
     public static Funcionario getFuncionarioLogado() {
         return funcionarioLogado;
+    }
+
+    /**
+     * Retorna acessos do funcionário logado.
+     *
+     * @return List<Acesso> - Acessos do funcionário logado
+     */
+    public static List<Acesso> getFuncionarioAcessos() {
+        return funcionarioLogado != null ? funcionarioLogado.getAcessos().stream().toList() : null;
+    }
+
+    /**
+     * Verifica se o funcionário logado possui acesso.
+     *
+     * @param acesso - Acesso
+     * @return boolean - Se possui acesso
+     */
+    public static boolean hasFuncionarioAcesso(String acesso) {
+        List<Acesso> acessos = getFuncionarioAcessos();
+        if (acessos == null) {
+            return false;
+        }
+        
+        return acessos
+            .stream()
+            .anyMatch(a -> a.getNome().toLowerCase().equals(acesso.toLowerCase()));
     }
 
     /**

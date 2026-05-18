@@ -6,11 +6,11 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 
-import org.javapi.sigob.view.UI;
 import org.javapi.sigob.view.components.LabelComponent;
 import org.javapi.sigob.view.components.MenuBarComponent;
 import org.javapi.sigob.view.components.MenuButtonComponent;
 import org.javapi.sigob.view.components.MenuComponent;
+import org.javapi.sigob.view.ui.UI;
 
 /**
  * Builder fluente para barra de menus.

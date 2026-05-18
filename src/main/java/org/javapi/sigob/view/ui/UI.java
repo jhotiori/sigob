@@ -1,35 +1,33 @@
-package org.javapi.sigob.view;
+package org.javapi.sigob.view.ui;
 
+import java.awt.Image;
 import java.util.function.Consumer;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
-import javax.swing.text.JTextComponent;
 
+import org.javapi.sigob.view.builders.BorderBuilder;
+import org.javapi.sigob.view.builders.CardBuilder;
+import org.javapi.sigob.view.builders.ColumnBuilder;
+import org.javapi.sigob.view.builders.FlowBuilder;
+import org.javapi.sigob.view.builders.GridBuilder;
 import org.javapi.sigob.view.builders.MenuBarBuilder;
+import org.javapi.sigob.view.builders.RowBuilder;
 import org.javapi.sigob.view.components.ButtonComponent;
 import org.javapi.sigob.view.components.CheckBoxComponent;
 import org.javapi.sigob.view.components.ComboBoxComponent;
 import org.javapi.sigob.view.components.LabelComponent;
 import org.javapi.sigob.view.components.ListComponent;
 import org.javapi.sigob.view.components.MenuBarComponent;
+import org.javapi.sigob.view.components.MenuButtonComponent;
 import org.javapi.sigob.view.components.PasswordFieldComponent;
 import org.javapi.sigob.view.components.ScrollComponent;
 import org.javapi.sigob.view.components.TableComponent;
 import org.javapi.sigob.view.components.TextAreaComponent;
 import org.javapi.sigob.view.components.TextFieldComponent;
-import org.javapi.sigob.view.layouts.BorderBuilder;
-import org.javapi.sigob.view.layouts.CardBuilder;
-import org.javapi.sigob.view.layouts.ColumnBuilder;
-import org.javapi.sigob.view.layouts.FlowBuilder;
-import org.javapi.sigob.view.layouts.FrameBuilder;
-import org.javapi.sigob.view.layouts.GridBuilder;
-import org.javapi.sigob.view.layouts.RowBuilder;
-import org.javapi.sigob.view.styles.Fonts;
-import org.javapi.sigob.view.styles.Palette;
 
 /**
  * Fábrica centralizada de componentes visuais.
@@ -60,12 +58,52 @@ public final class UI {
     }
 
     /**
+     * Cria ícone escalado.
+     *
+     * @param path - Caminho do recurso
+     * @param width - Largura desejada
+     * @param height - Altura desejada
+     * @return ImageIcon - Ícone criado
+     */
+    public static ImageIcon icon(
+            String path,
+            int width,
+            int height
+    ) {
+        ImageIcon icon = new ImageIcon(
+                UI.class.getResource(path)
+        );
+
+        Image scaled = icon.getImage().getScaledInstance(
+                width,
+                height,
+                Image.SCALE_SMOOTH
+        );
+
+        return new ImageIcon(scaled);
+    }
+
+    /**
+     * Cria ícone escalado.
+     *
+     * @param path - Caminho do recurso
+     * @param size - Tamanho desejado
+     * @return ImageIcon - Ícone criado
+     */
+    public static ImageIcon icon(
+            String path,
+            int size
+    ) {
+        return icon(path, size, size);
+    }
+
+    /**
      * Cria label vazio.
      *
      * @return LabelComponent - Label criado
      */
     public static LabelComponent label() {
-        return label(null, null);
+        return new LabelComponent();
     }
 
     /**
@@ -75,7 +113,7 @@ public final class UI {
      * @return LabelComponent - Label criado
      */
     public static LabelComponent label(Consumer<LabelComponent> config) {
-        return label(null, config);
+        return build(new LabelComponent(), config);
     }
 
     /**
@@ -100,6 +138,30 @@ public final class UI {
     }
 
     /**
+     * Cria label com ícone.
+     *
+     * @param icon - Ícone do label
+     * @return LabelComponent - Label criado
+     */
+    public static LabelComponent label(Icon icon) {
+        return label(icon, null);
+    }
+
+    /**
+     * Cria label configurável com ícone.
+     *
+     * @param icon - Ícone do label
+     * @param config - Configuração do label
+     * @return LabelComponent - Label criado
+     */
+    public static LabelComponent label(
+            Icon icon,
+            Consumer<LabelComponent> config
+    ) {
+        return build(new LabelComponent(icon), config);
+    }
+
+    /**
      * Cria botão com texto.
      *
      * @param text - Texto do botão
@@ -118,6 +180,37 @@ public final class UI {
      */
     public static ButtonComponent button(String text, Consumer<ButtonComponent> config) {
         return build(new ButtonComponent(text), config);
+    }
+
+    /**
+     * Cria botão de menu com texto.
+     *
+     * @param text - Texto do botão
+     * @return MenuButtonComponent - Botão de menu criado
+     */
+    public static MenuButtonComponent menuButton(String text) {
+        return new MenuButtonComponent(text);
+    }
+
+    /**
+     * Cria botão de menu configurável com texto.
+     *
+     * @param text - Texto do botão
+     * @param config - Configuração do botão
+     * @return MenuButtonComponent - Botão de menu criado
+     */
+    public static MenuButtonComponent menuButton(String text, Consumer<MenuButtonComponent> config) {
+        return build(new MenuButtonComponent(text), config);
+    }
+
+    /**
+     * Cria botão de menu configurável.
+     *
+     * @param config - Configuração do botão
+     * @return MenuButtonComponent - Botão de menu criado
+     */
+    public static MenuButtonComponent menuButton(Consumer<MenuButtonComponent> config) {
+        return build(new MenuButtonComponent(), config);
     }
 
     /**
@@ -261,7 +354,10 @@ public final class UI {
      * @return ComboBoxComponent<T> - ComboBox criado
      */
     @SafeVarargs
-    public static <T> ComboBoxComponent<T> comboBox(Consumer<ComboBoxComponent<T>> config, T... items) {
+    public static <T> ComboBoxComponent<T> comboBox(
+            Consumer<ComboBoxComponent<T>> config,
+            T... items
+    ) {
         return build(new ComboBoxComponent<>(items), config);
     }
 
@@ -282,90 +378,11 @@ public final class UI {
      * @param config - Configuração do CheckBox
      * @return CheckBoxComponent - CheckBox criado
      */
-    public static CheckBoxComponent checkBox(String text, Consumer<CheckBoxComponent> config) {
+    public static CheckBoxComponent checkBox(
+            String text,
+            Consumer<CheckBoxComponent> config
+    ) {
         return build(new CheckBoxComponent(text), config);
-    }
-
-    /**
-     * Cria campo composto com label.
-     *
-     * @param label - Texto do campo
-     * @param component - Componente do campo
-     * @return JPanel - Campo criado
-     */
-    public static JPanel field(String label, JComponent component) {
-        return column()
-                .add(UI.label(label), component)
-                .build();
-    }
-
-    /**
-     * Cria campo composto com label.
-     *
-     * @param label - Label do Campo
-     * @param component - Componente do campo
-     * @return JPanel - Campo criado
-     */
-    public static JPanel field(JLabel label, JComponent component) {
-        return column()
-                .add(label, component)
-                .build();
-    }
-
-    /**
-     * Cria label padrão para campos.
-     *
-     * @param text - Texto do label
-     * @return LabelComponent - Label criado
-     */
-    public static LabelComponent fieldLabel(String text) {
-        return UI.label(text, label -> {
-            label.setFont(Fonts.MEDIUM_ITALIC);
-        });
-    }
-
-    /**
-     * Cria subtítulo padrão.
-     *
-     * @param text - Texto do subtítulo
-     * @return LabelComponent - Label criado
-     */
-    public static LabelComponent subtitle(String text) {
-        return UI.label(text, label -> {
-            label.setForeground(Palette.FG_MUTED);
-            label.setFont(Fonts.TITLE_SMALL);
-        });
-    }
-
-    /**
-     * Cria painel padrão de ações.
-     *
-     * @param components - Componentes das ações
-     * @return JPanel - Painel criado
-     */
-    public static JPanel actions(JComponent... components) {
-        return UI.row()
-                .add(components)
-                .build();
-    }
-
-    /**
-     * Cria builder de barra de menus.
-     *
-     * @return MenuBarBuilder - Builder criado
-     */
-    public static MenuBarBuilder menubar() {
-        return new MenuBarBuilder();
-    }
-
-    /**
-     * Cria builder usando barra existente.
-     *
-     * @param menuBar - Barra existente
-     * @return MenuBarBuilder - Builder criado
-     */
-    public static MenuBarBuilder menubar(MenuBarComponent menuBar) {
-        return new MenuBarBuilder(menuBar);
     }
 
     /**
@@ -468,31 +485,41 @@ public final class UI {
     }
 
     /**
-     * Cria builder de frame.
-     *
-     * @return FrameBuilder - Builder criado
-     */
-    public static FrameBuilder frame() {
-        return new FrameBuilder();
-    }
-
-    /**
-     * Cria builder usando frame existente.
-     *
-     * @param frame - Frame existente
-     * @return FrameBuilder - Builder criado
-     */
-    public static FrameBuilder frame(JFrame frame) {
-        return new FrameBuilder(frame);
-    }
-
-    /**
      * Cria builder de cards.
      *
      * @return CardBuilder - Builder criado
      */
     public static CardBuilder cards() {
         return new CardBuilder();
+    }
+
+    /**
+     * Cria builder de cards usando painel existente.
+     *
+     * @param panel - Painel existente
+     * @return CardBuilder - Builder criado
+     */
+    public static CardBuilder cards(JPanel panel) {
+        return new CardBuilder(panel);
+    }
+
+    /**
+     * Cria builder de barra de menus.
+     *
+     * @return MenuBarBuilder - Builder criado
+     */
+    public static MenuBarBuilder menubar() {
+        return new MenuBarBuilder();
+    }
+
+    /**
+     * Cria builder usando barra existente.
+     *
+     * @param menuBar - Barra existente
+     * @return MenuBarBuilder - Builder criado
+     */
+    public static MenuBarBuilder menubar(MenuBarComponent menuBar) {
+        return new MenuBarBuilder(menuBar);
     }
 
     /**
@@ -503,47 +530,6 @@ public final class UI {
      */
     public static <T> ListComponent<T> list() {
         return new ListComponent<>();
-    }
-
-    /**
-     * Cria lista configurável.
-     *
-     * @param config - Configuração da lista
-     * @param <T> - Tipo dos itens
-     * @return ListComponent<T> - Lista criada
-     */
-    public static <T> ListComponent<T> list(
-            Consumer<ListComponent<T>> config
-    ) {
-        return build(new ListComponent<>(), config);
-    }
-
-    /**
-     * Cria lista com itens.
-     *
-     * @param items - Itens da lista
-     * @param <T> - Tipo dos itens
-     * @return ListComponent<T> - Lista criada
-     */
-    @SafeVarargs
-    public static <T> ListComponent<T> list(T... items) {
-        return list(null, items);
-    }
-
-    /**
-     * Cria lista configurável com itens.
-     *
-     * @param config - Configuração da lista
-     * @param items - Itens da lista
-     * @param <T> - Tipo dos itens
-     * @return ListComponent<T> - Lista criada
-     */
-    @SafeVarargs
-    public static <T> ListComponent<T> list(
-            Consumer<ListComponent<T>> config,
-            T... items
-    ) {
-        return build(new ListComponent<>(items), config);
     }
 
     /**
@@ -568,16 +554,6 @@ public final class UI {
             Consumer<ScrollComponent> config
     ) {
         return build(new ScrollComponent(component), config);
-    }
-
-    /**
-     * Cria builder de cards usando painel existente.
-     *
-     * @param panel - Painel existente
-     * @return CardBuilder - Builder criado
-     */
-    public static CardBuilder cards(JPanel panel) {
-        return new CardBuilder(panel);
     }
 
     /**
@@ -621,16 +597,5 @@ public final class UI {
             Consumer<TableComponent> config
     ) {
         return build(new TableComponent(model), config);
-    }
-
-    /**
-     * Limpa campos de texto.
-     *
-     * @param fields - Campos alvo
-     */
-    public static void clearFields(JTextComponent... fields) {
-        for (JTextComponent field : fields) {
-            field.setText("");
-        }
     }
 }

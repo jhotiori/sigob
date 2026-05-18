@@ -1,28 +1,29 @@
 package org.javapi.sigob.view.windows;
 
 import java.awt.CardLayout;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import org.javapi.sigob.entity.Acesso;
-import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Settings;
-import org.javapi.sigob.view.UI;
-import org.javapi.sigob.view.screens.BaseScreen;
+import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseWindow;
+import org.javapi.sigob.view.builders.MenuBarBuilder;
 import org.javapi.sigob.view.styles.Fonts;
 import org.javapi.sigob.view.styles.Palette;
+import org.javapi.sigob.view.styles.Spacing;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIWindow;
 
 /**
  * Janela principal da aplicação.
@@ -34,7 +35,9 @@ public final class ApplicationWindow extends BaseWindow {
      *
      * @see {@link ImageIcon}
      */
-    private final ImageIcon icon = new ImageIcon(Settings.APP_ICON_PATH);
+    private final ImageIcon icon = new ImageIcon(
+        getClass().getResource(Settings.APP_ICON_PATH)
+    );
 
     /**
      * Layout interno das telas.
@@ -58,6 +61,13 @@ public final class ApplicationWindow extends BaseWindow {
     private final LinkedHashMap<String, BaseScreen> screensMap = new LinkedHashMap<>();
 
     /**
+     * Botão de saída.
+     *
+     * @see {@link JButton}
+     */
+    private final JButton sairButton = UI.menuButton("Sair");
+
+    /**
      * Barra de menus.
      *
      * @see {@link JMenuBar}
@@ -68,7 +78,7 @@ public final class ApplicationWindow extends BaseWindow {
      * Cria janela principal.
      */
     public ApplicationWindow() {
-        init();
+        initialize();
     }
 
     /**
@@ -76,8 +86,8 @@ public final class ApplicationWindow extends BaseWindow {
      *
      * @param screen - Tela registrada
      */
-    public void register(BaseScreen screen) {
-        if (screen == null || screensMap.containsKey(screen.id())) {
+    public void registerScreen(BaseScreen screen) {
+        if (screen == null || containsScreen(screen.id())) {
             return;
         }
 
@@ -86,15 +96,28 @@ public final class ApplicationWindow extends BaseWindow {
     }
 
     /**
+     * Registra telas.
+     *
+     * @param baseScreens - Telas registradas
+     */
+    public void registerScreen(BaseScreen ...baseScreens) {
+        for (BaseScreen screen : baseScreens) {
+            registerScreen(screen);
+        }
+    }
+
+    /**
      * Exibe tela.
      *
      * @param screenName - Nome da tela
      */
     public void showScreen(String screenName) {
-        BaseScreen screen = screensMap.get(screenName);
-        if (screen != null) {
-            screen.update();
+        BaseScreen screen = getScreen(screenName);
+        if (screen == null) {
+            return;
         }
+
+        screen.refresh();
         layout.show(screens, screenName);
     }
 
@@ -108,12 +131,11 @@ public final class ApplicationWindow extends BaseWindow {
             return;
         }
 
-        if (!screensMap.containsKey(screen.id())) {
-            register(screen);
+        if (!containsScreen(screen.id())) {
+            registerScreen(screen);
         }
 
-        screen.update();
-
+        screen.refresh();
         layout.show(screens, screen.id());
     }
 
@@ -144,7 +166,7 @@ public final class ApplicationWindow extends BaseWindow {
      */
     @Override
     protected JFrame build() {
-        return UI.frame()
+        return UIWindow.create()
                 .title(Settings.APP_WINDOW_TITLE)
                 .size(Settings.APP_MIN_WIDTH, Settings.APP_MIN_HEIGHT)
                 .minimumSize(Settings.APP_MIN_WIDTH, Settings.APP_MIN_HEIGHT)
@@ -162,101 +184,108 @@ public final class ApplicationWindow extends BaseWindow {
      * @return JMenuBar - Barra construída
      */
     private JMenuBar buildBar() {
-        /*
         MenuBarBuilder builder = UI.menubar();
+        boolean hasAdminAcesso = ApplicationContext.hasFuncionarioAcesso("admin");
+        boolean hasVendedorAcesso = ApplicationContext.hasFuncionarioAcesso("vendedor");
+        boolean hasFuncionarioAcesso = ApplicationContext.hasFuncionarioAcesso("funcionario");
+
         builder.button("Dashboard", () -> showScreen("dashboard"));
 
-        Set<Acesso> acessos = ApplicationContext.getFuncionarioLogado().getAcessos();
+        if (hasAdminAcesso || hasVendedorAcesso) {
+            builder.menu("Operações", menu -> {
+                menu.item("Vendas", () -> showScreen("vendas"));
+                menu.item("Mercadorias", () -> showScreen("mercadorias"));
+            });
 
-        for (Acesso acesso : acessos) {
-            if (acesso.getNome().toLowerCase().equals("admin")) {
-                builder.menu("Operações", menu -> {
-                    menu.item("Vendas", () -> {
-                    });
+            builder.menu("Cadastros", menu -> {
+                menu.item("Acesso", () -> showScreen("cadastro-acesso"));
+                menu.item("Categoria", () -> showScreen("cadastro-categoria"));
+                menu.item("Produtos", () -> showScreen("cadastro-produto"));
+                menu.item("Clientes", () -> showScreen("cadastro-cliente"));
+                menu.item("Estoques", () -> showScreen("cadastro-estoque"));
+                menu.item("Funcionarios", () -> showScreen("cadastro-funcionario"));
+                menu.item("Documentos", () -> showScreen("cadastro-documento"));
+            });
+        }
 
-                    menu.item("Mercadorias", () -> {
-                    });
-                });
-            }
-        }*/
+        return builder.menu("Relatórios", menu -> {
+            menu.item("Acessos", () -> showScreen("relatorio-acesso"));
+            menu.item("Categorias", () -> showScreen("relatorio-categoria"));
+            menu.item("Documentos", () -> showScreen("relatorio-documento"));
+            menu.item("Produtos", () -> showScreen("relatorio-produto"));
+            menu.item("Clientes", () -> showScreen("relatorio-cliente"));
+            menu.item("Estoques", () -> showScreen("relatorio-estoque"));
+            menu.item("Funcionarios", () -> showScreen("relatorio-funcionario"));
+            menu.item("Vendas", () -> showScreen("relatorio-venda"));
+        })
+            .glue()
+            .add(buildHorarioRow())
+            .button(sairButton, this::dispose)
+            .build();
 
-        return UI.menubar()
+        /*return UI.menubar()
                 .button("Dashboard", () -> showScreen("dashboard"))
                 .menu("Operações", menu -> {
-                    menu.item("Vendas", () -> {
-                        showScreen("vendas");
-                    });
-
-                    menu.item("Mercadorias", () -> {
-                    });
+                    menu.item("Vendas", () -> showScreen("vendas"));
+                    menu.item("Mercadorias", () -> showScreen("mercadorias"));
                 })
                 .menu("Cadastros", menu -> {
-                    menu.item("Acesso", () -> {
-                        showScreen("cadastro-acesso");
-                    });
-
-                    menu.item("Categoria", () -> {
-                        showScreen("cadastro-categoria");
-                    });
-
-                    menu.item("Produtos", () -> {
-                        showScreen("cadastro-produto");
-                    });
-
-                    menu.item("Clientes", () -> {
-                        showScreen("cadastro-cliente");
-                    });
-
-                    menu.item("Estoques", () -> {
-                        showScreen("cadastro-estoque");
-                    });
-
-                    menu.item("Funcionarios", () -> {
-                        showScreen("cadastro-funcionario");
-                    });
-
-                    menu.item("Documentos", () -> {
-                        showScreen("cadastro-documento");
-                    });
+                    menu.item("Acesso", () -> showScreen("cadastro-acesso"));
+                    menu.item("Categoria", () -> showScreen("cadastro-categoria"));
+                    menu.item("Produtos", () -> showScreen("cadastro-produto"));
+                    menu.item("Clientes", () -> showScreen("cadastro-cliente"));
+                    menu.item("Estoques", () -> showScreen("cadastro-estoque"));
+                    menu.item("Funcionarios", () -> showScreen("cadastro-funcionario"));
+                    menu.item("Documentos", () -> showScreen("cadastro-documento"));
                 })
                 .menu("Relatórios", menu -> {
-                    menu.item("Vendas", () -> {
-                    });
+                    menu.item("Acessos", () -> showScreen("relatorio-acesso"));
+                    menu.item("Categorias", () -> showScreen("relatorio-categoria"));
+                    menu.item("Documentos", () -> showScreen("relatorio-documento"));
+                    menu.item("Produtos", () -> showScreen("relatorio-produto"));
+                    menu.item("Clientes", () -> showScreen("relatorio-cliente"));
+                    menu.item("Estoques", () -> showScreen("relatorio-estoque"));
+                    menu.item("Funcionarios", () -> showScreen("relatorio-funcionario"));
+                    menu.item("Vendas", () -> showScreen("relatorio-venda"));
                 })
                 .glue()
-                .add(buildLogadoLabel())
-                .glue()
-                .add(buildHorarioLabel())
-                .button("Sair", this::dispose)
-                .build();
+                .add(buildHorarioRow())
+                .button(sairButton, this::dispose)
+                .build();*/
     }
 
-    private JLabel buildLogadoLabel() {
-        Funcionario funcionario = ApplicationContext.getFuncionarioLogado();
-        List<Acesso> acessos = funcionario.getAcessos().stream().toList();
-        String acessosString = new ArrayList<>(acessos).stream().map(Acesso::getNome).collect(Collectors.joining(", "));
-
-        return UI.label("Logado(a) como %s (%s)".formatted(funcionario.getNome(), acessosString), label -> {
-            label.setFont(Fonts.SMALL_BOLD);
-            label.setForeground(Palette.FG_MUTED);
-        });
-    }
-
-    private JLabel buildHorarioLabel() {
-        JLabel horario = UI.label("", label -> {
-            label.setForeground(Palette.FG_MUTED);
-            label.setFont(Fonts.DEFAULT_BOLD);
+    /**
+     * Constrói label de horário.
+     *
+     * @return JPanel - Label construida
+     */
+    private JPanel buildHorarioRow() {
+        JLabel dataLabel = UI.label("[dd/MM/yyyy]", label -> {
+            label.setForeground(Palette.FG_DARK);
+            label.setFont(Fonts.DEFAULT_ITALIC);
         });
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        JLabel horarioLabel = UI.label("HH:mm:ss", label -> {
+            label.setForeground(Palette.FG_DARK);
+            label.setFont(Fonts.DEFAULT_ITALIC);
+        });
+
+        DateTimeFormatter formatterData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatterHorario = DateTimeFormatter.ofPattern("HH:mm:ss");
+
         Timer timer = new Timer(1000, e -> {
-            horario.setText(LocalTime.now().format(formatter));
+            horarioLabel.setText(LocalTime.now().format(formatterHorario));
+            dataLabel.setText("[%s]".formatted(LocalDate.now().format(formatterData)));
         });
 
         timer.setInitialDelay(0);
         timer.start();
 
-        return horario;
+        return UI.row()
+            .add(horarioLabel)
+            .gap(Spacing.XS)
+            .add(dataLabel)
+            .build();
     }
 
 }

@@ -1,33 +1,29 @@
 package org.javapi.sigob.view.screens.cadastros;
 
+import java.util.List;
+
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.view.ApplicationContext;
 import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.Messages;
-import org.javapi.sigob.view.UI;
-import org.javapi.sigob.view.screens.BaseScreen;
-import org.javapi.sigob.view.styles.Fonts;
+import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.models.AcessoTableModel;
+import org.javapi.sigob.view.popups.Popups;
+import org.javapi.sigob.view.popups.PopupValues;
 import org.javapi.sigob.view.styles.Spacing;
+import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIForm;
+import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de cadastro de acessos.
  */
 public final class CadastroAcessoScreen extends BaseScreen {
-
-    /**
-     * Campo de código.
-     *
-     * @see {@link JTextField}
-     */
-    private final JTextField codigoField = UI.textField(field -> {
-        field.setColumns(20);
-    });
 
     /**
      * Campo de nome.
@@ -49,124 +45,359 @@ public final class CadastroAcessoScreen extends BaseScreen {
     });
 
     /**
+     * Campo de pesquisa.
+     *
+     * @see {@link JTextField}
+     */
+    private final JTextField pesquisaField = UI.textField(field -> {
+        field.setColumns(20);
+    });
+
+    /**
+     * Modelo da tabela de acessos.
+     *
+     * @see {@link AcessoTableModel}
+     */
+    private final AcessoTableModel tableModel
+            = new AcessoTableModel();
+
+    /**
+     * Tabela de acessos.
+     *
+     * @see {@link JTable}
+     */
+    private final JTable table
+            = UI.table(tableModel);
+
+    /**
      * Botão de cadastro.
      *
      * @see {@link JButton}
      */
-    private final JButton cadastrarButton = UI.button("Cadastrar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton cadastrarButton
+            = UI.button("Cadastrar");
 
     /**
      * Botão de limpeza.
      *
      * @see {@link JButton}
      */
-    private final JButton limparButton = UI.button("Limpar", button -> {
-        button.setFont(Fonts.MEDIUM_BOLD);
-    });
+    private final JButton limparButton
+            = UI.button("Limpar");
+
+    /**
+     * Botão de pesquisa.
+     *
+     * @see {@link JButton}
+     */
+    private final JButton pesquisarButton
+            = UI.button("Pesquisar");
 
     /**
      * Cria tela de cadastro de acessos.
      */
     public CadastroAcessoScreen() {
         super("cadastro-acesso");
-        init();
-        setup();
+
+        initialize();
     }
 
     /**
-     * Realiza setup da tela.
+     * Realiza setup interno da tela.
      */
     @Override
     protected void setup() {
+        listarTodos();
+
+        registerEvents();
+    }
+
+    /**
+     * Registra eventos da tela.
+     */
+    private void registerEvents() {
         Events.mouse(cadastrarButton, mouse -> {
-            mouse.onClicked(() -> {
-                try {
-                    Acesso acesso = new Acesso();
-
-                    acesso.setCodigo(codigoField.getText());
-                    acesso.setNome(nomeField.getText());
-                    acesso.setDescricao(descricaoArea.getText());
-
-                    ApplicationContext.getAcessoService().save(acesso);
-
-                    Messages.info("Acesso cadastrado com sucesso!");
-                    clearForm();
-                } catch (Exception e) {
-                    Messages.error(e.getMessage());
-                }
-            });
+            mouse.onClicked(this::cadastrar);
         });
 
         Events.mouse(limparButton, mouse -> {
             mouse.onClicked(this::clearForm);
+        });
+
+        Events.mouse(pesquisarButton, mouse -> {
+            mouse.onClicked(this::pesquisar);
+        });
+
+        Events.mouse(table, mouse -> {
+            mouse.onClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    editarSelecionado();
+                }
+            });
         });
     }
 
     /**
      * Constrói interface da tela.
      *
-     * @return JPanel - Painel raiz
+     * @return JPanel - Painel raiz da tela
      */
     @Override
     protected JPanel build() {
         return UI.border()
-                .center(buildForm())
+                .center(buildContent())
                 .padding(Spacing.XL)
                 .build();
     }
 
     /**
-     * Constrói formulário principal.
+     * Constrói conteúdo principal.
      *
-     * @return JPanel - Formulário construído
+     * @return JPanel - Conteúdo construído
      */
-    private JPanel buildForm() {
+    private JPanel buildContent() {
         return UI.column()
-                .add(buildTitle(), buildSubtitle())
-                .glue()
                 .add(
-                        UI.field(UI.fieldLabel("Código"), codigoField),
-                        UI.field(UI.fieldLabel("Nome"), nomeField),
-                        UI.field(UI.fieldLabel("Descrição"), descricaoArea)
+                        UIScreen.title("Cadastro de Acessos"),
+                        UIScreen.subtitle(
+                                "Gerencia os acessos e permissões disponíveis no sistema."
+                        )
                 )
                 .glue()
-                .add(UI.actions(cadastrarButton, limparButton))
+                .add(
+                        UIScreen.section(
+                                "Cadastro",
+                                buildCadastroSection()
+                        )
+                )
+                .glue()
+                .add(
+                        UIScreen.section(
+                                "Atualizar",
+                                buildAtualizacaoSection()
+                        )
+                )
                 .build();
     }
 
     /**
-     * Constrói título da tela.
+     * Constrói seção de cadastro.
      *
-     * @return JLabel - Título construído
+     * @return JPanel - Seção construída
      */
-    private JLabel buildTitle() {
-        return UI.label("Cadastro de Acessos", label -> {
-            label.setFont(Fonts.TITLE_MEDIUM);
-        });
+    private JPanel buildCadastroSection() {
+        return UI.column()
+                .add(
+                        UIForm.field(
+                                UIForm.fieldLabel("Nome [obrigatorio]"),
+                                nomeField
+                        ),
+                        UIForm.field(
+                                UIForm.fieldLabel("Descrição [opcional]"),
+                                descricaoArea
+                        )
+                )
+                .glue()
+                .add(
+                        UIScreen.actions(
+                                cadastrarButton,
+                                limparButton
+                        )
+                )
+                .build();
     }
 
     /**
-     * Constrói subtítulo da tela.
+     * Constrói seção de atualização.
      *
-     * @return JLabel - Subtítulo construído
+     * @return JPanel - Seção construída
      */
-    private JLabel buildSubtitle() {
-        return UI.subtitle(
-                "Gerencia os acessos e permissões disponíveis no sistema."
+    private JPanel buildAtualizacaoSection() {
+        return UI.column()
+                .add(
+                        UI.row()
+                                .add(
+                                        pesquisaField
+                                )
+                                .glue()
+                                .add(
+                                        pesquisarButton
+                                )
+                                .build(),
+                        UI.scroll(table)
+                )
+                .build();
+    }
+
+    /**
+     * Cadastra um novo acesso.
+     */
+    private void cadastrar() {
+        try {
+            Acesso acesso = new Acesso();
+
+            acesso.setNome(nomeField.getText());
+            acesso.setDescricao(descricaoArea.getText());
+
+            ApplicationContext
+                    .getAcessoService()
+                    .save(acesso);
+
+            Popups.success("Acesso cadastrado com sucesso!");
+
+            clearForm();
+
+            listarTodos();
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Pesquisa acessos pelo nome informado.
+     */
+    private void pesquisar() {
+        try {
+            String nome = pesquisaField.getText();
+
+            if (nome.isBlank()) {
+                listarTodos();
+                return;
+            }
+
+            List<Acesso> acessos = ApplicationContext
+                    .getAcessoService()
+                    .findByNome(nome);
+
+            setResultados(acessos);
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Lista todos os acessos.
+     */
+    private void listarTodos() {
+        try {
+            List<Acesso> acessos = ApplicationContext
+                    .getAcessoService()
+                    .findAll();
+
+            setResultados(acessos);
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Edita acesso selecionado.
+     */
+    private void editarSelecionado() {
+        int row = table.getSelectedRow();
+
+        if (row < 0) {
+            Popups.warn("Selecione um acesso.");
+            return;
+        }
+
+        Acesso acesso = tableModel.getAcesso(row);
+
+        boolean confirmacao = Popups.confirm(
+                "Você deseja editar esse acesso?"
         );
+
+        if (!confirmacao) {
+            return;
+        }
+
+        try {
+            String nome = Popups.input(
+                    "Editar Acesso",
+                    """
+                    Novo nome
+                    Atual: %s
+
+                    [vazio = manter]
+                    """
+                            .formatted(acesso.getNome())
+            );
+
+            if (PopupValues.wasCancelled(nome)) {
+                return;
+            }
+
+            String descricao = Popups.input(
+                    "Editar Descrição",
+                    """
+                    Nova descrição
+                    Atual: %s
+
+                    [vazio = manter]
+                    [null = limpar]
+                    """
+                            .formatted(acesso.getDescricao())
+            );
+
+            if (PopupValues.wasCancelled(descricao)) {
+                return;
+            }
+
+            if (!PopupValues.shouldKeep(nome)) {
+                acesso.setNome(nome);
+            }
+
+            if (PopupValues.shouldClear(descricao)) {
+                acesso.setDescricao(null);
+            } else if (!PopupValues.shouldKeep(descricao)) {
+                acesso.setDescricao(descricao);
+            }
+
+            ApplicationContext
+                    .getAcessoService()
+                    .update(acesso);
+
+            Popups.success("Acesso atualizado com sucesso!");
+
+            pesquisar();
+        } catch (Exception e) {
+            Popups.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Define resultados da tabela.
+     *
+     * @param acessos - Lista de acessos
+     */
+    private void setResultados(List<Acesso> acessos) {
+        if (acessos.isEmpty()) {
+            clearResults();
+
+            Popups.warn("Nenhum acesso encontrado.");
+
+            return;
+        }
+
+        tableModel.setAcessos(acessos);
+    }
+
+    /**
+     * Limpa resultados da tabela.
+     */
+    private void clearResults() {
+        tableModel.setAcessos(List.of());
     }
 
     /**
      * Limpa formulário.
      */
     private void clearForm() {
-        UI.clearFields(
-                codigoField,
+        UIForm.clearFields(
                 nomeField,
                 descricaoArea
         );
     }
 
 }
+
