@@ -1,15 +1,13 @@
 package org.javapi.sigob.service;
 
-import org.javapi.sigob.entity.Cliente;
-import org.javapi.sigob.exception.SigobException;
-import org.javapi.sigob.repository.ClienteRepository;
-import org.javapi.sigob.repository.DocumentoRepository;
-import org.javapi.sigob.repository.VendaRepository;
-import org.javapi.sigob.transaction.TransactionExecutor;
-import org.javapi.sigob.util.Validator;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.repository.ClienteRepository;
+import org.javapi.sigob.repository.DocumentoRepository;
+import org.javapi.sigob.transaction.TransactionExecutor;
+import org.javapi.sigob.util.Validator;
 
 public class ClienteService {
 
@@ -68,23 +66,17 @@ public class ClienteService {
      */
     public void delete(Cliente cliente) {
         //validateCliente(cliente); -- não é necessário validar o objeto recém recuperado do banco
+        int documento_id = cliente.getDocumento().getId();
 
-        if (validateDeleteCliente(cliente)){
-            int documento_id = cliente.getDocumento().getId();
+        TransactionExecutor.executeVoid(em -> {
+            new ClienteRepository(em).deleteById(cliente.getId());
+        });
 
+        //após deletar o cliente tem que deletar o documento que ele tinha
+        if (documento_id > 0) {
             TransactionExecutor.executeVoid(em -> {
-                new ClienteRepository(em).deleteById(cliente.getId());
+                new DocumentoRepository(em).deleteById(documento_id);
             });
-
-            //após deletar o cliente tem que deletar o documento que ele tinha
-            if(documento_id > 0){
-                TransactionExecutor.executeVoid(em -> {
-                    new DocumentoRepository(em).deleteById(documento_id);
-                });
-            }
-
-        } else{
-            throw new SigobException("O Cliente possuí vínculo com Vendas, não podendo ser removido!");
         }
 
     }
@@ -190,11 +182,5 @@ public class ClienteService {
         Validator.start()
                 .expectNotBlank(documento, "Documento não pode ser nulo ou vazio")
                 .validate();
-    }
-
-    private boolean validateDeleteCliente(Cliente cliente){
-        return TransactionExecutor.query(em -> {
-            return (new VendaRepository(em).findByClienteId(cliente.getId()).isEmpty() ? true : false);
-        });
     }
 }
