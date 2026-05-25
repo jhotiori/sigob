@@ -77,15 +77,16 @@ public final class CadastroProdutoScreen extends BaseScreen {
     private final JComboBox<String> moedasBox = UI.comboBox();
 
     /**
-     * Tabela de produtos.
-     */
-    private final JTable produtosTable = UI.table();
-
-    /**
      * Modelo da tabela.
      */
     private final ProdutoTableModel tableModel
             = new ProdutoTableModel();
+
+    /**
+     * Tabela de produtos.
+     */
+    private final JTable produtosTable = UI.table(this.tableModel);
+
 
     /**
      * Ordenador/filtro da tabela.
@@ -326,6 +327,8 @@ public final class CadastroProdutoScreen extends BaseScreen {
                             atualizado.getMoeda()
                     );
 
+                    int produtoId = selectedProduto.getId();
+
                     service.update(selectedProduto);
 
                     Popups.success(
@@ -333,7 +336,8 @@ public final class CadastroProdutoScreen extends BaseScreen {
                     );
 
                     refreshTable();
-                    restoreSelection(selectedProduto.getId());
+
+                    restoreSelection(produtoId);
                 } catch (IllegalArgumentException e) {
                     Popups.warn(e.getMessage());
                 } catch (Exception e) {

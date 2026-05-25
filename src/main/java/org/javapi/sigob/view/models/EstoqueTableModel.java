@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Estoque;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela para estoques.
  */
-public final class EstoqueTableModel extends AbstractTableModel {
+public class EstoqueTableModel extends BaseTableModel<Estoque> {
 
     /**
      * Colunas da tabela.
@@ -22,11 +20,6 @@ public final class EstoqueTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de estoques.
-     */
-    private List<Estoque> estoques = new ArrayList<>();
-
-    /**
      * Define estoques da tabela.
      *
      * @param estoques - Lista de estoques
@@ -34,79 +27,47 @@ public final class EstoqueTableModel extends AbstractTableModel {
     public void setEstoques(
             List<Estoque> estoques
     ) {
-        this.estoques = estoques == null
-                ? new ArrayList<>()
-                : new ArrayList<>(estoques);
-
-        fireTableDataChanged();
+        setRows(estoques);
     }
 
     /**
-     * Retorna estoque pela linha.
+     * Retorna estoque da linha.
      *
-     * @param row - Linha
-     * @return Estoque - Estoque encontrado
+     * @param row - Índice da linha
+     * @return Estoque - Estoque encontrado ou null
      */
     public Estoque getEstoque(
             int row
     ) {
-        return estoques.get(row);
+        return getRow(row);
     }
 
     /**
-     * Retorna quantidade de linhas.
-     *
-     * @return int - Quantidade de linhas
+     * {@inheritDoc}
      */
     @Override
-    public int getRowCount() {
-        return estoques.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
     /**
-     * Retorna quantidade de colunas.
-     *
-     * @return int - Quantidade de colunas
+     * {@inheritDoc}
      */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    /**
-     * Retorna nome da coluna.
-     *
-     * @param column - Índice da coluna
-     * @return String - Nome da coluna
-     */
-    @Override
-    public String getColumnName(
-            int column
-    ) {
-        return COLUMNS[column];
-    }
-
-    /**
-     * Retorna valor da célula.
-     *
-     * @param rowIndex - Linha
-     * @param columnIndex - Coluna
-     * @return Object - Valor da célula
-     */
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Estoque estoque,
             int columnIndex
     ) {
-        Estoque estoque = estoques.get(rowIndex);
-
         return switch (columnIndex) {
             case 0 ->
                 estoque.getId();
+
             case 1 ->
                 estoque.getCodigo();
+
             case 2 ->
                 estoque.getNome();
+
             default ->
                 null;
         };

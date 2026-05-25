@@ -9,24 +9,28 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Funcionario;
 import org.javapi.sigob.service.FuncionarioService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.FuncionarioTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de funcionários.
  */
-public final class FuncionarioRelatorioScreen extends BaseScreen {
+public final class FuncionarioRelatorioScreen
+        extends BaseRelatorioScreen<Funcionario> {
 
     /**
      * Serviço de funcionários.
      *
-     * @see {@link FuncionarioService}
+     * @see FuncionarioService
      */
     private final FuncionarioService service
             = ApplicationContext.getFuncionarioService();
@@ -34,7 +38,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Modelo da tabela.
      *
-     * @see {@link FuncionarioTableModel}
+     * @see FuncionarioTableModel
      */
     private final FuncionarioTableModel tableModel
             = new FuncionarioTableModel();
@@ -42,7 +46,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Tabela de funcionários.
      *
-     * @see {@link JTable}
+     * @see JTable
      */
     private final JTable table
             = UI.table(tableModel);
@@ -50,7 +54,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Botão de busca por ID.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton buscarIdButton
             = UI.button("Buscar por ID");
@@ -58,7 +62,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Botão de busca por nome.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton buscarNomeButton
             = UI.button("Buscar por Nome");
@@ -66,7 +70,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Botão de listagem geral.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton listarTodosButton
             = UI.button("Listar Todos");
@@ -74,7 +78,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     /**
      * Botão de remoção.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton removerButton
             = UI.button("Remover Selecionado");
@@ -107,6 +111,46 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Funcionario> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Funcionario> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "funcionário";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "funcionários";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -123,21 +167,25 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarNomeButton, mouse -> {
-            mouse.onClicked(this::buscarPorNome);
-        });
+        UIEvents.onClick(
+                buscarNomeButton,
+                this::buscarPorNome
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
@@ -178,7 +226,7 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
      * @return JPanel - Painel construído
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -187,175 +235,120 @@ public final class FuncionarioRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-            return UI.grid(2, 3)
-                    .add(
-                            buscarIdButton,
-                            buscarNomeButton,
-                            listarTodosButton
-                    )
-                    .build();
         }
+
+        return UI.grid(2, 3)
+                .add(
+                        buscarIdButton,
+                        buscarNomeButton,
+                        listarTodosButton
+                )
+                .build();
     }
 
     /**
      * Busca funcionário por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID do funcionário:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Funcionário",
+                "ID do funcionário:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Funcionario> funcionario = service
-                    .findById(id);
-
-            if (funcionario.isEmpty()) {
-                clearResults();
-
-                Popups.warn(
-                        "Funcionário não encontrado!"
-                );
-
-                return;
-            }
-
-            setResultados(
-                    List.of(funcionario.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error(
-                    "ID inválido!"
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar funcionário: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar funcionário!",
+                () -> {
+                    Optional<Funcionario> funcionario = service
+                            .findById(id);
+
+                    if (funcionario.isEmpty()) {
+                        clearResults();
+
+                        Popups.warn(
+                                "Funcionário não encontrado!"
+                        );
+
+                        return;
+                    }
+
+                    setResultados(
+                            List.of(funcionario.get())
+                    );
+                }
+        );
     }
 
     /**
      * Busca funcionários por nome.
      */
     private void buscarPorNome() {
-        try {
-            String nome = Popups.input(
-                    "Nome do funcionário:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Funcionário",
+                "Nome do funcionário:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Funcionario> funcionarios = service
-                    .findByNome(nome);
-
-            setResultados(funcionarios);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar funcionários: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar funcionários!",
+                () -> setResultados(
+                        service.findByNome(nome)
+                )
+        );
     }
 
     /**
      * Lista todos os funcionários.
      */
     private void listarTodos() {
-        try {
-            List<Funcionario> funcionarios = service
-                    .findAll();
-
-            setResultados(funcionarios);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar funcionários: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        Actions.safe(
+                "Erro ao listar funcionários!",
+                () -> setResultados(
+                        service.findAll()
+                )
+        );
     }
 
     /**
      * Remove funcionário selecionado.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Funcionario funcionario = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione um funcionário para remover!"
-                );
-
-                return;
-            }
-
-            Funcionario funcionario = tableModel
-                    .getFuncionario(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover o funcionário '%s'?"
-                            .formatted(funcionario.getNome())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-            service.delete(funcionario);
-
-            Popups.success(
-                    "Funcionário removido com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao remover funcionário: %s"
-                            .formatted(e.getMessage())
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param funcionarios - Lista de funcionários
-     */
-    private void setResultados(
-            List<Funcionario> funcionarios
-    ) {
-        if (funcionarios == null
-                || funcionarios.isEmpty()) {
-
-            clearResults();
-
+        if (funcionario == null) {
             Popups.warn(
-                    "Nenhum funcionário encontrado!"
+                    "Selecione um funcionário para remover!"
             );
 
             return;
         }
 
-        tableModel.setFuncionarios(
-                funcionarios
+        boolean confirmacao = Popups.confirm(
+                "Deseja remover o funcionário '%s'?"
+                        .formatted(funcionario.getNome())
         );
-    }
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setFuncionarios(
-                List.of()
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover funcionário!",
+                () -> {
+                    service.delete(funcionario);
+
+                    Popups.success(
+                            "Funcionário removido com sucesso!"
+                    );
+
+                    listarTodos();
+                }
         );
     }
 

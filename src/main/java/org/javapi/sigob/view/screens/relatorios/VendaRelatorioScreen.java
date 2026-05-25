@@ -3,7 +3,6 @@ package org.javapi.sigob.view.screens.relatorios;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -11,19 +10,23 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Venda;
 import org.javapi.sigob.service.VendaService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.VendaTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de vendas.
  */
-public final class VendaRelatorioScreen extends BaseScreen {
+public final class VendaRelatorioScreen
+        extends BaseRelatorioScreen<Venda> {
 
     /**
      * Formatter de datas.
@@ -131,6 +134,46 @@ public final class VendaRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Venda> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Venda> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "venda";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "vendas";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -147,29 +190,35 @@ public final class VendaRelatorioScreen extends BaseScreen {
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarClienteButton, mouse -> {
-            mouse.onClicked(this::buscarPorCliente);
-        });
+        UIEvents.onClick(
+                buscarClienteButton,
+                this::buscarPorCliente
+        );
 
-        Events.mouse(buscarFuncionarioButton, mouse -> {
-            mouse.onClicked(this::buscarPorFuncionario);
-        });
+        UIEvents.onClick(
+                buscarFuncionarioButton,
+                this::buscarPorFuncionario
+        );
 
-        Events.mouse(buscarDataAberturaButton, mouse -> {
-            mouse.onClicked(this::buscarPorDataAbertura);
-        });
+        UIEvents.onClick(
+                buscarDataAberturaButton,
+                this::buscarPorDataAbertura
+        );
 
-        Events.mouse(buscarDataFechamentoButton, mouse -> {
-            mouse.onClicked(this::buscarPorDataFechamento);
-        });
+        UIEvents.onClick(
+                buscarDataFechamentoButton,
+                this::buscarPorDataFechamento
+        );
 
-        Events.mouse(buscarPeriodoButton, mouse -> {
-            mouse.onClicked(this::buscarPorPeriodo);
-        });
+        UIEvents.onClick(
+                buscarPeriodoButton,
+                this::buscarPorPeriodo
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
     }
 
     /**
@@ -180,7 +229,9 @@ public final class VendaRelatorioScreen extends BaseScreen {
     private JPanel buildContent() {
         return UI.column()
                 .add(
-                        UIScreen.title("Relatório de Vendas"),
+                        UIScreen.title(
+                                "Relatório de Vendas"
+                        ),
                         UIScreen.subtitle(
                                 "Consulta e visualização das vendas cadastradas no sistema."
                         )
@@ -224,82 +275,72 @@ public final class VendaRelatorioScreen extends BaseScreen {
      * Busca vendas por cliente.
      */
     private void buscarPorCliente() {
-        try {
-            String nome = Popups.input(
-                    "Nome do cliente:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Nome do cliente:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Venda> vendas = vendaService
-                    .findByClienteNome(nome);
-
-            setResultados(vendas);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar vendas por cliente: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar vendas por cliente!",
+                () -> setResultados(
+                        vendaService.findByClienteNome(nome)
+                )
+        );
     }
 
     /**
      * Busca vendas por funcionário.
      */
     private void buscarPorFuncionario() {
-        try {
-            String nome = Popups.input(
-                    "Nome do funcionário:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Nome do funcionário:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Venda> vendas = vendaService
-                    .findByFuncionarioNome(nome);
-
-            setResultados(vendas);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar vendas por funcionário: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar vendas por funcionário!",
+                () -> setResultados(
+                        vendaService.findByFuncionarioNome(nome)
+                )
+        );
     }
 
     /**
      * Busca vendas por data de abertura.
      */
     private void buscarPorDataAbertura() {
+        String input = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Data de abertura [DD-MM-YYYY]:"
+        );
+
+        if (input == null) {
+            return;
+        }
+
         try {
-            String input = Popups.input(
-                    "Data de abertura [DD-MM-YYYY]:"
-            );
-
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
             LocalDate data = LocalDate.parse(
                     input,
                     DATE_FORMATTER
             );
 
-            List<Venda> vendas = vendaService
-                    .findByDataAbertura(data);
-
-            setResultados(vendas);
+            Actions.safe(
+                    "Erro ao buscar vendas por data de abertura!",
+                    () -> setResultados(
+                            vendaService.findByDataAbertura(data)
+                    )
+            );
         } catch (DateTimeParseException e) {
             Popups.error(
                     "Data inválida! Utilize o formato DD-MM-YYYY."
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar vendas por data de abertura: %s"
-                            .formatted(e.getMessage())
             );
         }
     }
@@ -308,32 +349,30 @@ public final class VendaRelatorioScreen extends BaseScreen {
      * Busca vendas por data de fechamento.
      */
     private void buscarPorDataFechamento() {
+        String input = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Data de fechamento [DD-MM-YYYY]:"
+        );
+
+        if (input == null) {
+            return;
+        }
+
         try {
-            String input = Popups.input(
-                    "Data de fechamento [DD-MM-YYYY]:"
-            );
-
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
             LocalDate data = LocalDate.parse(
                     input,
                     DATE_FORMATTER
             );
 
-            List<Venda> vendas = vendaService
-                    .findByDataFinalizada(data);
-
-            setResultados(vendas);
+            Actions.safe(
+                    "Erro ao buscar vendas por data de fechamento!",
+                    () -> setResultados(
+                            vendaService.findByDataFinalizada(data)
+                    )
+            );
         } catch (DateTimeParseException e) {
             Popups.error(
                     "Data inválida! Utilize o formato DD-MM-YYYY."
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar vendas por data de fechamento: %s"
-                            .formatted(e.getMessage())
             );
         }
     }
@@ -342,23 +381,25 @@ public final class VendaRelatorioScreen extends BaseScreen {
      * Busca vendas por período de abertura.
      */
     private void buscarPorPeriodo() {
+        String inicioInput = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Data inicial [DD-MM-YYYY]:"
+        );
+
+        if (inicioInput == null) {
+            return;
+        }
+
+        String fimInput = PopupInputs.requiredText(
+                "Buscar Vendas",
+                "Data final [DD-MM-YYYY]:"
+        );
+
+        if (fimInput == null) {
+            return;
+        }
+
         try {
-            String inicioInput = Popups.input(
-                    "Data inicial [DD-MM-YYYY]:"
-            );
-
-            if (inicioInput == null || inicioInput.isBlank()) {
-                return;
-            }
-
-            String fimInput = Popups.input(
-                    "Data final [DD-MM-YYYY]:"
-            );
-
-            if (fimInput == null || fimInput.isBlank()) {
-                return;
-            }
-
             LocalDate dataInicio = LocalDate.parse(
                     inicioInput,
                     DATE_FORMATTER
@@ -377,16 +418,18 @@ public final class VendaRelatorioScreen extends BaseScreen {
                 return;
             }
 
-            List<Venda> vendas = vendaService.findByPeriodo(dataInicio, dataFim);
-            setResultados(vendas);
+            Actions.safe(
+                    "Erro ao buscar vendas por período!",
+                    () -> setResultados(
+                            vendaService.findByPeriodo(
+                                    dataInicio,
+                                    dataFim
+                            )
+                    )
+            );
         } catch (DateTimeParseException e) {
             Popups.error(
                     "Data inválida! Utilize o formato DD-MM-YYYY."
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar vendas por período: %s"
-                            .formatted(e.getMessage())
             );
         }
     }
@@ -395,45 +438,12 @@ public final class VendaRelatorioScreen extends BaseScreen {
      * Lista todas as vendas.
      */
     private void listarTodos() {
-        try {
-            List<Venda> vendas = vendaService
-                    .findAll();
-
-            setResultados(vendas);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar vendas: %s"
-                            .formatted(e.getMessage())
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param vendas Lista de vendas
-     */
-    private void setResultados(
-            List<Venda> vendas
-    ) {
-        if (vendas == null || vendas.isEmpty()) {
-            clearResults();
-
-            Popups.warn(
-                    "Nenhuma venda encontrada!"
-            );
-
-            return;
-        }
-
-        tableModel.setVendas(vendas);
-    }
-
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setVendas(List.of());
+        Actions.safe(
+                "Erro ao listar vendas!",
+                () -> setResultados(
+                        vendaService.findAll()
+                )
+        );
     }
 
 }

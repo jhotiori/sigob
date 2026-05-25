@@ -1,17 +1,15 @@
 package org.javapi.sigob.view.models;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Produto;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo tabular de produtos.
  */
-public final class ProdutoTableModel extends AbstractTableModel {
+public class ProdutoTableModel extends BaseTableModel<Produto> {
 
     /**
      * Índice da coluna de ID.
@@ -56,12 +54,6 @@ public final class ProdutoTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de produtos exibidos.
-     */
-    private List<Produto> produtos
-            = new ArrayList<>();
-
-    /**
      * Define produtos da tabela.
      *
      * @param produtos - Lista de produtos
@@ -69,72 +61,37 @@ public final class ProdutoTableModel extends AbstractTableModel {
     public void setProdutos(
             List<Produto> produtos
     ) {
-        this.produtos = produtos != null
-                ? new ArrayList<>(produtos)
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+        setRows(produtos);
     }
 
     /**
-     * Retorna produto pelo índice da linha.
+     * Retorna produto da linha.
      *
      * @param row - Índice da linha
-     * @return Produto - Produto encontrado
+     * @return Produto - Produto encontrado ou null
      */
     public Produto getProduto(
             int row
     ) {
-        return produtos.get(row);
+        return getRow(row);
     }
 
     /**
-     * Retorna quantidade de linhas.
-     *
-     * @return int - Quantidade de linhas
+     * {@inheritDoc}
      */
     @Override
-    public int getRowCount() {
-        return produtos.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
     /**
-     * Retorna quantidade de colunas.
-     *
-     * @return int - Quantidade de colunas
+     * {@inheritDoc}
      */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    /**
-     * Retorna nome da coluna.
-     *
-     * @param column - Índice da coluna
-     * @return String - Nome da coluna
-     */
-    @Override
-    public String getColumnName(
-            int column
-    ) {
-        return COLUMNS[column];
-    }
-
-    /**
-     * Retorna valor da célula.
-     *
-     * @param rowIndex - Índice da linha
-     * @param columnIndex - Índice da coluna
-     * @return Object - Valor da célula
-     */
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Produto produto,
             int columnIndex
     ) {
-        Produto produto = produtos.get(rowIndex);
-
         return switch (columnIndex) {
             case COLUMN_ID ->
                 produto.getId();
@@ -145,40 +102,28 @@ public final class ProdutoTableModel extends AbstractTableModel {
             case COLUMN_NOME ->
                 produto.getNome();
 
-            case COLUMN_CATEGORIA -> {
-                if (produto.getCategoria() == null) {
-                    yield "-";
-                }
+            case COLUMN_CATEGORIA ->
+                produto.getCategoria() != null
+                ? produto.getCategoria().getNome()
+                : "-";
 
-                yield produto.getCategoria().getNome();
-            }
-
-            case COLUMN_VALOR_COMPRA -> {
-                BigDecimal valorCompra = produto.getValorCompra();
-
-                yield valorCompra != null
-                ? valorCompra
+            case COLUMN_VALOR_COMPRA ->
+                produto.getValorCompra() != null
+                ? produto.getValorCompra()
                 : BigDecimal.ZERO;
-            }
 
-            case COLUMN_VALOR_VENDA -> {
-                BigDecimal valorVenda = produto.getValorVenda();
-
-                yield valorVenda != null
-                ? valorVenda
+            case COLUMN_VALOR_VENDA ->
+                produto.getValorVenda() != null
+                ? produto.getValorVenda()
                 : BigDecimal.ZERO;
-            }
 
             default ->
-                "";
+                null;
         };
     }
 
     /**
-     * Retorna tipo da coluna.
-     *
-     * @param columnIndex - Índice da coluna
-     * @return Class<?> - Classe da coluna
+     * {@inheritDoc}
      */
     @Override
     public Class<?> getColumnClass(
@@ -194,21 +139,6 @@ public final class ProdutoTableModel extends AbstractTableModel {
             default ->
                 String.class;
         };
-    }
-
-    /**
-     * Define se célula é editável.
-     *
-     * @param rowIndex - Índice da linha
-     * @param columnIndex - Índice da coluna
-     * @return boolean - true se editável
-     */
-    @Override
-    public boolean isCellEditable(
-            int rowIndex,
-            int columnIndex
-    ) {
-        return false;
     }
 
 }

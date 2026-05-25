@@ -1,17 +1,19 @@
 package org.javapi.sigob.view.models;
 
-import org.javapi.sigob.entity.Cliente;
-
-import javax.swing.table.AbstractTableModel;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TableModel responsável pela tabela de clientes.
- */
-public class ClientesTableModel extends AbstractTableModel {
+import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.view.base.BaseTableModel;
 
+/**
+ * Modelo de tabela de clientes.
+ */
+public class ClientesTableModel extends BaseTableModel<Cliente> {
+
+    /**
+     * Colunas da tabela.
+     */
     private static final String[] COLUMNS = {
         "ID",
         "Nome",
@@ -20,60 +22,55 @@ public class ClientesTableModel extends AbstractTableModel {
         "Data Nascimento"
     };
 
+    /**
+     * Formatter de datas.
+     */
     private static final DateTimeFormatter FORMATTER
             = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private List<Cliente> clientes;
-
     /**
-     * Cria um novo ClientesTableModel.
-     */
-    public ClientesTableModel() {
-        this.clientes = new ArrayList<>();
-    }
-
-    /**
-     * Atualiza os clientes da tabela.
+     * Define clientes da tabela.
      *
-     * @param clientes Os clientes
+     * @param clientes - Lista de clientes
      */
-    public void setClientes(List<Cliente> clientes) {
-        this.clientes = clientes;
-        fireTableDataChanged();
+    public void setClientes(
+            List<Cliente> clientes
+    ) {
+        setRows(clientes);
     }
 
     /**
-     * Retorna um cliente pelo índice.
+     * Retorna cliente da linha.
      *
-     * @param row O índice
-     * @return Cliente - O cliente
+     * @param row - Índice da linha
+     * @return Cliente - Cliente encontrado ou null
      */
-    public Cliente getCliente(int row) {
-        return clientes.get(row);
+    public Cliente getCliente(
+            int row
+    ) {
+        return getRow(row);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getRowCount() {
-        return clientes.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Cliente cliente = clientes.get(rowIndex);
-
+    protected Object getValueAt(
+            Cliente cliente,
+            int columnIndex
+    ) {
         return switch (columnIndex) {
             case 0 ->
                 cliente.getId();
+
             case 1 ->
                 cliente.getNome();
 
@@ -93,7 +90,8 @@ public class ClientesTableModel extends AbstractTableModel {
                 : "-";
 
             default ->
-                "";
+                null;
         };
     }
+
 }

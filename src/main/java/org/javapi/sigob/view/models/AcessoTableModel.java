@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela de acessos.
  */
-public class AcessoTableModel extends AbstractTableModel {
+public class AcessoTableModel extends BaseTableModel<Acesso> {
 
     /**
      * Colunas da tabela.
@@ -22,59 +20,44 @@ public class AcessoTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de acessos.
-     */
-    private List<Acesso> acessos = new ArrayList<>();
-
-    /**
      * Define acessos da tabela.
      *
      * @param acessos - Lista de acessos
      */
-    public void setAcessos(List<Acesso> acessos) {
-        this.acessos = acessos != null
-                ? acessos
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+    public void setAcessos(
+            List<Acesso> acessos
+    ) {
+        setRows(acessos);
     }
 
     /**
      * Retorna acesso da linha.
      *
      * @param row - Índice da linha
-     * @return Acesso - Acesso encontrado
+     * @return Acesso - Acesso encontrado ou null
      */
-    public Acesso getAcesso(int row) {
-        if (row < 0 || row >= acessos.size()) {
-            return null;
-        }
-
-        return acessos.get(row);
+    public Acesso getAcesso(
+            int row
+    ) {
+        return getRow(row);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getRowCount() {
-        return acessos.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Acesso acesso,
             int columnIndex
     ) {
-        Acesso acesso = acessos.get(rowIndex);
-
         return switch (columnIndex) {
             case 0 ->
                 acesso.getId();
@@ -88,14 +71,6 @@ public class AcessoTableModel extends AbstractTableModel {
             default ->
                 null;
         };
-    }
-
-    @Override
-    public boolean isCellEditable(
-            int rowIndex,
-            int columnIndex
-    ) {
-        return false;
     }
 
 }

@@ -8,63 +8,63 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.service.AcessoService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.AcessoTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de acessos.
  */
-public final class AcessoRelatorioScreen extends BaseScreen {
+public final class AcessoRelatorioScreen
+        extends BaseRelatorioScreen<Acesso> {
+
+    /**
+     * Serviço de acessos.
+     */
+    private final AcessoService acessoService
+            = ApplicationContext.getAcessoService();
 
     /**
      * Modelo da tabela.
-     *
-     * @see {@link AcessoTableModel}
      */
     private final AcessoTableModel tableModel
             = new AcessoTableModel();
 
     /**
      * Tabela de acessos.
-     *
-     * @see {@link JTable}
      */
-    private final JTable table = UI.table(tableModel);
+    private final JTable table
+            = UI.table(tableModel);
 
     /**
-     * Botão de listagem por ID.
-     *
-     * @see {@link JButton}
+     * Botão de busca por ID.
      */
     private final JButton buscarIdButton
             = UI.button("Buscar por ID");
 
     /**
-     * Botão de listagem por nome.
-     *
-     * @see {@link JButton}
+     * Botão de busca por nome.
      */
     private final JButton buscarNomeButton
             = UI.button("Buscar por Nome");
 
     /**
      * Botão de listagem geral.
-     *
-     * @see {@link JButton}
      */
     private final JButton listarTodosButton
             = UI.button("Listar Todos");
 
     /**
      * Botão de remoção.
-     *
-     * @see {@link JButton}
      */
     private final JButton removerButton
             = UI.button("Remover Selecionado");
@@ -89,6 +89,54 @@ public final class AcessoRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Atualiza tela.
+     */
+    @Override
+    public void refresh() {
+        listarTodos();
+    }
+
+    /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Acesso> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Acesso> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "acesso";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "acessos";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -102,32 +150,28 @@ public final class AcessoRelatorioScreen extends BaseScreen {
     }
 
     /**
-     * Atualiza tela.
-     */
-    @Override
-    public void refresh() {
-        listarTodos();
-    }
-
-    /**
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarNomeButton, mouse -> {
-            mouse.onClicked(this::buscarPorNome);
-        });
+        UIEvents.onClick(
+                buscarNomeButton,
+                this::buscarPorNome
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
@@ -166,7 +210,7 @@ public final class AcessoRelatorioScreen extends BaseScreen {
      * @return JPanel - Painel construído
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -175,171 +219,121 @@ public final class AcessoRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-            return UI.grid(2, 3)
-                    .add(
-                            buscarIdButton,
-                            buscarNomeButton,
-                            listarTodosButton
-                    )
-                    .build();
         }
 
+        return UI.grid(2, 3)
+                .add(
+                        buscarIdButton,
+                        buscarNomeButton,
+                        listarTodosButton
+                )
+                .build();
     }
 
     /**
      * Busca acesso por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID do acesso:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Acesso",
+                "ID do acesso:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Acesso> acesso = ApplicationContext
-                    .getAcessoService()
-                    .findById(id);
-
-            if (acesso.isEmpty()) {
-                clearResults();
-
-                Popups.warn("Acesso não encontrado!");
-
-                return;
-            }
-
-            setResultados(
-                    List.of(acesso.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error("ID inválido!");
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar acesso: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Optional<Acesso> acesso = Actions.safe(
+                "Erro ao buscar acesso!",
+                () -> acessoService.findById(id),
+                Optional.empty()
+        );
+
+        if (acesso.isEmpty()) {
+            clearResults();
+
+            Popups.warn(
+                    "Acesso não encontrado!"
+            );
+
+            return;
+        }
+
+        setResultados(
+                List.of(acesso.get())
+        );
     }
 
     /**
      * Busca acessos por nome.
      */
     private void buscarPorNome() {
-        try {
-            String nome = Popups.input(
-                    "Nome do acesso:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Acesso",
+                "Nome do acesso:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Acesso> acessos = ApplicationContext
-                    .getAcessoService()
-                    .findByNome(nome);
-
-            setResultados(acessos);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar acessos: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        List<Acesso> acessos = Actions.safe(
+                "Erro ao buscar acessos!",
+                () -> acessoService.findByNome(nome),
+                List.of()
+        );
+
+        setResultados(acessos);
     }
 
     /**
      * Lista todos os acessos.
      */
     private void listarTodos() {
-        try {
-            List<Acesso> acessos = ApplicationContext
-                    .getAcessoService()
-                    .findAll();
+        List<Acesso> acessos = Actions.safe(
+                "Erro ao listar acessos!",
+                acessoService::findAll,
+                List.of()
+        );
 
-            setResultados(acessos);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar acessos: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        setResultados(acessos);
     }
 
     /**
      * Remove acesso selecionado.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Acesso acesso = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione um acesso para remover!"
-                );
-
-                return;
-            }
-
-            Acesso acesso = tableModel.getAcesso(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover o acesso '%s'?"
-                            .formatted(acesso.getNome())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-            ApplicationContext
-                    .getAcessoService()
-                    .delete(acesso);
-
-            Popups.success(
-                    "Acesso removido com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao remover acesso: %s"
-                            .formatted(e.getMessage())
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param acessos - Lista de acessos
-     */
-    private void setResultados(
-            List<Acesso> acessos
-    ) {
-        if (acessos == null || acessos.isEmpty()) {
-            clearResults();
-
+        if (acesso == null) {
             Popups.warn(
-                    "Nenhum acesso encontrado!"
+                    "Selecione um acesso para remover!"
             );
 
             return;
         }
 
-        tableModel.setAcessos(acessos);
-    }
+        boolean confirmacao = Popups.confirm(
+                "Deseja remover o acesso '%s'?"
+                        .formatted(acesso.getNome())
+        );
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setAcessos(List.of());
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover acesso!",
+                () -> {
+                    acessoService.delete(acesso);
+
+                    Popups.success(
+                            "Acesso removido com sucesso!"
+                    );
+
+                    listarTodos();
+                }
+        );
     }
 
 }

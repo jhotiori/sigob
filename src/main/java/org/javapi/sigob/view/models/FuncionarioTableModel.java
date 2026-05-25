@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela para funcionários.
  */
-public final class FuncionarioTableModel extends AbstractTableModel {
+public class FuncionarioTableModel extends BaseTableModel<Funcionario> {
 
     /**
      * Colunas da tabela.
@@ -23,12 +21,6 @@ public final class FuncionarioTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista atual de funcionários.
-     */
-    private List<Funcionario> funcionarios
-            = new ArrayList<>();
-
-    /**
      * Define funcionários da tabela.
      *
      * @param funcionarios - Lista de funcionários
@@ -36,61 +28,37 @@ public final class FuncionarioTableModel extends AbstractTableModel {
     public void setFuncionarios(
             List<Funcionario> funcionarios
     ) {
-        this.funcionarios = funcionarios != null
-                ? funcionarios
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+        setRows(funcionarios);
     }
 
     /**
      * Retorna funcionário da linha.
      *
      * @param row - Índice da linha
-     * @return Funcionario - Funcionário encontrado
+     * @return Funcionario - Funcionário encontrado ou null
      */
     public Funcionario getFuncionario(
             int row
     ) {
-        return funcionarios.get(row);
+        return getRow(row);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int getRowCount() {
-        return funcionarios.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getColumnName(
-            int column
-    ) {
-        return COLUMNS[column];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Funcionario funcionario,
             int columnIndex
     ) {
-        Funcionario funcionario = funcionarios.get(rowIndex);
-
         return switch (columnIndex) {
             case 0 ->
                 funcionario.getId();
@@ -112,7 +80,7 @@ public final class FuncionarioTableModel extends AbstractTableModel {
                 .orElse("-");
 
             default ->
-                "";
+                null;
         };
     }
 

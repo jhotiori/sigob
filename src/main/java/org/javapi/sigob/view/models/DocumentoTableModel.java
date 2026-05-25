@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Documento;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela de documentos.
  */
-public class DocumentoTableModel extends AbstractTableModel {
+public class DocumentoTableModel extends BaseTableModel<Documento> {
 
     /**
      * Colunas da tabela.
@@ -22,59 +20,44 @@ public class DocumentoTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de documentos.
-     */
-    private List<Documento> documentos = new ArrayList<>();
-
-    /**
      * Define documentos da tabela.
      *
      * @param documentos - Lista de documentos
      */
-    public void setDocumentos(List<Documento> documentos) {
-        this.documentos = documentos != null
-                ? documentos
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+    public void setDocumentos(
+            List<Documento> documentos
+    ) {
+        setRows(documentos);
     }
 
     /**
      * Retorna documento da linha.
      *
      * @param row - Índice da linha
-     * @return Documento - Documento encontrado
+     * @return Documento - Documento encontrado ou null
      */
-    public Documento getDocumento(int row) {
-        if (row < 0 || row >= documentos.size()) {
-            return null;
-        }
-
-        return documentos.get(row);
+    public Documento getDocumento(
+            int row
+    ) {
+        return getRow(row);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getRowCount() {
-        return documentos.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Documento documento,
             int columnIndex
     ) {
-        Documento documento = documentos.get(rowIndex);
-
         return switch (columnIndex) {
             case 0 ->
                 documento.getId();
@@ -88,14 +71,6 @@ public class DocumentoTableModel extends AbstractTableModel {
             default ->
                 null;
         };
-    }
-
-    @Override
-    public boolean isCellEditable(
-            int rowIndex,
-            int columnIndex
-    ) {
-        return false;
     }
 
 }

@@ -9,19 +9,23 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Documento;
 import org.javapi.sigob.service.DocumentoService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.DocumentoTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de documentos.
  */
-public final class DocumentoRelatorioScreen extends BaseScreen {
+public final class DocumentoRelatorioScreen
+        extends BaseRelatorioScreen<Documento> {
 
     /**
      * Serviço de documentos.
@@ -115,6 +119,46 @@ public final class DocumentoRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Documento> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Documento> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "documento";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "documentos";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -131,25 +175,30 @@ public final class DocumentoRelatorioScreen extends BaseScreen {
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarDocumentoButton, mouse -> {
-            mouse.onClicked(this::buscarPorDocumento);
-        });
+        UIEvents.onClick(
+                buscarDocumentoButton,
+                this::buscarPorDocumento
+        );
 
-        Events.mouse(buscarTipoButton, mouse -> {
-            mouse.onClicked(this::buscarPorTipo);
-        });
+        UIEvents.onClick(
+                buscarTipoButton,
+                this::buscarPorTipo
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
@@ -164,7 +213,10 @@ public final class DocumentoRelatorioScreen extends BaseScreen {
                                 "Relatório de Documentos"
                         ),
                         UIScreen.subtitle(
-                                "Consulta e gerenciamento dos documentos cadastrados no sistema."
+                                """
+                                Consulta e gerenciamento dos documentos
+                                cadastrados no sistema.
+                                """
                         )
                 )
                 .glue()
@@ -190,7 +242,7 @@ public final class DocumentoRelatorioScreen extends BaseScreen {
      * @return JPanel - Painel construído
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -200,214 +252,156 @@ public final class DocumentoRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-            return UI.grid(2, 3)
-                    .add(
-                            buscarIdButton,
-                            buscarDocumentoButton,
-                            buscarTipoButton,
-                            listarTodosButton
-                    )
-                    .build();
         }
+
+        return UI.grid(2, 3)
+                .add(
+                        buscarIdButton,
+                        buscarDocumentoButton,
+                        buscarTipoButton,
+                        listarTodosButton
+                )
+                .build();
     }
 
     /**
      * Busca documento por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID do documento:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Documento",
+                "ID do documento:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Documento> documento = documentoService
-                    .findById(id);
-
-            if (documento.isEmpty()) {
-                clearResults();
-
-                Popups.warn(
-                        "Documento não encontrado!"
-                );
-
-                return;
-            }
-
-            setResultados(
-                    List.of(documento.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error(
-                    "ID inválido!"
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar documento: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar documento!",
+                () -> {
+                    Optional<Documento> documento
+                    = documentoService.findById(id);
+
+                    if (documento.isEmpty()) {
+                        clearResults();
+
+                        Popups.warn(
+                                "Documento não encontrado!"
+                        );
+
+                        return;
+                    }
+
+                    setResultados(
+                            List.of(documento.get())
+                    );
+                }
+        );
     }
 
     /**
      * Busca documentos por documento.
      */
     private void buscarPorDocumento() {
-        try {
-            String documento = Popups.input(
-                    "Documento:"
-            );
+        String documento = PopupInputs.requiredText(
+                "Buscar Documento",
+                "Documento:"
+        );
 
-            if (documento == null || documento.isBlank()) {
-                return;
-            }
-
-            List<Documento> documentos = documentoService
-                    .findByDocumento(documento);
-
-            setResultados(documentos);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar documentos: %s"
-                            .formatted(e.getMessage())
-            );
+        if (documento == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar documentos!",
+                () -> {
+                    setResultados(
+                            documentoService.findByDocumento(
+                                    documento
+                            )
+                    );
+                }
+        );
     }
 
     /**
      * Busca documentos por tipo.
      */
     private void buscarPorTipo() {
-        try {
-            String tipo = Popups.input(
-                    "Tipo do documento:"
-            );
+        String tipo = PopupInputs.requiredText(
+                "Buscar Documento",
+                "Tipo do documento:"
+        );
 
-            if (tipo == null || tipo.isBlank()) {
-                return;
-            }
-
-            List<Documento> documentos = documentoService
-                    .findByTipo(tipo);
-
-            setResultados(documentos);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar documentos por tipo: %s"
-                            .formatted(e.getMessage())
-            );
+        if (tipo == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar documentos por tipo!",
+                () -> {
+                    setResultados(
+                            documentoService.findByTipo(tipo)
+                    );
+                }
+        );
     }
 
     /**
      * Lista todos os documentos.
      */
     private void listarTodos() {
-        try {
-            List<Documento> documentos = documentoService
-                    .findAll();
-
-            setResultados(documentos);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar documentos: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        Actions.safe(
+                "Erro ao listar documentos!",
+                () -> {
+                    setResultados(
+                            documentoService.findAll()
+                    );
+                }
+        );
     }
 
     /**
      * Remove documento selecionado.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Documento documento = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione um documento para remover!"
-                );
-
-                return;
-            }
-
-            Documento documento = tableModel
-                    .getDocumento(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover o documento '%s'?"
-                            .formatted(documento.getDocumento())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-            documentoService.delete(documento);
-
-            Popups.success(
-                    "Documento removido com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            String message = e.getMessage();
-
-            if (message != null
-                    && message.contains("violates foreign key constraint")) {
-
-                Popups.error(
-                        "Não é possível remover este documento porque ele está vinculado a outros registros."
-                );
-
-                return;
-            }
-
-            Popups.error(
-                    "Erro ao remover documento: %s"
-                            .formatted(message)
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param documentos - Lista de documentos
-     */
-    private void setResultados(
-            List<Documento> documentos
-    ) {
-        if (documentos == null
-                || documentos.isEmpty()) {
-
-            clearResults();
-
+        if (documento == null) {
             Popups.warn(
-                    "Nenhum documento encontrado!"
+                    "Selecione um documento para remover!"
             );
 
             return;
         }
 
-        tableModel.setDocumentos(
-                documentos
+        boolean confirmacao = Popups.confirm(
+                """
+                Deseja remover o documento '%s'?
+                """
+                        .formatted(
+                                documento.getDocumento()
+                        )
         );
-    }
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setDocumentos(
-                List.of()
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover documento!",
+                () -> {
+                    documentoService.delete(documento);
+
+                    Popups.success(
+                            "Documento removido com sucesso!"
+                    );
+
+                    listarTodos();
+                }
         );
+
     }
 
 }

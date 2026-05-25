@@ -84,12 +84,6 @@ public final class DashboardScreen extends BaseScreen {
         );
     }
 
-    private JLabel buildDescription() {
-        return UI.label(
-            "SIGOB é um sistema "
-        );
-    }
-
     /**
      * Constrói uma label para grid.
      *

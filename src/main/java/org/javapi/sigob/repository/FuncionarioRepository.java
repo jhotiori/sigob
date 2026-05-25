@@ -19,6 +19,21 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
     }
 
     /**
+     * Busca um Funcionario pelo ID
+     *
+     * @param id O ID do Funcionario
+     * @return Optional<Funcionario> - O Funcionario encontrado
+     */
+    @Override
+    public Optional<Funcionario> findById(Integer id) {
+        return Optional.ofNullable(
+                em.createQuery("select f from funcionarios f join fetch f.acessos where f.id = :id", Funcionario.class)
+                    .setParameter("id", id)
+                    .getSingleResultOrNull()
+        );
+    }
+
+    /**
      * Busca todos os Funcionarios disponíveis
      *
      * @return List<Funcionario> - Todos os Funcionarios

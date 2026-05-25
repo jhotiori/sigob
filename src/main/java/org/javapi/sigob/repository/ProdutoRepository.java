@@ -40,6 +40,27 @@ public class ProdutoRepository
     }
 
     /**
+     * Busca um produto pelo ID.
+     *
+     * @param id - ID do produto
+     * @return Optional<Produto> - Produto encontrado
+     */
+    @Override
+    public Optional<Produto> findById(Integer id) {
+        return Optional.ofNullable(
+                em.createQuery("""
+                                SELECT p
+                                FROM produtos p
+                                LEFT JOIN FETCH p.categoria
+                                LEFT JOIN FETCH p.moeda
+                                WHERE p.id = :id
+                                """, Produto.class)
+                        .setParameter("id", id)
+                        .getSingleResultOrNull()
+        );
+    }
+
+    /**
      * Busca produtos cujo nome contenha o valor informado.
      *
      * @param nome - Nome para busca

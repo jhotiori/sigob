@@ -9,19 +9,23 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.service.EstoqueService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.EstoqueTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de estoques.
  */
-public final class EstoqueRelatorioScreen extends BaseScreen {
+public final class EstoqueRelatorioScreen
+        extends BaseRelatorioScreen<Estoque> {
 
     /**
      * Serviço de estoques.
@@ -62,6 +66,14 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
      */
     private final JButton buscarNomeButton
             = UI.button("Buscar por Nome");
+
+    /**
+     * Botão de busca por codigo.
+     *
+     * @see JButton
+     */
+    private final JButton buscarCodigoButton
+            = UI.button("Buscar por Codigo");
 
     /**
      * Botão de listagem geral.
@@ -107,6 +119,46 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Estoque> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Estoque> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "estoque";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "estoques";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -123,21 +175,30 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarNomeButton, mouse -> {
-            mouse.onClicked(this::buscarPorNome);
-        });
+        UIEvents.onClick(
+                buscarNomeButton,
+                this::buscarPorNome
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                buscarCodigoButton,
+                this::buscarPorCodigo
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
+
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
@@ -148,7 +209,9 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
     private JPanel buildContent() {
         return UI.column()
                 .add(
-                        UIScreen.title("Relatório de Estoques"),
+                        UIScreen.title(
+                                "Relatório de Estoques"
+                        ),
                         UIScreen.subtitle(
                                 "Consulta e gerenciamento dos estoques cadastrados no sistema."
                         )
@@ -176,7 +239,7 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
      * @return JPanel - Painel construído
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -185,181 +248,142 @@ public final class EstoqueRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-            return UI.grid(2, 3)
-                    .add(
-                            buscarIdButton,
-                            buscarNomeButton,
-                            listarTodosButton
-                    )
-                    .build();
         }
+
+        return UI.grid(2, 3)
+                .add(
+                        buscarIdButton,
+                        buscarNomeButton,
+                        listarTodosButton
+                )
+                .build();
     }
 
     /**
      * Busca estoque por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID do estoque:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Estoque",
+                "ID do estoque:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Estoque> estoque = estoqueService
-                    .findById(id);
-
-            if (estoque.isEmpty()) {
-                clearResults();
-
-                Popups.warn(
-                        "Estoque não encontrado!"
-                );
-
-                return;
-            }
-
-            setResultados(
-                    List.of(estoque.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error(
-                    "ID inválido!"
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar estoque: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar estoque!",
+                () -> {
+                    Optional<Estoque> estoque = estoqueService
+                            .findById(id);
+
+                    if (estoque.isEmpty()) {
+                        clearResults();
+
+                        Popups.warn(
+                                "Estoque não encontrado!"
+                        );
+
+                        return;
+                    }
+
+                    setResultados(
+                            List.of(estoque.get())
+                    );
+                }
+        );
     }
 
     /**
      * Busca estoques por nome.
      */
     private void buscarPorNome() {
-        try {
-            String nome = Popups.input(
-                    "Nome do estoque:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Estoque",
+                "Nome do estoque:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Estoque> estoques = estoqueService
-                    .findByNome(nome);
-
-            setResultados(estoques);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar estoques: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar estoques!",
+                () -> setResultados(
+                        estoqueService.findByNome(nome)
+                )
+        );
+    }
+
+    /**
+     * Busca estoques por codigo.
+     */
+    private void buscarPorCodigo() {
+        String codigo = PopupInputs.requiredText(
+                "Buscar Estoque",
+                "Codigo do estoque:"
+        );
+
+        if (codigo == null) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao buscar estoques!",
+                () -> setResultados(
+                        estoqueService.findByCodigo(codigo)
+                )
+        );
     }
 
     /**
      * Lista todos os estoques.
      */
     private void listarTodos() {
-        try {
-            List<Estoque> estoques = estoqueService
-                    .findAll();
-
-            setResultados(estoques);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar estoques: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        Actions.safe(
+                "Erro ao listar estoques!",
+                () -> setResultados(
+                        estoqueService.findAll()
+                )
+        );
     }
 
     /**
      * Remove estoque selecionado.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Estoque estoque = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione um estoque para remover!"
-                );
-
-                return;
-            }
-
-            Estoque estoque = tableModel
-                    .getEstoque(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover o estoque '%s'?"
-                            .formatted(estoque.getNome())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-            estoqueService.delete(estoque);
-
-            Popups.success(
-                    "Estoque removido com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            String message = e.getMessage();
-
-            if (message != null
-                    && message.contains("violates foreign key constraint")) {
-                Popups.error(
-                        "Não é possível remover este estoque porque ele está vinculado a outros registros."
-                );
-
-                return;
-            }
-
-            Popups.error(
-                    "Erro ao remover estoque: %s"
-                            .formatted(e.getMessage())
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param estoques - Lista de estoques
-     */
-    private void setResultados(
-            List<Estoque> estoques
-    ) {
-        if (estoques == null || estoques.isEmpty()) {
-            clearResults();
-
+        if (estoque == null) {
             Popups.warn(
-                    "Nenhum estoque encontrado!"
+                    "Selecione um estoque para remover!"
             );
 
             return;
         }
 
-        tableModel.setEstoques(estoques);
-    }
+        boolean confirmacao = Popups.confirm(
+                "Deseja remover o estoque '%s'?"
+                        .formatted(estoque.getNome())
+        );
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setEstoques(List.of());
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover estoque!",
+                () -> {
+                    estoqueService.delete(estoque);
+
+                    Popups.success(
+                            "Estoque removido com sucesso!"
+                    );
+
+                    listarTodos();
+                }
+        );
     }
 
 }

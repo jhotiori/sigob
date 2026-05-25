@@ -9,31 +9,36 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.service.CategoriaService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.base.BaseTableModel;
 import org.javapi.sigob.view.models.CategoriaTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de categorias.
  */
-public final class CategoriaRelatorioScreen extends BaseScreen {
+public final class CategoriaRelatorioScreen
+        extends BaseRelatorioScreen<Categoria> {
 
     /**
      * Serviço de categorias.
      *
-     * @see {@link CategoriaService}
+     * @see CategoriaService
      */
-    private final CategoriaService categoriaService = ApplicationContext.getCategoriaService();
+    private final CategoriaService categoriaService
+            = ApplicationContext.getCategoriaService();
 
     /**
      * Modelo da tabela.
      *
-     * @see {@link CategoriaTableModel}
+     * @see CategoriaTableModel
      */
     private final CategoriaTableModel tableModel
             = new CategoriaTableModel();
@@ -41,22 +46,23 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
     /**
      * Tabela de categorias.
      *
-     * @see {@link JTable}
+     * @see JTable
      */
-    private final JTable table = UI.table(tableModel);
+    private final JTable table
+            = UI.table(tableModel);
 
     /**
-     * Botão de listagem por ID.
+     * Botão de busca por ID.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton buscarIdButton
             = UI.button("Buscar por ID");
 
     /**
-     * Botão de listagem por nome.
+     * Botão de busca por nome.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton buscarNomeButton
             = UI.button("Buscar por Nome");
@@ -64,7 +70,7 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
     /**
      * Botão de listagem geral.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton listarTodosButton
             = UI.button("Listar Todos");
@@ -72,7 +78,7 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
     /**
      * Botão de remoção.
      *
-     * @see {@link JButton}
+     * @see JButton
      */
     private final JButton removerButton
             = UI.button("Remover Selecionado");
@@ -105,6 +111,46 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return BaseTableModel<Categoria> - Model da tabela
+     */
+    @Override
+    protected BaseTableModel<Categoria> tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "categoria";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "categorias";
+    }
+
+    /**
      * Constrói interface da tela.
      *
      * @return JPanel - Painel raiz
@@ -121,21 +167,25 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarNomeButton, mouse -> {
-            mouse.onClicked(this::buscarPorNome);
-        });
+        UIEvents.onClick(
+                buscarNomeButton,
+                this::buscarPorNome
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
@@ -146,9 +196,14 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
     private JPanel buildContent() {
         return UI.column()
                 .add(
-                        UIScreen.title("Relatório de Categorias"),
+                        UIScreen.title(
+                                "Relatório de Categorias"
+                        ),
                         UIScreen.subtitle(
-                                "Consulta e gerenciamento das categorias cadastradas no sistema."
+                                """
+                                Consulta e gerenciamento das categorias
+                                cadastradas no sistema.
+                                """
                         )
                 )
                 .glue()
@@ -174,7 +229,7 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
      * @return JPanel - Painel construído
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -183,164 +238,129 @@ public final class CategoriaRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-            return UI.grid(2, 3)
-                    .add(
-                            buscarIdButton,
-                            buscarNomeButton,
-                            listarTodosButton
-                    )
-                    .build();
         }
 
+        return UI.grid(2, 3)
+                .add(
+                        buscarIdButton,
+                        buscarNomeButton,
+                        listarTodosButton
+                )
+                .build();
     }
 
     /**
      * Busca categoria por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID da categoria:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Categoria",
+                "ID da categoria:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Categoria> categoria = categoriaService.findById(id);
-
-            if (categoria.isEmpty()) {
-                clearResults();
-
-                Popups.warn("Categoria não encontrada!");
-
-                return;
-            }
-
-            setResultados(
-                    List.of(categoria.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error("ID inválido!");
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar categoria: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar categoria!",
+                () -> {
+                    Optional<Categoria> categoria
+                    = categoriaService.findById(id);
+
+                    if (categoria.isEmpty()) {
+                        clearResults();
+
+                        Popups.warn(
+                                "Categoria não encontrada!"
+                        );
+
+                        return;
+                    }
+
+                    setResultados(
+                            List.of(categoria.get())
+                    );
+                }
+        );
     }
 
     /**
      * Busca categorias por nome.
      */
     private void buscarPorNome() {
-        try {
-            String nome = Popups.input(
-                    "Nome da categoria:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Categoria",
+                "Nome da categoria:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Categoria> categorias = categoriaService.findByNome(nome);
-
-            setResultados(categorias);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar categorias: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar categorias!",
+                () -> {
+                    setResultados(
+                            categoriaService.findByNome(nome)
+                    );
+                }
+        );
     }
 
     /**
      * Lista todas as categorias.
      */
     private void listarTodos() {
-        try {
-            List<Categoria> categorias = categoriaService.findAll();
-
-            setResultados(categorias);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar categorias: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        Actions.safe(
+                "Erro ao listar categorias!",
+                () -> {
+                    setResultados(
+                            categoriaService.findAll()
+                    );
+                }
+        );
     }
 
     /**
      * Remove categoria selecionada.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Categoria categoria = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione uma categoria para remover!"
-                );
-
-                return;
-            }
-
-            Categoria categoria = tableModel.getCategoria(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover a categoria '%s'?"
-                            .formatted(categoria.getNome())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-
-            categoriaService.delete(categoria);
-
-            Popups.success(
-                    "Categoria removida com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao remover categoria: %s"
-                            .formatted(e.getMessage())
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param categorias - Lista de categorias
-     */
-    private void setResultados(
-            List<Categoria> categorias
-    ) {
-        if (categorias == null || categorias.isEmpty()) {
-            clearResults();
-
+        if (categoria == null) {
             Popups.warn(
-                    "Nenhuma categoria encontrada!"
+                    "Selecione uma categoria para remover!"
             );
 
             return;
         }
 
-        tableModel.setCategorias(categorias);
-    }
+        boolean confirmacao = Popups.confirm(
+                """
+                Deseja remover a categoria '%s'?
+                """
+                        .formatted(
+                                categoria.getNome()
+                        )
+        );
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setCategorias(List.of());
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover categoria!",
+                () -> {
+                    categoriaService.delete(categoria);
+
+                    Popups.success(
+                            "Categoria removida com sucesso!"
+                    );
+
+                    listarTodos();
+                }
+        );
     }
 
 }

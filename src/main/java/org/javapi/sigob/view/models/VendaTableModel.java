@@ -1,13 +1,15 @@
 package org.javapi.sigob.view.models;
 
-import org.javapi.sigob.entity.Venda;
-
-import javax.swing.table.AbstractTableModel;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-public class VendaTableModel extends AbstractTableModel {
+import org.javapi.sigob.entity.Venda;
+import org.javapi.sigob.view.base.BaseTableModel;
+
+/**
+ * Modelo de tabela de vendas.
+ */
+public class VendaTableModel extends BaseTableModel<Venda> {
 
     /**
      * Colunas da tabela.
@@ -29,78 +31,73 @@ public class VendaTableModel extends AbstractTableModel {
             = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /**
-     * Lista de vendas.
-     */
-    private List<Venda> vendas = new ArrayList<>();
-
-    @Override
-    public int getRowCount() {
-        return vendas.size();
-    }
-
-    @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Venda venda = vendas.get(rowIndex);
-
-        return switch (columnIndex) {
-            case 0 ->
-                venda.getId();
-            case 1 ->
-                venda.getStatus();
-            case 2 ->
-                venda.getCliente().getNome();
-            case 3 ->
-                venda.getFuncionario().getNome();
-            case 4 ->
-                venda.getDataAbertura() == null
-                ? "-"
-                : FORMATTER.format(venda.getDataAbertura());
-            case 5 ->
-                venda.getDataFinalizada() == null
-                ? "-"
-                : FORMATTER.format(venda.getDataFinalizada());
-            case 6 ->
-                venda.getValorTotal();
-            default ->
-                "";
-        };
-    }
-
-    /**
      * Define vendas da tabela.
      *
-     * @param vendas Lista de vendas
+     * @param vendas - Lista de vendas
      */
     public void setVendas(
             List<Venda> vendas
     ) {
-        this.vendas = vendas == null
-                ? new ArrayList<>()
-                : vendas;
-
-        fireTableDataChanged();
+        setRows(vendas);
     }
 
     /**
-     * Retorna venda por linha.
+     * Retorna venda da linha.
      *
-     * @param row Linha
-     * @return Venda - Venda encontrada
+     * @param row - Índice da linha
+     * @return Venda - Venda encontrada ou null
      */
     public Venda getVenda(
             int row
     ) {
-        return vendas.get(row);
+        return getRow(row);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String[] columns() {
+        return COLUMNS;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Object getValueAt(
+            Venda venda,
+            int columnIndex
+    ) {
+        return switch (columnIndex) {
+            case 0 ->
+                venda.getId();
+
+            case 1 ->
+                venda.getStatus();
+
+            case 2 ->
+                venda.getCliente().getNome();
+
+            case 3 ->
+                venda.getFuncionario().getNome();
+
+            case 4 ->
+                venda.getDataAbertura() != null
+                ? FORMATTER.format(venda.getDataAbertura())
+                : "-";
+
+            case 5 ->
+                venda.getDataFinalizada() != null
+                ? FORMATTER.format(venda.getDataFinalizada())
+                : "-";
+
+            case 6 ->
+                venda.getValorTotal();
+
+            default ->
+                null;
+        };
     }
 
 }

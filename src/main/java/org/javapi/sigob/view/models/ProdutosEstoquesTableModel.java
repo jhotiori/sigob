@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.ProdutosEstoques;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela de produtos em estoque.
  */
-public class ProdutosEstoquesTableModel extends AbstractTableModel {
+public class ProdutosEstoquesTableModel extends BaseTableModel<ProdutosEstoques> {
 
     /**
      * Colunas da tabela.
@@ -24,56 +22,44 @@ public class ProdutosEstoquesTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de itens.
-     */
-    private List<ProdutosEstoques> itens = new ArrayList<>();
-
-    /**
      * Define itens da tabela.
      *
      * @param itens - Lista de itens
      */
-    public void setItens(List<ProdutosEstoques> itens) {
-        this.itens = itens != null
-                ? itens
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+    public void setItens(
+            List<ProdutosEstoques> itens
+    ) {
+        setRows(itens);
     }
 
     /**
      * Retorna item da linha.
      *
      * @param row - Índice da linha
-     * @return ProdutosEstoques - Item encontrado
+     * @return ProdutosEstoques - Item encontrado ou null
      */
-    public ProdutosEstoques getItem(int row) {
-        if (row < 0 || row >= itens.size()) {
-            return null;
-        }
-
-        return itens.get(row);
+    public ProdutosEstoques getItem(
+            int row
+    ) {
+        return getRow(row);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getRowCount() {
-        return itens.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        ProdutosEstoques item = itens.get(rowIndex);
-
+    protected Object getValueAt(
+            ProdutosEstoques item,
+            int columnIndex
+    ) {
         return switch (columnIndex) {
             case 0 ->
                 item.getProduto().getNome();
@@ -93,11 +79,6 @@ public class ProdutosEstoquesTableModel extends AbstractTableModel {
             default ->
                 null;
         };
-    }
-
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return false;
     }
 
 }

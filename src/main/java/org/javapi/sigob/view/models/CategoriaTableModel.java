@@ -1,16 +1,14 @@
 package org.javapi.sigob.view.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.javapi.sigob.entity.Categoria;
+import org.javapi.sigob.view.base.BaseTableModel;
 
 /**
  * Modelo de tabela de categorias.
  */
-public class CategoriaTableModel extends AbstractTableModel {
+public class CategoriaTableModel extends BaseTableModel<Categoria> {
 
     /**
      * Colunas da tabela.
@@ -21,59 +19,44 @@ public class CategoriaTableModel extends AbstractTableModel {
     };
 
     /**
-     * Lista de categorias.
-     */
-    private List<Categoria> categorias = new ArrayList<>();
-
-    /**
      * Define categorias da tabela.
      *
      * @param categorias - Lista de categorias
      */
-    public void setCategorias(List<Categoria> categorias) {
-        this.categorias = categorias != null
-                ? categorias
-                : new ArrayList<>();
-
-        fireTableDataChanged();
+    public void setCategorias(
+            List<Categoria> categorias
+    ) {
+        setRows(categorias);
     }
 
     /**
      * Retorna categoria da linha.
      *
      * @param row - Índice da linha
-     * @return Categoria - Categoria encontrada
+     * @return Categoria - Categoria encontrada ou null
      */
-    public Categoria getCategoria(int row) {
-        if (row < 0 || row >= categorias.size()) {
-            return null;
-        }
-
-        return categorias.get(row);
+    public Categoria getCategoria(
+            int row
+    ) {
+        return getRow(row);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getRowCount() {
-        return categorias.size();
+    protected String[] columns() {
+        return COLUMNS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getColumnCount() {
-        return COLUMNS.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMNS[column];
-    }
-
-    @Override
-    public Object getValueAt(
-            int rowIndex,
+    protected Object getValueAt(
+            Categoria categoria,
             int columnIndex
     ) {
-        Categoria categoria = categorias.get(rowIndex);
-
         return switch (columnIndex) {
             case 0 ->
                 categoria.getId();
@@ -84,14 +67,6 @@ public class CategoriaTableModel extends AbstractTableModel {
             default ->
                 null;
         };
-    }
-
-    @Override
-    public boolean isCellEditable(
-            int rowIndex,
-            int columnIndex
-    ) {
-        return false;
     }
 
 }

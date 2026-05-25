@@ -9,80 +9,68 @@ import javax.swing.JTable;
 
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.service.ClienteService;
+import org.javapi.sigob.view.Actions;
 import org.javapi.sigob.view.ApplicationContext;
-import org.javapi.sigob.view.Events;
-import org.javapi.sigob.view.base.BaseScreen;
+import org.javapi.sigob.view.base.BaseRelatorioScreen;
+import org.javapi.sigob.view.errors.ErrorsDatabase;
 import org.javapi.sigob.view.models.ClientesTableModel;
+import org.javapi.sigob.view.popups.PopupInputs;
 import org.javapi.sigob.view.popups.Popups;
 import org.javapi.sigob.view.styles.Spacing;
 import org.javapi.sigob.view.ui.UI;
+import org.javapi.sigob.view.ui.UIEvents;
 import org.javapi.sigob.view.ui.UIScreen;
 
 /**
  * Tela de relatório de clientes.
  */
-public final class ClienteRelatorioScreen extends BaseScreen {
+public final class ClienteRelatorioScreen
+        extends BaseRelatorioScreen<Cliente> {
 
     /**
      * Serviço de clientes.
-     *
-     * @see ClienteService
      */
     private final ClienteService clienteService
             = ApplicationContext.getClienteService();
 
     /**
      * Modelo da tabela.
-     *
-     * @see ClientesTableModel
      */
     private final ClientesTableModel tableModel
             = new ClientesTableModel();
 
     /**
-     * Tabela de clientes.
-     *
-     * @see JTable
+     * Tabela principal.
      */
     private final JTable table
             = UI.table(tableModel);
 
     /**
      * Botão de busca por ID.
-     *
-     * @see JButton
      */
     private final JButton buscarIdButton
             = UI.button("Buscar por ID");
 
     /**
      * Botão de busca por nome.
-     *
-     * @see JButton
      */
     private final JButton buscarNomeButton
             = UI.button("Buscar por Nome");
 
     /**
      * Botão de busca por documento.
-     *
-     * @see JButton
      */
     private final JButton buscarDocumentoButton
             = UI.button("Buscar por Documento");
 
     /**
      * Botão de listagem geral.
-     *
-     * @see JButton
      */
     private final JButton listarTodosButton
             = UI.button("Listar Todos");
 
     /**
      * Botão de remoção.
-     *
-     * @see JButton
      */
     private final JButton removerButton
             = UI.button("Remover Selecionado");
@@ -128,42 +116,84 @@ public final class ClienteRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Retorna tabela principal.
+     *
+     * @return JTable - Tabela principal
+     */
+    @Override
+    protected JTable table() {
+        return table;
+    }
+
+    /**
+     * Retorna model da tabela.
+     *
+     * @return ClientesTableModel - Model da tabela
+     */
+    @Override
+    protected ClientesTableModel tableModel() {
+        return tableModel;
+    }
+
+    /**
+     * Retorna nome singular da entidade.
+     *
+     * @return String - Nome singular
+     */
+    @Override
+    protected String entityNameSingular() {
+        return "cliente";
+    }
+
+    /**
+     * Retorna nome plural da entidade.
+     *
+     * @return String - Nome plural
+     */
+    @Override
+    protected String entityNamePlural() {
+        return "clientes";
+    }
+
+    /**
      * Registra eventos da tela.
      */
     private void registerEvents() {
-        Events.mouse(buscarIdButton, mouse -> {
-            mouse.onClicked(this::buscarPorId);
-        });
+        UIEvents.onClick(
+                buscarIdButton,
+                this::buscarPorId
+        );
 
-        Events.mouse(buscarNomeButton, mouse -> {
-            mouse.onClicked(this::buscarPorNome);
-        });
+        UIEvents.onClick(
+                buscarNomeButton,
+                this::buscarPorNome
+        );
 
-        Events.mouse(buscarDocumentoButton, mouse -> {
-            mouse.onClicked(this::buscarPorDocumento);
-        });
+        UIEvents.onClick(
+                buscarDocumentoButton,
+                this::buscarPorDocumento
+        );
 
-        Events.mouse(listarTodosButton, mouse -> {
-            mouse.onClicked(this::listarTodos);
-        });
+        UIEvents.onClick(
+                listarTodosButton,
+                this::listarTodos
+        );
 
-        Events.mouse(removerButton, mouse -> {
-            mouse.onClicked(this::removerSelecionado);
-        });
+        UIEvents.onClick(
+                removerButton,
+                this::removerSelecionado
+        );
     }
 
     /**
      * Constrói conteúdo principal.
      *
-     * @return JPanel - Conteúdo construído
+     * @return JPanel - Conteúdo principal
      */
     private JPanel buildContent() {
         return UI.column()
                 .add(
-                        UIScreen.title("Relatório de Clientes"),
-                        UIScreen.subtitle(
-                                "Consulta e gerenciamento dos clientes cadastrados no sistema."
-                        )
+                        buildHeader()
                 )
                 .glue()
                 .add(
@@ -183,12 +213,28 @@ public final class ClienteRelatorioScreen extends BaseScreen {
     }
 
     /**
+     * Constrói cabeçalho da tela.
+     *
+     * @return JPanel - Cabeçalho construído
+     */
+    private JPanel buildHeader() {
+        return UI.column()
+                .add(
+                        UIScreen.title("Relatório de Clientes"),
+                        UIScreen.subtitle(
+                                "Consulta e gerenciamento dos clientes cadastrados no sistema."
+                        )
+                )
+                .build();
+    }
+
+    /**
      * Constrói painel de ações.
      *
-     * @return JPanel - Painel construído
+     * @return JPanel - Painel de ações
      */
     private JPanel buildActions() {
-        if (ApplicationContext.hasFuncionarioAcesso("admin")) {
+        if (hasAdminAccess()) {
             return UI.grid(2, 4)
                     .add(
                             buscarIdButton,
@@ -198,8 +244,9 @@ public final class ClienteRelatorioScreen extends BaseScreen {
                             removerButton
                     )
                     .build();
-        } else {
-                return UI.grid(2, 3)
+        }
+
+        return UI.grid(2, 3)
                 .add(
                         buscarIdButton,
                         buscarNomeButton,
@@ -208,210 +255,143 @@ public final class ClienteRelatorioScreen extends BaseScreen {
                 )
                 .build();
     }
-    }
 
     /**
      * Busca cliente por ID.
      */
     private void buscarPorId() {
-        try {
-            String input = Popups.input(
-                    "ID do cliente:"
-            );
+        Integer id = PopupInputs.integer(
+                "Buscar Cliente",
+                "ID do cliente:"
+        );
 
-            if (input == null || input.isBlank()) {
-                return;
-            }
-
-            int id = Integer.parseInt(input);
-
-            Optional<Cliente> cliente = clienteService
-                    .findById(id);
-
-            if (cliente.isEmpty()) {
-                clearResults();
-
-                Popups.warn(
-                        "Cliente não encontrado!"
-                );
-
-                return;
-            }
-
-            setResultados(
-                    List.of(cliente.get())
-            );
-        } catch (NumberFormatException e) {
-            Popups.error(
-                    "ID inválido!"
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar cliente: %s"
-                            .formatted(e.getMessage())
-            );
+        if (id == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar cliente!",
+                () -> {
+                    Optional<Cliente> cliente = clienteService.findById(id);
+
+                    if (cliente.isEmpty()) {
+                        clearResults();
+
+                        Popups.warn(
+                                "Cliente não encontrado!"
+                        );
+
+                        return;
+                    }
+
+                    setResultados(
+                            List.of(cliente.get())
+                    );
+                }
+        );
     }
 
     /**
      * Busca clientes por nome.
      */
     private void buscarPorNome() {
-        try {
-            String nome = Popups.input(
-                    "Nome do cliente:"
-            );
+        String nome = PopupInputs.requiredText(
+                "Buscar Cliente",
+                "Nome do cliente:"
+        );
 
-            if (nome == null || nome.isBlank()) {
-                return;
-            }
-
-            List<Cliente> clientes = clienteService
-                    .findByNome(nome);
-
-            setResultados(clientes);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar clientes: %s"
-                            .formatted(e.getMessage())
-            );
+        if (nome == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar clientes!",
+                () -> setResultados(
+                        clienteService.findByNome(nome)
+                )
+        );
     }
 
     /**
-     * Busca cliente por documento.
+     * Busca clientes por documento.
      */
     private void buscarPorDocumento() {
-        try {
-            String documento = Popups.input(
-                    "Documento do cliente:"
-            );
+        String documento = PopupInputs.requiredText(
+                "Buscar Cliente",
+                "Documento do cliente:"
+        );
 
-            if (documento == null || documento.isBlank()) {
-                return;
-            }
-
-            List<Cliente> clientes = clienteService
-                    .findByDocumento(documento);
-
-            if (clientes.isEmpty()) {
-                clearResults();
-
-                Popups.warn(
-                        "Cliente não encontrado!"
-                );
-
-                return;
-            }
-
-            setResultados(
-                    clientes
-            );
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao buscar cliente: %s"
-                            .formatted(e.getMessage())
-            );
+        if (documento == null) {
+            return;
         }
+
+        Actions.safe(
+                "Erro ao buscar cliente!",
+                () -> setResultados(
+                        clienteService.findByDocumento(documento)
+                )
+        );
     }
 
     /**
      * Lista todos os clientes.
      */
     private void listarTodos() {
-        try {
-            List<Cliente> clientes = clienteService
-                    .findAll();
-
-            setResultados(clientes);
-        } catch (Exception e) {
-            Popups.error(
-                    "Erro ao listar clientes: %s"
-                            .formatted(e.getMessage())
-            );
-        }
+        Actions.safe(
+                "Erro ao listar clientes!",
+                () -> setResultados(
+                        clienteService.findAll()
+                )
+        );
     }
 
     /**
      * Remove cliente selecionado.
      */
     private void removerSelecionado() {
-        try {
-            int row = table.getSelectedRow();
+        Cliente cliente = selectedRow();
 
-            if (row < 0) {
-                Popups.warn(
-                        "Selecione um cliente para remover!"
-                );
-
-                return;
-            }
-
-            Cliente cliente = tableModel
-                    .getCliente(row);
-
-            boolean confirmacao = Popups.confirm(
-                    "Deseja remover o cliente '%s'?"
-                            .formatted(cliente.getNome())
-            );
-
-            if (!confirmacao) {
-                return;
-            }
-
-            clienteService.delete(cliente);
-
-            Popups.success(
-                    "Cliente removido com sucesso!"
-            );
-
-            listarTodos();
-        } catch (Exception e) {
-            String message = e.getMessage();
-
-            if (message != null
-                    && message.contains("violates foreign key constraint")) {
-
-                Popups.error(
-                        "Não é possível remover este cliente pois existem vendas vinculadas."
-                );
-
-                return;
-            }
-
-            Popups.error(
-                    "Erro ao remover cliente: %s"
-                            .formatted(message)
-            );
-        }
-    }
-
-    /**
-     * Define resultados da tabela.
-     *
-     * @param clientes - Lista de clientes
-     */
-    private void setResultados(
-            List<Cliente> clientes
-    ) {
-        if (clientes == null || clientes.isEmpty()) {
-            clearResults();
-
+        if (cliente == null) {
             Popups.warn(
-                    "Nenhum cliente encontrado!"
+                    "Selecione um cliente para remover!"
             );
 
             return;
         }
 
-        tableModel.setClientes(clientes);
-    }
+        boolean confirmacao = Popups.confirm(
+                "Deseja remover o cliente '%s'?"
+                        .formatted(cliente.getNome())
+        );
 
-    /**
-     * Limpa resultados da tabela.
-     */
-    private void clearResults() {
-        tableModel.setClientes(List.of());
+        if (!confirmacao) {
+            return;
+        }
+
+        Actions.safe(
+                "Erro ao remover cliente!",
+                () -> {
+                    try {
+                        clienteService.delete(cliente);
+
+                        Popups.success(
+                                "Cliente removido com sucesso!"
+                        );
+
+                        listarTodos();
+                    } catch (Exception e) {
+                        if (ErrorsDatabase.isForeignKey(e)) {
+                            Popups.error(
+                                    "Não é possível remover este cliente pois existem vendas vinculadas."
+                            );
+
+                            return;
+                        }
+
+                        throw e;
+                    }
+                }
+        );
     }
 
 }

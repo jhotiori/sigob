@@ -188,7 +188,7 @@ public final class ApplicationWindow extends BaseWindow {
         boolean hasAdminAcesso = ApplicationContext.hasFuncionarioAcesso("admin");
         boolean hasVendedorAcesso = ApplicationContext.hasFuncionarioAcesso("vendedor");
         boolean hasFuncionarioAcesso = ApplicationContext.hasFuncionarioAcesso("funcionario");
-
+        
         builder.button("Dashboard", () -> showScreen("dashboard"));
 
         if (hasAdminAcesso || hasVendedorAcesso) {
