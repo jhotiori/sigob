@@ -12,6 +12,9 @@ import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
+import java.util.List;
+import java.util.Optional;
+
 public class EstoqueService {
 
     /**
@@ -120,6 +123,21 @@ public class EstoqueService {
 
         return TransactionExecutor.query(em -> {
             return new EstoqueRepository(em).findByNome(prefixo);
+        });
+    }
+
+    /**
+     * Busca estoques pelo prefixo
+     *
+     * @param prefixo O prefixo do estoque
+     * @return List<Estoque> - A lista de estoques encontrados
+     * @throws IllegalArgumentException Se o prefixo for invalido
+     */
+    public List<Estoque> findByCodigo(String codigo) {
+        validateCodigo(codigo);
+
+        return TransactionExecutor.query(em -> {
+            return new EstoqueRepository(em).findByCodigo(codigo);
         });
     }
 

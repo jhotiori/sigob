@@ -1,4 +1,4 @@
-package org.javapi.sigob.view.windows;
+package org.javapi.sigob.view.base;
 
 import javax.swing.JFrame;
 
@@ -10,21 +10,56 @@ public abstract class BaseWindow {
     /**
      * Janela raiz.
      *
-     * @see {@link JFrame}
+     * @see JFrame
      */
     private JFrame root;
+
+    /**
+     * Estado de inicialização.
+     */
+    private boolean initialized;
 
     /**
      * Cria janela base.
      */
     protected BaseWindow() {
+
     }
 
     /**
      * Inicializa janela.
      */
-    protected final void init() {
+    public final void initialize() {
+        if (initialized) {
+            return;
+        }
+
         this.root = build();
+
+        setup();
+
+        this.initialized = true;
+    }
+
+    /**
+     * Realiza setup interno da janela.
+     */
+    protected void setup() {
+
+    }
+
+    /**
+     * Executado ao exibir janela.
+     */
+    protected void onShow() {
+
+    }
+
+    /**
+     * Executado ao ocultar janela.
+     */
+    protected void onHide() {
+
     }
 
     /**
@@ -38,6 +73,8 @@ public abstract class BaseWindow {
      * Exibe janela.
      */
     public void show() {
+        onShow();
+
         root.setVisible(true);
     }
 
@@ -45,6 +82,8 @@ public abstract class BaseWindow {
      * Oculta janela.
      */
     public void hide() {
+        onHide();
+
         root.setVisible(false);
     }
 
@@ -62,6 +101,15 @@ public abstract class BaseWindow {
      */
     public JFrame root() {
         return root;
+    }
+
+    /**
+     * Retorna estado de inicialização.
+     *
+     * @return boolean - Estado da janela
+     */
+    public boolean initialized() {
+        return initialized;
     }
 
 }

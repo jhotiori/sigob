@@ -13,6 +13,9 @@ import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
+import java.util.List;
+import java.util.Optional;
+
 public class MoedaService {
 
     /**

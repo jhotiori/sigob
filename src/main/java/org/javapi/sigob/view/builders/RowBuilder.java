@@ -1,12 +1,7 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
-import java.awt.Component;
-import java.awt.Dimension;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Builder fluente para layouts em linha.

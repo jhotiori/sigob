@@ -3,10 +3,14 @@ package org.javapi.sigob.view.builders;
 import java.util.function.Consumer;
 
 import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 
+import org.javapi.sigob.view.components.LabelComponent;
 import org.javapi.sigob.view.components.MenuBarComponent;
 import org.javapi.sigob.view.components.MenuButtonComponent;
 import org.javapi.sigob.view.components.MenuComponent;
+import org.javapi.sigob.view.ui.UI;
 
 /**
  * Builder fluente para barra de menus.
@@ -58,6 +62,20 @@ public class MenuBarBuilder {
     }
 
     /**
+     * Adiciona componente na barra.
+     *
+     * @param component - Componente adicionado
+     * @return MenuBarBuilder - Instância atual
+     */
+    public MenuBarBuilder add(JComponent component) {
+        if (component != null) {
+            menuBar.add(component);
+        }
+
+        return this;
+    }
+
+    /**
      * Adiciona botão na barra.
      *
      * @param text - Texto do botão
@@ -72,6 +90,54 @@ public class MenuBarBuilder {
         }
 
         menuBar.add(button);
+
+        return this;
+    }
+
+    /**
+     * Adiciona botão na barra.
+     *
+     * @param button - Botão adicionado
+     * @param action - Ação do botão
+     * @return MenuBarBuilder - Instância atual
+     */
+    public MenuBarBuilder button(JButton button, Runnable action) {
+        if (action != null) {
+            button.addActionListener(event -> action.run());
+        }
+
+        menuBar.add(button);
+
+        return this;
+    }
+
+    /**
+     * Adiciona label na barra.
+     *
+     * @param text - Texto da label
+     * @return MenuBarBuilder - Instância atual
+     */
+    public MenuBarBuilder label(String text) {
+        menuBar.add(UI.label(text));
+
+        return this;
+    }
+
+    /**
+     * Adiciona label configurável na barra.
+     *
+     * @param text - Texto da label
+     * @param config - Configuração da label
+     * @return MenuBarBuilder - Instância atual
+     */
+    public MenuBarBuilder label(String text, Consumer<LabelComponent> config) {
+        LabelComponent label = UI.label(text);
+
+        if (config != null) {
+            config.accept(label);
+        }
+
+        menuBar.add(label);
 
         return this;
     }

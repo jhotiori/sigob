@@ -1,5 +1,6 @@
 package org.javapi.sigob.view.components;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 
 import org.javapi.sigob.view.styles.Fonts;
@@ -24,6 +25,34 @@ public class LabelComponent extends JLabel {
      */
     public LabelComponent(String text) {
         super(text);
+
+        setup();
+    }
+
+    /**
+     * Cria label com ícone.
+     *
+     * @param icon - Ícone do label
+     */
+    public LabelComponent(Icon icon) {
+        super(icon);
+
+        setup();
+    }
+
+    /**
+     * Cria label com texto e ícone.
+     *
+     * @param text - Texto do label
+     * @param icon - Ícone do label
+     * @param alignment - Alinhamento horizontal
+     */
+    public LabelComponent(
+            String text,
+            Icon icon,
+            int alignment
+    ) {
+        super(text, icon, alignment);
 
         setup();
     }

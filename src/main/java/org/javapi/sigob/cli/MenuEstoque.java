@@ -1,12 +1,12 @@
 package org.javapi.sigob.cli;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.service.EstoqueService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Menu responsável pelas operações de estoque via CLI.

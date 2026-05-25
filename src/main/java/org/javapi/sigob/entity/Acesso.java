@@ -17,9 +17,6 @@ public class Acesso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "codigo")
-    private String codigo;
-
     @Column(name = "nome", nullable = false, unique = true)
     private String nome;
 
@@ -27,7 +24,7 @@ public class Acesso {
     private String descricao;
 
     @ManyToMany(mappedBy = "acessos")
-    private final Set<Funcionario> funcionarios = new HashSet<>();
+    private Set<Funcionario> funcionarios = new HashSet<>();
 
     /**
      * Construtor padrão JPA
@@ -43,9 +40,8 @@ public class Acesso {
      * @param nome O Nome do Acesso
      * @param descricao A Descrição do Acesso
      */
-    public Acesso(int id, String codigo, String nome, String descricao) {
+    public Acesso(int id, String nome, String descricao) {
         this.id = id;
-        this.codigo = codigo;
         this.nome = nome;
         this.descricao = descricao;
     }
@@ -57,15 +53,6 @@ public class Acesso {
      */
     public void setId(int id) {
         this.id = id;
-    }
-
-    /**
-     * Atribui o Código do Acesso
-     *
-     * @param codigo O Código do Acesso
-     */
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
     }
 
     /**
@@ -96,15 +83,6 @@ public class Acesso {
     }
 
     /**
-     * Retorna o Código do Acesso
-     *
-     * @return codigo - O Código do Acesso
-     */
-    public String getCodigo() {
-        return codigo;
-    }
-
-    /**
      * Retorna o Nome do Acesso
      *
      * @return nome - O Nome do Acesso
@@ -128,7 +106,7 @@ public class Acesso {
      * @return funcionarios - Os Funcionários
      */
     public Set<Funcionario> getFuncionarios() {
-        return Set.copyOf(funcionarios);
+        return funcionarios;
     }
 
     public void addFuncionario(Funcionario funcionario) {
@@ -137,7 +115,7 @@ public class Acesso {
 
     @Override
     public String toString() {
-        return "Acesso(Id = %d, Codigo = %s, Nome = %s, Descricao = %s)"
-                .formatted(this.getId(), this.getCodigo(), this.getNome(), this.getDescricao());
+        return "Acesso(Id = %d, Nome = %s, Descricao = %s)"
+                .formatted(this.getId(), this.getNome(), this.getDescricao());
     }
 }

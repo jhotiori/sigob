@@ -1,17 +1,9 @@
 package org.javapi.sigob.entity;
 
+import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 
 @Entity(name = "funcionarios")
 public class Funcionario {
@@ -142,9 +134,9 @@ public class Funcionario {
             return false;
         }
         boolean adicionado = this.acessos.add(acesso);
-        if (adicionado) {
-            acesso.addFuncionario(this);
-        }
+        /*if (adicionado) {
+            acesso.getFuncionarios().add(this);
+        }*/
         return adicionado;
     }
 
@@ -158,11 +150,8 @@ public class Funcionario {
         if (acesso == null) {
             return false;
         }
-        boolean removido = this.acessos.remove(acesso);
-        if (removido) {
-            acesso.getFuncionarios().remove(this);
-        }
-        return removido;
+
+        return this.acessos.remove(acesso);
     }
 
     /**

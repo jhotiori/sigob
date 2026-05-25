@@ -1,15 +1,15 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
-import java.awt.Component;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+
+
 
 /**
- * Builder fluente para GridLayout.
+ * Builder fluente para FlowLayout.
  */
-public class GridBuilder {
+public class FlowBuilder {
 
     /**
      * Painel interno do builder.
@@ -19,46 +19,32 @@ public class GridBuilder {
     private final JPanel panel;
 
     /**
-     * Layout interno do builder.
-     *
-     * @see {@link GridLayout}
+     * Cria builder com painel vazio.
      */
-    private final GridLayout layout;
-
-    /**
-     * Cria builder de grid.
-     *
-     * @param rows - Quantidade de linhas
-     * @param cols - Quantidade de colunas
-     */
-    public GridBuilder(int rows, int cols) {
-        this(new JPanel(), rows, cols);
+    public FlowBuilder() {
+        this(new JPanel());
     }
 
     /**
      * Cria builder usando painel existente.
      *
      * @param panel - Painel existente
-     * @param rows - Quantidade de linhas
-     * @param cols - Quantidade de colunas
      */
-    public GridBuilder(JPanel panel, int rows, int cols) {
+    public FlowBuilder(JPanel panel) {
         this.panel = panel != null
                 ? panel
                 : new JPanel();
 
-        this.layout = new GridLayout(rows, cols);
-
-        this.panel.setLayout(layout);
+        this.panel.setLayout(new FlowLayout());
     }
 
     /**
      * Define preenchimento interno uniforme.
      *
      * @param padding - Tamanho do preenchimento
-     * @return GridBuilder - Instância atual
+     * @return FlowBuilder - Instância atual
      */
-    public GridBuilder padding(int padding) {
+    public FlowBuilder padding(int padding) {
         panel.setBorder(
                 BorderFactory.createEmptyBorder(
                         padding,
@@ -76,9 +62,9 @@ public class GridBuilder {
      *
      * @param vertical - Preenchimento vertical
      * @param horizontal - Preenchimento horizontal
-     * @return GridBuilder - Instância atual
+     * @return FlowBuilder - Instância atual
      */
-    public GridBuilder padding(int vertical, int horizontal) {
+    public FlowBuilder padding(int vertical, int horizontal) {
         panel.setBorder(
                 BorderFactory.createEmptyBorder(
                         vertical,
@@ -95,10 +81,10 @@ public class GridBuilder {
      * Define espaçamento horizontal.
      *
      * @param gap - Espaçamento horizontal
-     * @return GridBuilder - Instância atual
+     * @return FlowBuilder - Instância atual
      */
-    public GridBuilder hgap(int gap) {
-        layout.setHgap(gap);
+    public FlowBuilder hgap(int gap) {
+        ((FlowLayout) panel.getLayout()).setHgap(gap);
 
         return this;
     }
@@ -107,10 +93,10 @@ public class GridBuilder {
      * Define espaçamento vertical.
      *
      * @param gap - Espaçamento vertical
-     * @return GridBuilder - Instância atual
+     * @return FlowBuilder - Instância atual
      */
-    public GridBuilder vgap(int gap) {
-        layout.setVgap(gap);
+    public FlowBuilder vgap(int gap) {
+        ((FlowLayout) panel.getLayout()).setVgap(gap);
 
         return this;
     }
@@ -119,9 +105,9 @@ public class GridBuilder {
      * Adiciona componentes ao painel.
      *
      * @param components - Componentes adicionados
-     * @return GridBuilder - Instância atual
+     * @return FlowBuilder - Instância atual
      */
-    public GridBuilder add(Component... components) {
+    public FlowBuilder add(Component... components) {
         if (components == null) {
             return this;
         }

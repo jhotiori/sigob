@@ -1,9 +1,5 @@
 package org.javapi.sigob.cli;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Categoria;
 import org.javapi.sigob.entity.Moeda;
 import org.javapi.sigob.entity.Produto;
@@ -12,6 +8,10 @@ import org.javapi.sigob.service.MoedaService;
 import org.javapi.sigob.service.ProdutoService;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Menu responsável pelas operações de produto via CLI.

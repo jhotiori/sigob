@@ -27,7 +27,6 @@ public class CategoriaService {
      */
     public void save(Categoria categoria) {
         validateNome(categoria.getNome());
-        validateCodigo(categoria.getCodigo());
 
         TransactionExecutor.executeVoid(em -> {
             new CategoriaRepository(em).save(categoria);
@@ -96,8 +95,6 @@ public class CategoriaService {
      * @return Optional<Categoria> - A Categoria buscada
      */
     public Optional<Categoria> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new CategoriaRepository(em).findById(id);
         });
@@ -114,20 +111,6 @@ public class CategoriaService {
 
         return TransactionExecutor.query(em -> {
             return new CategoriaRepository(em).findByNome(nome);
-        });
-    }
-
-    /**
-     * Busca por uma Categoria pelo seu codigo
-     *
-     * @param codigo O codigo da categoria
-     * @return Optional<Categoria> - A categoria buscada
-     */
-    public Optional<Categoria> findByCodigo(String codigo) {
-        validateCodigo(codigo);
-
-        return TransactionExecutor.query(em -> {
-            return new CategoriaRepository(em).findByCodigo(codigo);
         });
     }
 

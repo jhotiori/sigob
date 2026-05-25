@@ -7,66 +7,130 @@ import org.javapi.sigob.entity.Produto;
 
 import jakarta.persistence.EntityManager;
 
-public class ProdutoRepository extends BaseRepository<Produto, Integer> {
+/**
+ * Repositório de produtos.
+ */
+public class ProdutoRepository
+        extends BaseRepository<Produto, Integer> {
 
     /**
-     * Cria um novo ProdutoRepository
+     * Cria um novo ProdutoRepository.
      *
-     * @param em O EntityManager
+     * @param em - EntityManager utilizado
      */
-    public ProdutoRepository(EntityManager em) {
+    public ProdutoRepository(
+            EntityManager em
+    ) {
         super(em, Produto.class);
     }
 
     /**
-     * Busca todos os Produtos disponíveis
+     * Busca todos os produtos disponíveis.
      *
-     * @return List<Produto> - Todos os Produtos
+     * @return List<Produto> - Produtos encontrados
      */
     public List<Produto> findAll() {
-        return em.createQuery("select p from produtos p", Produto.class)
+        return em.createQuery("""
+                        SELECT DISTINCT p
+                        FROM produtos p
+                        LEFT JOIN FETCH p.categoria
+                        LEFT JOIN FETCH p.moeda
+                        """, Produto.class)
                 .getResultList();
     }
 
     /**
-     * Busca Produtos cujo nome inicia com o valor informado
+     * Busca um produto pelo ID.
      *
-     * @param nome O Nome para buscar
-     * @return List<Produto> - Os Produtos encontrados
+     * @param id - ID do produto
+     * @return Optional<Produto> - Produto encontrado
      */
-    public List<Produto> findByNome(String nome) {
-        return em.createQuery("select p from produtos p where p.nome like :str", Produto.class)
-                .setParameter("str", nome + "%")
-                .getResultList();
-    }
-
-    /**
-     * Busca um Produto pelo código (único)
-     *
-     * @param codigo O Código do Produto
-     * @return Optional<Produto> - O Produto encontrado, se existir
-     */
-    public Optional<Produto> findByCodigo(String codigo) {
+    @Override
+    public Optional<Produto> findById(Integer id) {
         return Optional.ofNullable(
-                em.createQuery("select p from produtos p where p.codigo = :codigo", Produto.class)
-                        .setParameter("codigo", codigo)
+                em.createQuery("""
+                                SELECT p
+                                FROM produtos p
+                                LEFT JOIN FETCH p.categoria
+                                LEFT JOIN FETCH p.moeda
+                                WHERE p.id = :id
+                                """, Produto.class)
+                        .setParameter("id", id)
                         .getSingleResultOrNull()
         );
     }
 
     /**
-     * Busca todos os Produtos de uma Categoria pelo nome (único)
+     * Busca produtos cujo nome contenha o valor informado.
      *
-     * @param nomeCategoria O nome da Categoria
-     * @return List<Produto> - Os Produtos encontrados
+     * @param nome - Nome para busca
+     * @return List<Produto> - Produtos encontrados
      */
-    public List<Produto> findByCategoriaNome(String nomeCategoria) {
+    public List<Produto> findByNome(
+            String nome
+    ) {
         return em.createQuery("""
-                        SELECT p FROM produtos p
-                        JOIN p.categoria c
-                        WHERE c.nome = :nome
+                        SELECT DISTINCT p
+                        FROM produtos p
+                        LEFT JOIN FETCH p.categoria
+                        LEFT JOIN FETCH p.moeda
+                        WHERE LOWER(p.nome)
+                        LIKE LOWER(:str)
                         """, Produto.class)
-                .setParameter("nome", nomeCategoria)
+                .setParameter(
+                        "str",
+                        "%" + nome + "%"
+                )
+                .getResultList();
+    }
+
+    /**
+     * Busca produto pelo código.
+     *
+     * @param codigo - Código do produto
+     * @return Optional<Produto> - Produto encontrado
+     */
+    public Optional<Produto> findByCodigo(
+            String codigo
+    ) {
+        return Optional.ofNullable(
+                em.createQuery("""
+                                SELECT p
+                                FROM produtos p
+                                LEFT JOIN FETCH p.categoria
+                                LEFT JOIN FETCH p.moeda
+                                WHERE p.codigo = :codigo
+                                """, Produto.class)
+                        .setParameter(
+                                "codigo",
+                                codigo
+                        )
+                        .getSingleResultOrNull()
+        );
+    }
+
+    /**
+     * Busca produtos pelo nome da categoria.
+     *
+     * @param nomeCategoria - Nome da categoria
+     * @return List<Produto> - Produtos encontrados
+     */
+    public List<Produto> findByCategoriaNome(
+            String nomeCategoria
+    ) {
+        return em.createQuery("""
+                        SELECT DISTINCT p
+                        FROM produtos p
+                        LEFT JOIN FETCH p.categoria
+                        LEFT JOIN FETCH p.moeda
+                        JOIN p.categoria c
+                        WHERE LOWER(c.nome)
+                        LIKE LOWER(:nome)
+                        """, Produto.class)
+                .setParameter(
+                        "nome",
+                        "%" + nomeCategoria + "%"
+                )
                 .getResultList();
     }
 

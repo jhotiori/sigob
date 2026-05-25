@@ -14,6 +14,10 @@ import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 public class ProdutoService {
 
     /**

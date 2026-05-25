@@ -1,4 +1,4 @@
-package org.javapi.sigob.view.screens;
+package org.javapi.sigob.view.base;
 
 import javax.swing.JPanel;
 
@@ -15,9 +15,14 @@ public abstract class BaseScreen {
     /**
      * Painel raiz da tela.
      *
-     * @see {@link JPanel}
+     * @see JPanel
      */
     private JPanel root;
+
+    /**
+     * Estado de inicialização.
+     */
+    private boolean initialized;
 
     /**
      * Cria tela base.
@@ -31,14 +36,47 @@ public abstract class BaseScreen {
     /**
      * Inicializa estrutura da tela.
      */
-    protected final void init() {
+    public final void initialize() {
+        if (initialized) {
+            return;
+        }
+
         this.root = build();
+
+        setup();
+
+        this.initialized = true;
     }
 
     /**
-     * Realiza setup de forma interna.
+     * Realiza setup interno da tela.
+     *
+     * Executado apenas uma vez após a construção.
      */
-    protected void setup() {}
+    protected void setup() {
+
+    }
+
+    /**
+     * Executado ao exibir a tela.
+     */
+    public void onShow() {
+
+    }
+
+    /**
+     * Executado ao ocultar a tela.
+     */
+    public void onHide() {
+
+    }
+
+    /**
+     * Atualiza dados dinâmicos da tela.
+     */
+    public void refresh() {
+
+    }
 
     /**
      * Constrói interface da tela.
@@ -63,6 +101,15 @@ public abstract class BaseScreen {
      */
     public JPanel root() {
         return root;
+    }
+
+    /**
+     * Retorna estado de inicialização.
+     *
+     * @return boolean - Estado da tela
+     */
+    public boolean initialized() {
+        return initialized;
     }
 
 }

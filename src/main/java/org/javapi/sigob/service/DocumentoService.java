@@ -1,12 +1,12 @@
 package org.javapi.sigob.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Documento;
 import org.javapi.sigob.repository.DocumentoRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
+
+import java.util.List;
+import java.util.Optional;
 
 public class DocumentoService {
 
@@ -68,6 +68,18 @@ public class DocumentoService {
     }
 
     /**
+     * Busca um Documento pelo seu ID
+     *
+     * @param id O ID do Documento
+     * @return Optional<Documento> - O Documento buscado
+     */
+    public Optional<Documento> findById(int id) {
+        return TransactionExecutor.query(em -> {
+            return new DocumentoRepository(em).findById(id);
+        });
+    }
+
+    /**
      * Busca todos os Documento disponíveis
      *
      * @return List<Documento> - Todos os Documento
@@ -84,7 +96,7 @@ public class DocumentoService {
      * @param prefixo O prefixo do nome
      * @return List<Documento> - As Documento encontradas
      */
-    public Optional<Documento> findByDocumento(String prefixo) {
+    public List<Documento> findByDocumento(String prefixo) {
         return TransactionExecutor.query(em -> {
             return new DocumentoRepository(em).findByDocumento(prefixo);
         });

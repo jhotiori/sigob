@@ -1,10 +1,7 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
-import java.awt.CardLayout;
-import java.awt.Component;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Builder fluente para CardLayout.

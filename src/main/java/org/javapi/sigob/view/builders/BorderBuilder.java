@@ -1,4 +1,4 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
 import java.awt.BorderLayout;
 

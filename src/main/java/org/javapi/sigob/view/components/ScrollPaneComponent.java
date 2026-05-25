@@ -14,7 +14,7 @@ public class ScrollPaneComponent extends JScrollPane {
      * Cria um ScrollPane vazio.
      */
     public ScrollPaneComponent() {
-        style();
+        setup();
     }
 
     /**
@@ -24,13 +24,14 @@ public class ScrollPaneComponent extends JScrollPane {
      */
     public ScrollPaneComponent(JComponent component) {
         super(component);
-        style();
+
+        setup();
     }
 
     /**
      * Aplica estilos padrões do componente.
      */
-    private void style() {
+    private void setup() {
         getViewport().setBackground(Palette.BG_PRIMARY);
         setBorder(null);
     }

@@ -1,11 +1,11 @@
 package org.javapi.sigob.cli;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.javapi.sigob.config.MenuConfig;
 import org.javapi.sigob.util.Inputter;
 import org.javapi.sigob.util.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Menu {
 

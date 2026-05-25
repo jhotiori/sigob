@@ -1,8 +1,8 @@
 package org.javapi.sigob.repository;
 
-import java.util.Optional;
-
 import jakarta.persistence.EntityManager;
+
+import java.util.Optional;
 
 /**
  * Repositorio base para todos os outros repositorios

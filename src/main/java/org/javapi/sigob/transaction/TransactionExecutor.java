@@ -1,12 +1,11 @@
 package org.javapi.sigob.transaction;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import org.javapi.sigob.config.JPAConfig;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import org.javapi.sigob.config.JPAConfig;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Executor transacional

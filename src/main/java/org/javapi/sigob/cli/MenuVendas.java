@@ -1,22 +1,14 @@
 package org.javapi.sigob.cli;
 
+import org.javapi.sigob.entity.*;
+import org.javapi.sigob.service.*;
+import org.javapi.sigob.util.Inputter;
+import org.javapi.sigob.util.Logger;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import org.javapi.sigob.entity.Cliente;
-import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.entity.ItemVenda;
-import org.javapi.sigob.entity.ProdutosEstoques;
-import org.javapi.sigob.entity.Venda;
-import org.javapi.sigob.service.ClienteService;
-import org.javapi.sigob.service.FuncionarioService;
-import org.javapi.sigob.service.ItemVendaService;
-import org.javapi.sigob.service.ProdutosEstoquesService;
-import org.javapi.sigob.service.VendaService;
-import org.javapi.sigob.util.Inputter;
-import org.javapi.sigob.util.Logger;
 
 public class MenuVendas extends Menu {
 

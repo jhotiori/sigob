@@ -1,8 +1,5 @@
 package org.javapi.sigob.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.ClienteRepository;
@@ -10,6 +7,9 @@ import org.javapi.sigob.repository.DocumentoRepository;
 import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ClienteService {
 
@@ -134,7 +134,7 @@ public class ClienteService {
      * @param documento O Documento do Cliente
      * @return Optional<Cliente> - O Cliente buscado
      */
-    public Optional<Cliente> findByDocumento(String documento) {
+    public List<Cliente> findByDocumento(String documento) {
         validateDocumento(documento);
 
         return TransactionExecutor.query(em -> {

@@ -1,10 +1,10 @@
 package org.javapi.sigob.util;
 
+import org.javapi.sigob.exception.ValidationException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import org.javapi.sigob.exception.ValidationException;
 
 /**
  * Classe utilitaria para validar dados e argumentos

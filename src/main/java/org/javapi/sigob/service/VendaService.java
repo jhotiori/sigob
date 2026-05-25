@@ -1,5 +1,9 @@
 package org.javapi.sigob.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,6 +125,100 @@ public class VendaService {
     public List<Venda> findFinalizadas() {
         return TransactionExecutor.query(em -> {
             return new VendaRepository(em).findFinalizadas();
+        });
+    }
+
+    /**
+     * Busca vendas pelo nome do cliente.
+     *
+     * @param nome Nome do cliente
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByClienteNome(String nome) {
+        Validator.start()
+                .expectNotBlank(nome, "Nome não pode ser vazio")
+                .validate();
+
+        return TransactionExecutor.query(em -> {
+            return new VendaRepository(em)
+                    .findByClienteNome(nome);
+        });
+    }
+
+    /**
+     * Busca vendas pelo nome do funcionário.
+     *
+     * @param nome Nome do funcionário
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByFuncionarioNome(String nome) {
+        Validator.start()
+                .expectNotBlank(nome, "Nome não pode ser vazio")
+                .validate();
+
+        return TransactionExecutor.query(em -> {
+            return new VendaRepository(em)
+                    .findByFuncionarioNome(nome);
+        });
+    }
+
+    /**
+     * Busca vendas pela data de abertura.
+     *
+     * @param data Data desejada
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByDataAbertura(
+            LocalDate data
+    ) {
+        Validator.start()
+                .expectNotNull(data, "Data não pode ser nula")
+                .validate();
+
+        return TransactionExecutor.query(em -> {
+            return new VendaRepository(em)
+                    .findByDataAbertura(data);
+        });
+    }
+
+    /**
+     * Busca vendas pela data de fechamento.
+     *
+     * @param data Data desejada
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByDataFinalizada(
+            LocalDate data
+    ) {
+        Validator.start()
+                .expectNotNull(data, "Data não pode ser nula")
+                .validate();
+
+        return TransactionExecutor.query(em -> {
+            return new VendaRepository(em)
+                    .findByDataFinalizada(data);
+        });
+    }
+
+    /**
+     * Busca vendas por período de abertura.
+     *
+     * @param inicioData Data inicial
+     * @param fimData Data final
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByPeriodo(
+            LocalDate inicio,
+            LocalDate fim
+    ) {
+        Validator.start()
+                .expectNotNull(inicio, "Data inicial não pode ser nula")
+                .expectNotNull(fim, "Data final não pode ser nula")
+                .validate();
+
+        return TransactionExecutor.query(em -> {
+            return new VendaRepository(em)
+                    .findByPeriodo(inicio, fim);
         });
     }
 

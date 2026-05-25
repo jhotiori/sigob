@@ -1,11 +1,8 @@
-package org.javapi.sigob.view.layouts;
+package org.javapi.sigob.view.builders;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
 
 /**
  * Builder fluente para JFrame.

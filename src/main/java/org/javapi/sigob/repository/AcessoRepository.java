@@ -1,7 +1,6 @@
 package org.javapi.sigob.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.javapi.sigob.entity.Acesso;
 

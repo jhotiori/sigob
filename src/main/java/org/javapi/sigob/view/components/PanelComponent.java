@@ -13,13 +13,13 @@ public class PanelComponent extends JPanel {
      * Cria um painel padrão.
      */
     public PanelComponent() {
-        style();
+        setup();
     }
 
     /**
      * Aplica estilos padrões do componente.
      */
-    private void style() {
+    private void setup() {
         setBackground(Palette.BG_PRIMARY);
     }
 }

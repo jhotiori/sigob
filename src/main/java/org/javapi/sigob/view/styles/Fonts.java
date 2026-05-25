@@ -6,6 +6,7 @@ import java.awt.Font;
  * Fontes centralizadas da interface.
  */
 public final class Fonts {
+
     /**
      * Nome da fonte padrão.
      */
@@ -38,6 +39,10 @@ public final class Fonts {
     public static final Font TITLE_BIG = new Font("Inter", Font.BOLD, 48);
     public static final Font TITLE_MEDIUM = new Font("Inter", Font.BOLD, 32);
     public static final Font TITLE_SMALL = new Font("Inter", Font.BOLD, 24);
+
+    public static final Font TITLE_BIG_ITALIC = new Font("Inter", Font.ITALIC, 48);
+    public static final Font TITLE_MEDIUM_ITALIC = new Font("Inter", Font.ITALIC, 32);
+    public static final Font TITLE_SMALL_ITALIC = new Font("Inter", Font.ITALIC, 24);
 
     /**
      * Impede instanciação.

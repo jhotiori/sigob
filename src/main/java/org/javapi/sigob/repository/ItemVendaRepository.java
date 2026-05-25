@@ -1,11 +1,10 @@
 package org.javapi.sigob.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import jakarta.persistence.EntityManager;
 import org.javapi.sigob.entity.ItemVenda;
 
-import jakarta.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
 
 public class ItemVendaRepository extends BaseRepository<ItemVenda, Integer> {
 

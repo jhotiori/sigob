@@ -1,13 +1,13 @@
 package org.javapi.sigob.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.javapi.sigob.entity.Estoque;
 import org.javapi.sigob.entity.ProdutosEstoques;
 import org.javapi.sigob.repository.ProdutosEstoquesRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ProdutosEstoquesService {
 

@@ -25,8 +25,7 @@ public class AcessoService {
      * @param acesso O acesso a ser salvo
      */
     public void save(Acesso acesso) {
-        validateNome(acesso.getNome());
-        //validateCodigo(acesso.getCodigo()); codigo eh opcional
+        validateAcesso(acesso);
         TransactionExecutor.executeVoid(em -> {
             new AcessoRepository(em).save(acesso);
         });
@@ -94,7 +93,6 @@ public class AcessoService {
      * @return Optional<Acesso> - O Acesso buscado
      */
     public Optional<Acesso> findById(int id) {
-        validateId(id);
         return TransactionExecutor.query(em -> {
             return new AcessoRepository(em).findById(id);
         });
@@ -110,19 +108,6 @@ public class AcessoService {
         validateNome(nome);
         return TransactionExecutor.query(em -> {
             return new AcessoRepository(em).findByNome(nome);
-        });
-    }
-
-    /**
-     * Busca um Acesso pelo seu codigo
-     *
-     * @param codigo O codigo do Acesso
-     * @return Optional<Acesso> - O Acesso buscado
-     */
-    public Optional<Acesso> findByCodigo(String codigo) {
-        validateCodigo(codigo);
-        return TransactionExecutor.query(em -> {
-            return new AcessoRepository(em).findByCodigo(codigo);
         });
     }
 
