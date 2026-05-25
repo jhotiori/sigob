@@ -134,4 +134,33 @@ public class ProdutoRepository
                 .getResultList();
     }
 
+    /**
+     * Busca todos os Produtos de uma Categoria pelo ID (único)
+     *
+     * @param idCategoria O ID da Categoria
+     * @return List<Produto> - Os Produtos encontrados
+     */
+    public List<Produto> findByCategoriaId(int idCategoria) {
+        return em.createQuery("""
+                        SELECT p FROM produtos p
+                        WHERE p.categoria.id = :id
+                        """, Produto.class)
+                .setParameter("id", idCategoria)
+                .getResultList();
+    }
+
+    /**
+     * Busca todos os Produtos de uma Moeda pelo ID (único)
+     *
+     * @param idMoeda O ID da Moeda
+     * @return List<Produto> - Os Produtos encontrados
+     */
+    public List<Produto> findByMoedaId(int idMoeda) {
+        return em.createQuery("""
+                        SELECT p FROM produtos p
+                        WHERE p.moeda.id = :id
+                        """, Produto.class)
+                .setParameter("id", idMoeda)
+                .getResultList();
+    }
 }

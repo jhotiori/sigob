@@ -109,6 +109,10 @@ public class Acesso {
         return funcionarios;
     }
 
+    public void addFuncionario(Funcionario funcionario) {
+        this.funcionarios.add(funcionario);
+    }
+
     @Override
     public String toString() {
         return "Acesso(Id = %d, Nome = %s, Descricao = %s)"

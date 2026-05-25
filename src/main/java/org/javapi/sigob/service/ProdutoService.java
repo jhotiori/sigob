@@ -1,7 +1,16 @@
 package org.javapi.sigob.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Produto;
+import org.javapi.sigob.entity.ProdutosEstoques;
+import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.ProdutoRepository;
+import org.javapi.sigob.repository.ProdutosEstoquesRepository;
+import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -52,11 +61,15 @@ public class ProdutoService {
      * @throws IllegalArgumentException Se o produto for inválido
      */
     public void delete(Produto produto) {
-        validateProduto(produto);
+        //validateProduto(produto);
 
-        TransactionExecutor.executeVoid(em -> {
-            new ProdutoRepository(em).deleteById(produto.getId());
-        });
+        if(validateDeleteProduto(produto)){
+            TransactionExecutor.executeVoid(em -> {
+                new ProdutoRepository(em).deleteById(produto.getId());
+            });
+        } else{
+            throw new SigobException("O Produto possuí vínculo com Produtos_Estoques, não podendo ser removido!");
+        }
     }
 
     /**
@@ -248,5 +261,11 @@ public class ProdutoService {
         Validator.start()
                 .expectNotNull(id, "ID não pode ser nulo!")
                 .validate();
+    }
+
+    private boolean validateDeleteProduto(Produto produto){
+        return TransactionExecutor.query(em -> {
+            return (new ProdutosEstoquesRepository(em).findByProduto(produto.getId()).isEmpty() ? true : false);
+        });
     }
 }

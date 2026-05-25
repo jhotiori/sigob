@@ -1,7 +1,15 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Moeda;
+import org.javapi.sigob.exception.SigobException;
+import org.javapi.sigob.repository.AcessoRepository;
+import org.javapi.sigob.repository.FuncionarioRepository;
 import org.javapi.sigob.repository.MoedaRepository;
+import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -53,11 +61,15 @@ public class MoedaService {
      * @throws IllegalArgumentException Se a moeda for invalida
      */
     public void delete(Moeda moeda) {
-        validateMoeda(moeda);
+        //validateMoeda(moeda); --acredito nao ser necessario, pois o já tem validação antes
 
-        TransactionExecutor.executeVoid(em -> {
-            new MoedaRepository(em).deleteById(moeda.getId());
-        });
+        if(validateDeleteMoeda(moeda)){
+            TransactionExecutor.executeVoid(em -> {
+                new MoedaRepository(em).deleteById(moeda.getId());
+            });
+        } else {
+            throw new SigobException("A Moeda possuí vínculo com Produto, não podendo ser removido!");
+        }
     }
 
     /**
@@ -193,5 +205,11 @@ public class MoedaService {
         Validator.start()
                 .expectNotNull(id, "ID da moeda nao pode ser nulo!")
                 .validate();
+    }
+
+    private boolean validateDeleteMoeda(Moeda moeda){
+        return TransactionExecutor.query(em -> {
+            return (new ProdutoRepository(em).findByMoedaId(moeda.getId()).isEmpty() ? true : false);
+        });
     }
 }

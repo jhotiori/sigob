@@ -1,7 +1,14 @@
 package org.javapi.sigob.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.javapi.sigob.entity.Cliente;
 import org.javapi.sigob.entity.Estoque;
+import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.EstoqueRepository;
+import org.javapi.sigob.repository.ProdutosEstoquesRepository;
+import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -53,11 +60,14 @@ public class EstoqueService {
      * @throws IllegalArgumentException Se o estoque for invalido
      */
     public void delete(Estoque estoque) {
-        validateEstoque(estoque);
-
-        TransactionExecutor.executeVoid(em -> {
-            new EstoqueRepository(em).deleteById(estoque.getId());
-        });
+        //validateEstoque(estoque);
+        if(validateDeleteEstoque(estoque)){
+            TransactionExecutor.executeVoid(em -> {
+                new EstoqueRepository(em).deleteById(estoque.getId());
+            });
+        } else{
+            throw new SigobException("O Estoque possuí vínculo com Produtos_Estoques, não podendo ser removido!");
+        }
     }
 
     /**
@@ -180,5 +190,11 @@ public class EstoqueService {
         Validator.start()
                 .expectNotNull(id, "ID não pode ser nulo")
                 .validate();
+    }
+
+    private boolean validateDeleteEstoque(Estoque estoque){
+        return TransactionExecutor.query(em -> {
+            return (new ProdutosEstoquesRepository(em).findByEstoque(estoque.getId()).isEmpty() ? true : false);
+        });
     }
 }

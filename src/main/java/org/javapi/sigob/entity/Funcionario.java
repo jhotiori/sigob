@@ -42,7 +42,6 @@ public class Funcionario {
      * @param id O ID do Funcionario
      * @param nome O Nome do Funcionario
      * @param codigo O Código do Funcionario
-     * @param acesso O Acesso do Funcionario
      * @param documento O Documento do Funcionario
      */
     public Funcionario(int id, String nome, String codigo, Documento documento) {

@@ -38,4 +38,30 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
+
+    /**
+     * Busca um Acesso cujo codigo inicia com o valor informado
+     *
+     * @param codigo Codigo para procurar
+     * @return Optional<Acesso> - O Acesso encontrado (pode ser vazio)
+     */
+    public Optional<Acesso> findByCodigo(String codigo) {
+        return Optional.ofNullable(
+                em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
+                        .setParameter("str", codigo + "%")
+                        .getSingleResultOrNull()
+        );
+    }
+
+    @Override
+    public Optional<Acesso> findById(Integer id) {
+        return em.createQuery("""
+            SELECT a FROM acessos a
+            LEFT JOIN FETCH a.funcionarios
+            WHERE a.id = :id
+            """, Acesso.class)
+                .setParameter("id", id)
+                .getResultStream()
+                .findFirst();
+    }
 }

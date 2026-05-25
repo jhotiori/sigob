@@ -152,7 +152,7 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
 
     /**
      * Busca Venda que tenham status 'FINALIZADA'
-     *
+     *finalizada
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findFinalizadas() {

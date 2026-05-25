@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Categoria;
+import org.javapi.sigob.exception.SigobException;
+import org.javapi.sigob.exception.ValidationException;
 import org.javapi.sigob.repository.CategoriaRepository;
+import org.javapi.sigob.repository.ProdutoRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -13,7 +16,6 @@ public class CategoriaService {
     /**
      * Construtor para criar um novo CategoriaService
      *
-     * @return CategoriaService - O novo CategoriaService
      */
     public CategoriaService() {
     }
@@ -35,7 +37,6 @@ public class CategoriaService {
      * Atualiza uma Categoria
      *
      * @param categoria A Categoria para ser atualizada
-     * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
     public void update(Categoria categoria) {
         validateCategoria(categoria);
@@ -51,11 +52,15 @@ public class CategoriaService {
      * @param categoria A Categoria para ser removida
      */
     public void delete(Categoria categoria) {
-        validateCategoria(categoria);
+        //validateCategoria(categoria); nao acredito que seja necessario validar um objeto recuperado do banco
 
-        TransactionExecutor.executeVoid(em -> {
-            new CategoriaRepository(em).deleteById(categoria.getId());
-        });
+        if (validateDeleteCategoria(categoria)){
+            TransactionExecutor.executeVoid(em -> {
+                new CategoriaRepository(em).deleteById(categoria.getId());
+            });
+        } else{
+            throw new SigobException("A Categoria possuí vínculo com Produto, não podendo ser removida!");
+        }
     }
 
     /**
@@ -88,7 +93,6 @@ public class CategoriaService {
      *
      * @param id O ID da Categoria
      * @return Optional<Categoria> - A Categoria buscada
-     * @throws CategoriaException Se o ID da Categoria for menor ou igual a zero
      */
     public Optional<Categoria> findById(int id) {
         return TransactionExecutor.query(em -> {
@@ -121,6 +125,7 @@ public class CategoriaService {
                 .expectNotNull(categoria, "Categoria não pode ser nula")
                 .validate();
         validateNome(categoria.getNome());
+        //validateCodigo(categoria.getCodigo()); codigo eh opcional
     }
 
     /**
@@ -133,5 +138,35 @@ public class CategoriaService {
         Validator.start()
                 .expectNotBlank(nome, "Nome da Categoria não pode ser nulo ou vazio")
                 .validate();
+    }
+
+    /**
+     * Valida o codigo de uma Categoria
+     *
+     * @param codigo O codigo a ser validado
+     * @throws IllegalArgumentException Se o codigo for invalido
+     */
+    private void validateCodigo(String codigo) {
+        Validator.start()
+                .expectNotBlank(codigo, "Código da Categoria não pode ser nulo ou vazio")
+                .validate();
+    }
+
+    /**
+     * Valida o ID de uma Categoria
+     *
+     * @param id O ID a ser validado
+     * @throws IllegalArgumentException Se o ID for invalido
+     */
+    private void validateId(int id) {
+        Validator.start()
+                .expectNotNull(id, "ID da Categoria não pode ser nulo")
+                .validate();
+    }
+
+    private boolean validateDeleteCategoria(Categoria categoria){
+        return TransactionExecutor.query(em -> {
+            return (new ProdutoRepository(em).findByCategoriaId(categoria.getId()).isEmpty() ? true : false);
+        });
     }
 }
