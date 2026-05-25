@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         FlywayConfig.migrate();
         Async.ui(() -> {
-                                                                                                                                                                        FlatMacDarkLaf.setup();
+            FlatMacDarkLaf.setup();
             LoginWindow login = new LoginWindow();
             login.show();
         });
