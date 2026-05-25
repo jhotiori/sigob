@@ -22,7 +22,7 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
      * @return List<Estoque> - Todos os Estoques
      */
     public List<Estoque> findAll() {
-        return em.createQuery("select e from estoques e", Estoque.class)
+        return em.createQuery("SELECT e FROM estoques e", Estoque.class)
                 .getResultList();
     }
 
@@ -33,7 +33,7 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
      * @return List<Estoque> - Os Estoques encontrados
      */
     public List<Estoque> findByNome(String nome) {
-        return em.createQuery("select e from estoques e where e.nome like :prefix", Estoque.class)
+        return em.createQuery("SELECT e FROM estoques e WHERE e.nome LIKE :prefix", Estoque.class)
                 .setParameter("prefix", nome + "%")
                 .getResultList();
     }
@@ -45,7 +45,7 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
      * @return List<Estoque> - Os Estoques encontrados
      */
     public List<Estoque> findByCodigo(String codigo) {
-        return em.createQuery("select e from estoques e where e.codigo like :prefix", Estoque.class)
+        return em.createQuery("SELECT e FROM estoques e WHERE e.codigo LIKE :prefix", Estoque.class)
                 .setParameter("prefix", codigo + "%")
                 .getResultList();
     }

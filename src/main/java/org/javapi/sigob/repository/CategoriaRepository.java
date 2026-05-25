@@ -23,7 +23,7 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
      * @return List<Categoria> - Todas as Categorias
      */
     public List<Categoria> findAll() {
-        return em.createQuery("select c from categorias c", Categoria.class)
+        return em.createQuery("SELECT c FROM categorias c", Categoria.class)
                 .getResultList();
     }
 
@@ -34,7 +34,7 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
      * @return List<Categoria> - As Categorias encontradas
      */
     public List<Categoria> findByNome(String prefixo) {
-        return em.createQuery("select c from categorias c where c.nome like :prefix", Categoria.class)
+        return em.createQuery("SELECT c FROM categorias c WHERE c.nome LIKE :prefix", Categoria.class)
                 .setParameter("prefix", prefixo + "%")
                 .getResultList();
     }

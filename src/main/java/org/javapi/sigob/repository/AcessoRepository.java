@@ -24,7 +24,7 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      * @return List<Acesso> - Todos os Acessos
      */
     public List<Acesso> findAll() {
-        return em.createQuery("select a from acessos a", Acesso.class)
+        return em.createQuery("SELECT a FROM acessos a", Acesso.class)
                 .getResultList();
     }
 
@@ -35,7 +35,7 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      * @return List<Acesso> - Os Acessos encontrados
      */
     public List<Acesso> findByNome(String nome) {
-        return em.createQuery("select a from acessos a where a.nome like :str", Acesso.class)
+        return em.createQuery("SELECT a FROM acessos a WHERE a.nome LIKE :str", Acesso.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
@@ -48,7 +48,7 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      */
     public Optional<Acesso> findByCodigo(String codigo) {
         return Optional.ofNullable(
-                em.createQuery("select a from acessos a where a.codigo like :str", Acesso.class)
+                em.createQuery("SELECT a FROM acessos a WHERE a.codigo LIKE :str", Acesso.class)
                         .setParameter("str", codigo + "%")
                         .getSingleResultOrNull()
         );

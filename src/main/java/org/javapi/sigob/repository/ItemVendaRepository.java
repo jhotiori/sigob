@@ -23,7 +23,7 @@ public class ItemVendaRepository extends BaseRepository<ItemVenda, Integer> {
      * @return List<ItemVenda> - A lista de ItemVenda
      */
     public List<ItemVenda> findAll() {
-        return em.createQuery("select iv from item_vendas iv", ItemVenda.class)
+        return em.createQuery("SELECT iv FROM item_vendas iv", ItemVenda.class)
                 .getResultList();
     }
 

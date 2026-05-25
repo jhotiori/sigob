@@ -96,8 +96,7 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
     /**
      * Busca vendas pela data de fechamento.
      *
-     * @param inicio Início do período
-     * @param fim Fim do período
+     * @param data Data de finalização.
      * @return List<Venda> - Lista encontrada
      */
     public List<Venda> findByDataFinalizada(
@@ -109,7 +108,7 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
                 join fetch v.cliente
                 join fetch v.funcionario
                 where v.dataFinalizada is not null
-                where cast(v.dataFinalizada as date) = :data
+                and cast(v.dataFinalizada as date) = :data
                 order by v.dataFinalizada desc
                 """, Venda.class)
                 .setParameter("data", data)

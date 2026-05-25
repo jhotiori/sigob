@@ -23,7 +23,7 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      * @return List<Moeda> - Todas as Moedas
      */
     public List<Moeda> findAll() {
-        return em.createQuery("select m from moedas m", Moeda.class)
+        return em.createQuery("SELECT m FROM moedas m", Moeda.class)
                 .getResultList();
     }
 
@@ -34,7 +34,7 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      * @return List<Moeda> - As Moedas encontradas
      */
     public List<Moeda> findByNome(String nome) {
-        return em.createQuery("select m from moedas m where m.nome like :str", Moeda.class)
+        return em.createQuery("SELECT m FROM moedas m WHERE m.nome LIKE :str", Moeda.class)
                 .setParameter("str", nome + "%")
                 .getResultList();
     }
@@ -47,7 +47,7 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      */
     public Optional<Moeda> findBySigla(String sigla) {
         return Optional.ofNullable(
-                em.createQuery("select m from moedas m where m.sigla like :str", Moeda.class)
+                em.createQuery("SELECT m FROM moedas m WHERE m.sigla LIKE :str", Moeda.class)
                         .setParameter("str", sigla + "%")
                         .getSingleResultOrNull()
         );

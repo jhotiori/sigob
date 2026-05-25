@@ -25,9 +25,9 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
      */
     public List<Cliente> findAll() {
         return em.createQuery("""
-                select distinct c
-                from clientes c
-                left join fetch c.documento
+                SELECT DISTINCT c
+                FROM clientes c
+                LEFT JOIN FETCH c.documento
                 """, Cliente.class)
                 .getResultList();
     }
@@ -42,10 +42,10 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
     public Optional<Cliente> findById(Integer id) {
         return Optional.ofNullable(
                 em.createQuery("""
-                        select c
-                        from clientes c
-                        left join fetch c.documento
-                        where c.id = :id
+                        SELECT c
+                        FROM clientes c
+                        LEFT JOIN FETCH c.documento
+                        WHERE c.id = :id
                         """, Cliente.class)
                         .setParameter("id", id)
                         .getSingleResultOrNull()
@@ -60,10 +60,10 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
      */
     public List<Cliente> findByNome(String nome) {
         return em.createQuery("""
-                select distinct c
-                from clientes c
-                left join fetch c.documento
-                where lower(c.nome) like lower(:str)
+                SELECT DISTINCT c
+                FROM clientes c
+                LEFT JOIN FETCH c.documento
+                WHERE lower(c.nome) like lower(:str)
                 """, Cliente.class)
                 .setParameter("str", "%" + nome + "%")
                 .getResultList();
@@ -77,10 +77,10 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
      */
     public List<Cliente> findByDocumento(String documento) {
         return em.createQuery("""
-                        select c
-                        from clientes c
-                        left join fetch c.documento d
-                        where lower(d.documento) like lower(:str)
+                        SELECT c
+                        FROM clientes c
+                        LEFT JOIN FETCH c.documento d
+                        WHERE lower(d.documento) LIKE lower(:str)
                         """, Cliente.class)
                         .setParameter("str", "%" + documento + "%")
                         .getResultList();

@@ -23,7 +23,7 @@ public class ProdutosEstoquesRepository extends BaseRepository<ProdutosEstoques,
      * @return List<ProdutosEstoques> - Todos os ProdutosEstoques
      */
     public List<ProdutosEstoques> findAll() {
-        return em.createQuery("select pe from produtos_estoques pe", ProdutosEstoques.class)
+        return em.createQuery("SELECT pe FROM produtos_estoques pe", ProdutosEstoques.class)
                 .getResultList();
     }
 
