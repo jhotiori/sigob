@@ -95,8 +95,6 @@ public class MoedaService {
      * @return Optional<Moeda> - A moeda encontrada
      */
     public Optional<Moeda> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new MoedaRepository(em).findById(id);
         });
@@ -196,17 +194,12 @@ public class MoedaService {
     }
 
     /**
-     * Valida o ID da moeda
+     * Valida se uma Moeda está vinculada a um Produto antes de deletar
      *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
+     * @param moeda A Moeda a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
      */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID da moeda nao pode ser nulo!")
-                .validate();
-    }
-
     private boolean validateDeleteMoeda(Moeda moeda){
         return TransactionExecutor.query(em -> {
             return (new ProdutoRepository(em).findByMoedaId(moeda.getId()).isEmpty() ? true : false);

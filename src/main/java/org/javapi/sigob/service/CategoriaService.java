@@ -52,7 +52,6 @@ public class CategoriaService {
      * @param categoria A Categoria para ser removida
      */
     public void delete(Categoria categoria) {
-        //validateCategoria(categoria); nao acredito que seja necessario validar um objeto recuperado do banco
 
         if (validateDeleteCategoria(categoria)){
             TransactionExecutor.executeVoid(em -> {
@@ -101,9 +100,9 @@ public class CategoriaService {
     }
 
     /**
-     * Busca por categorias que comecam com o prefixo (nome)
+     * Busca por categorias com base em um nome
      *
-     * @param nome O prefixo
+     * @param nome O nome a ser buscado
      * @return List<Categoria> - A lista de categorias
      */
     public List<Categoria> findByNome(String nome) {
@@ -125,7 +124,6 @@ public class CategoriaService {
                 .expectNotNull(categoria, "Categoria não pode ser nula")
                 .validate();
         validateNome(categoria.getNome());
-        //validateCodigo(categoria.getCodigo()); codigo eh opcional
     }
 
     /**
@@ -141,29 +139,12 @@ public class CategoriaService {
     }
 
     /**
-     * Valida o codigo de uma Categoria
+     * Valida se uma Categoria está vinculado a um funcionário antes de deletar
      *
-     * @param codigo O codigo a ser validado
-     * @throws IllegalArgumentException Se o codigo for invalido
+     * @param categoria O acesso a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
      */
-    private void validateCodigo(String codigo) {
-        Validator.start()
-                .expectNotBlank(codigo, "Código da Categoria não pode ser nulo ou vazio")
-                .validate();
-    }
-
-    /**
-     * Valida o ID de uma Categoria
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID da Categoria não pode ser nulo")
-                .validate();
-    }
-
     private boolean validateDeleteCategoria(Categoria categoria){
         return TransactionExecutor.query(em -> {
             return (new ProdutoRepository(em).findByCategoriaId(categoria.getId()).isEmpty() ? true : false);

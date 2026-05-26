@@ -44,8 +44,6 @@ public class VendaService {
      */
     public void update(Venda venda) {
         validateVenda(venda);
-        validateId(venda.getId());
-
         TransactionExecutor.executeVoid(em -> {
             new VendaRepository(em).update(venda);
         });
@@ -99,8 +97,6 @@ public class VendaService {
      * @throws IllegalArgumentException Se o ID for inválido
      */
     public Optional<Venda> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new VendaRepository(em).findById(id);
         });
@@ -203,8 +199,8 @@ public class VendaService {
     /**
      * Busca vendas por período de abertura.
      *
-     * @param inicioData Data inicial
-     * @param fimData Data final
+     * @param inicio Data inicial
+     * @param fim Data final
      * @return List<Venda> - Lista encontrada
      */
     public List<Venda> findByPeriodo(
@@ -248,7 +244,6 @@ public class VendaService {
                 .expectNotNull(cliente, "Cliente não pode ser nulo!")
                 .validate();
 
-        validateId(cliente.getId());
     }
 
     /**
@@ -262,18 +257,6 @@ public class VendaService {
                 .expectNotNull(funcionario, "Funcionario não pode ser nulo!")
                 .validate();
 
-        validateId(funcionario.getId());
     }
 
-    /**
-     * Valida um ID
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se inválido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo!")
-                .validate();
-    }
 }

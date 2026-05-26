@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.javapi.sigob.entity.Cliente;
+import org.javapi.sigob.exception.SigobException;
 import org.javapi.sigob.repository.ClienteRepository;
 import org.javapi.sigob.repository.DocumentoRepository;
+import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -65,20 +67,23 @@ public class ClienteService {
      * @param cliente O Cliente para ser removido
      */
     public void delete(Cliente cliente) {
-        //validateCliente(cliente); -- não é necessário validar o objeto recém recuperado do banco
-        int documento_id = cliente.getDocumento().getId();
 
-        TransactionExecutor.executeVoid(em -> {
-            new ClienteRepository(em).deleteById(cliente.getId());
-        });
+        if(validateDeleteCliente(cliente)){
+            int documento_id = cliente.getDocumento().getId();
 
-        //após deletar o cliente tem que deletar o documento que ele tinha
-        if (documento_id > 0) {
             TransactionExecutor.executeVoid(em -> {
-                new DocumentoRepository(em).deleteById(documento_id);
+                new ClienteRepository(em).deleteById(cliente.getId());
             });
-        }
 
+            //após deletar o cliente tem que deletar o documento que ele tinha
+            if (documento_id > 0) {
+                TransactionExecutor.executeVoid(em -> {
+                    new DocumentoRepository(em).deleteById(documento_id);
+                });
+            }
+        } else {
+            throw new SigobException("O Cliente possuí vínculo com Vendas, não podendo ser removido!");
+        }
     }
 
     /**
@@ -99,8 +104,6 @@ public class ClienteService {
      * @return Optional<Cliente> - O Cliente buscado
      */
     public Optional<Cliente> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new ClienteRepository(em).findById(id);
         });
@@ -161,18 +164,6 @@ public class ClienteService {
     }
 
     /**
-     * Valida o ID de um Cliente
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo")
-                .validate();
-    }
-
-    /**
      * Valida o documento de um Cliente
      *
      * @param documento O documento a ser validado
@@ -182,5 +173,18 @@ public class ClienteService {
         Validator.start()
                 .expectNotBlank(documento, "Documento não pode ser nulo ou vazio")
                 .validate();
+    }
+
+    /**
+     * Valida se um Cliente está vinculado a uma Venda antes de deletar
+     *
+     * @param cliente O Cliente a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
+     */
+    private boolean validateDeleteCliente(Cliente cliente){
+        return TransactionExecutor.query(em -> {
+            return (new VendaRepository(em).findByClienteId(cliente.getId()).isEmpty() ? true : false);
+        });
     }
 }

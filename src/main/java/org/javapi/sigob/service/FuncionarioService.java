@@ -6,7 +6,10 @@ import java.util.Set;
 
 import org.javapi.sigob.entity.Acesso;
 import org.javapi.sigob.entity.Funcionario;
+import org.javapi.sigob.exception.SigobException;
+import org.javapi.sigob.repository.DocumentoRepository;
 import org.javapi.sigob.repository.FuncionarioRepository;
+import org.javapi.sigob.repository.VendaRepository;
 import org.javapi.sigob.transaction.TransactionExecutor;
 import org.javapi.sigob.util.Validator;
 
@@ -54,9 +57,22 @@ public class FuncionarioService {
      * @throws IllegalArgumentException Se o funcionario for invalido
      */
     public void delete(Funcionario funcionario) {
-        TransactionExecutor.executeVoid(em -> {
-            new FuncionarioRepository(em).deleteById(funcionario.getId());
-        });
+        if (validateDeleteFuncionario(funcionario)) {
+            int documento_id = funcionario.getDocumento().getId();
+
+            TransactionExecutor.executeVoid(em -> {
+                new FuncionarioRepository(em).deleteById(funcionario.getId());
+            });
+
+            if (documento_id > 0){
+                TransactionExecutor.executeVoid(em -> {
+                    new DocumentoRepository(em).deleteById(documento_id);
+                });
+            }
+
+        } else {
+            throw new SigobException("O Funcionário possuí vínculo com Vendas, não podendo ser removido!");
+        }
     }
 
     /**
@@ -93,8 +109,6 @@ public class FuncionarioService {
      * @throws IllegalArgumentException Se o id for invalido
      */
     public Optional<Funcionario> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new FuncionarioRepository(em).findById(id);
         });
@@ -182,16 +196,16 @@ public class FuncionarioService {
                         "Funcionário deve possuir ao menos um acesso")
                 .validate();
     }
-
     /**
-     * Valida o ID de um Funcionario
+     * Valida se um Funcionario está vinculado a uma Venda antes de deletar
      *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
+     * @param funcionario O Funcionario a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
      */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo")
-                .validate();
+    private boolean validateDeleteFuncionario(Funcionario funcionario){
+        return TransactionExecutor.query(em -> {
+            return (new VendaRepository(em).findByFuncionarioId(funcionario.getId()).isEmpty() ? true : false);
+        });
     }
 }

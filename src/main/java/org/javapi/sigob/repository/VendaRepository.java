@@ -44,7 +44,20 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
     }
 
     /**
-     * Busca vendas pelo prefixo do nome do funcionário.
+     * Busca vendas pelo id do cliente.
+     *
+     * @param id Id do cliente
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByClienteId(int id) {
+        return em.createQuery("""
+                SELECT v FROM vendas v WHERE v.idCliente = :id""", Venda.class)
+                .setParameter(":id", id)
+                .getResultList();
+    }
+
+    /**
+     * Busca vendas pelo nome do funcionário.
      *
      * @param nome Nome do funcionário
      * @return List<Venda> - Lista encontrada
@@ -54,6 +67,19 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
                 SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
                 WHERE LOWER(v.funcionario.nome) LIKE LOWER(:nome) ORDER BY v.id DESC """, Venda.class)
                 .setParameter("nome", "%" + nome + "%")
+                .getResultList();
+    }
+
+    /**
+     * Busca vendas pelo id do funcionário.
+     *
+     * @param id Id do funcionário
+     * @return List<Venda> - Lista encontrada
+     */
+    public List<Venda> findByFuncionarioId(int id) {
+        return em.createQuery("""
+                SELECT v FROM vendas v WHERE v.idFuncionario = :id""", Venda.class)
+                .setParameter(":id", id)
                 .getResultList();
     }
 

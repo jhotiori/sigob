@@ -91,14 +91,14 @@ public class DocumentoService {
     }
 
     /**
-     * Busca Documento cujo documento (valor dele) inicia com o valor informado
+     * Busca no banco de Documento registros que contenham um documento
      *
-     * @param prefixo O prefixo do nome
+     * @param documento O documento a ser procurado
      * @return List<Documento> - As Documento encontradas
      */
-    public List<Documento> findByDocumento(String prefixo) {
+    public List<Documento> findByDocumento(String documento) {
         return TransactionExecutor.query(em -> {
-            return new DocumentoRepository(em).findByDocumento(prefixo);
+            return new DocumentoRepository(em).findByDocumento(documento);
         });
     }
 

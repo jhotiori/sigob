@@ -49,7 +49,6 @@ public class AcessoService {
      * @param acesso O acesso a ser deletado
      */
     public void delete(Acesso acesso) {
-        //validateAcesso(acesso); --acredito nao ser necessario, pois o já tem validação antes
 
         if(validateDeleteAcesso(acesso)){
             TransactionExecutor.executeVoid(em -> {
@@ -122,7 +121,6 @@ public class AcessoService {
                 .expectNotNull(acesso, "Acesso nao pode ser nulo!")
                 .validate();
         validateNome(acesso.getNome());
-        //validateCodigo(acesso.getCodigo()); -- codigo eh opcional
     }
 
     /**
@@ -138,30 +136,12 @@ public class AcessoService {
     }
 
     /**
-     * Valida o codigo de um acesso
+     * Valida se um acesso está vinculado a um funcionário antes de deletar
      *
-     * @param codigo O codigo a ser validado
-     * @throws IllegalArgumentException Se o codigo for invalido
+     * @param acesso O acesso a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
      */
-    private void validateCodigo(String codigo) {
-        Validator.start()
-                .expectNotBlank(codigo, "Código do acesso não pode ser nulo ou vazio!")
-                .validate();
-    }
-
-    /**
-     * Valida o ID de um acesso
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se o ID for invalido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo!")
-                .validate();
-    }
-
-
     private boolean validateDeleteAcesso(Acesso acesso){
         return TransactionExecutor.query(em -> {
             return (new FuncionarioRepository(em).findByAcessoId(acesso.getId()).isEmpty() ? true : false);
