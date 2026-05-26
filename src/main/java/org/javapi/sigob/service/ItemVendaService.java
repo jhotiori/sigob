@@ -56,7 +56,6 @@ public class ItemVendaService {
      * @throws IllegalArgumentException Se o ItemVenda for inválido
      */
     public void delete(ItemVenda itemVenda) {
-        validateItemVenda(itemVenda);
 
         TransactionExecutor.executeVoid(em -> {
             new ItemVendaRepository(em).deleteById(itemVenda.getId());
@@ -95,8 +94,6 @@ public class ItemVendaService {
      * @return Optional<ItemVenda> - O ItemVenda encontrado
      */
     public Optional<ItemVenda> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new ItemVendaRepository(em).findById(id);
         });
@@ -109,8 +106,6 @@ public class ItemVendaService {
      * @return List<ItemVenda> - A lista de ItemVenda
      */
     public List<ItemVenda> findByProdutoEstoque(int produtoEstoqueId) {
-        validateId(produtoEstoqueId);
-
         return TransactionExecutor.query(em -> {
             return new ItemVendaRepository(em).findByProdutoEstoque(produtoEstoqueId);
         });
@@ -123,8 +118,6 @@ public class ItemVendaService {
      * @return List<ItemVenda> - A lista de ItemVenda
      */
     public List<ItemVenda> findByVenda(int vendaId) {
-        validateId(vendaId);
-
         return TransactionExecutor.query(em -> {
             return new ItemVendaRepository(em).findByVenda(vendaId);
         });
@@ -138,8 +131,6 @@ public class ItemVendaService {
      * @return Optional<ItemVenda> - O ItemVenda encontrado
      */
     public Optional<ItemVenda> findByVendaAndProdutoEstoque(int vendaId, int produtoEstoqueId) {
-        validateId(vendaId);
-        validateId(produtoEstoqueId);
 
         return TransactionExecutor.query(em -> {
             return new ItemVendaRepository(em).findByVendaAndProdutoEstoque(vendaId, produtoEstoqueId);
@@ -213,15 +204,4 @@ public class ItemVendaService {
                 .validate();
     }
 
-    /**
-     * Valida ID
-     *
-     * @param id O ID
-     * @throws IllegalArgumentException Se o ID for inválido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo")
-                .validate();
-    }
 }

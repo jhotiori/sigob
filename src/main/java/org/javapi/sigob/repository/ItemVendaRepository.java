@@ -35,9 +35,7 @@ public class ItemVendaRepository extends BaseRepository<ItemVenda, Integer> {
      */
     public List<ItemVenda> findByProdutoEstoque(int produtoEstoqueId) {
         return em.createQuery("""
-                        SELECT iv FROM item_vendas iv
-                        WHERE iv.produtoEstoque.id = :produtoEstoqueId
-                        """, ItemVenda.class)
+                        SELECT iv FROM item_vendas iv WHERE iv.produtoEstoque.id = :produtoEstoqueId""", ItemVenda.class)
                 .setParameter("produtoEstoqueId", produtoEstoqueId)
                 .getResultList();
     }
@@ -50,9 +48,7 @@ public class ItemVendaRepository extends BaseRepository<ItemVenda, Integer> {
      */
     public List<ItemVenda> findByVenda(int vendaId) {
         return em.createQuery("""
-                        SELECT iv FROM item_vendas iv
-                        WHERE iv.venda.id = :vendaId
-                        """, ItemVenda.class)
+                        SELECT iv FROM item_vendas iv WHERE iv.venda.id = :vendaId""", ItemVenda.class)
                 .setParameter("vendaId", vendaId)
                 .getResultList();
     }
@@ -70,10 +66,8 @@ public class ItemVendaRepository extends BaseRepository<ItemVenda, Integer> {
     public Optional<ItemVenda> findByVendaAndProdutoEstoque(int vendaId, int produtoEstoqueId) {
         return Optional.ofNullable(
                 em.createQuery("""
-                        SELECT iv FROM item_vendas iv
-                        WHERE iv.venda.id = :vendaId
-                          AND iv.produtoEstoque.id = :produtoEstoqueId
-                        """, ItemVenda.class)
+                        SELECT iv FROM item_vendas iv 
+                        WHERE iv.venda.id = :vendaId AND iv.produtoEstoque.id = :produtoEstoqueId""", ItemVenda.class)
                         .setParameter("vendaId", vendaId)
                         .setParameter("produtoEstoqueId", produtoEstoqueId)
                         .getSingleResultOrNull()

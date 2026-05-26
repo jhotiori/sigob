@@ -25,10 +25,7 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
      */
     public List<Cliente> findAll() {
         return em.createQuery("""
-                SELECT DISTINCT c
-                FROM clientes c
-                LEFT JOIN FETCH c.documento
-                """, Cliente.class)
+                SELECT DISTINCT c FROM clientes c LEFT JOIN FETCH c.documento """, Cliente.class)
                 .getResultList();
     }
 
@@ -42,46 +39,37 @@ public class ClienteRepository extends BaseRepository<Cliente, Integer> {
     public Optional<Cliente> findById(Integer id) {
         return Optional.ofNullable(
                 em.createQuery("""
-                        SELECT c
-                        FROM clientes c
-                        LEFT JOIN FETCH c.documento
-                        WHERE c.id = :id
-                        """, Cliente.class)
+                        SELECT c FROM clientes c LEFT JOIN FETCH c.documento
+                        WHERE c.id = :id """, Cliente.class)
                         .setParameter("id", id)
                         .getSingleResultOrNull()
         );
     }
 
     /**
-     * Busca Clientes cujo nome contenha o valor informado
+     * Busca Cliente no banco de dados com base em um nome
      *
-     * @param nome O Nome do Cliente
+     * @param nome string informada para busca
      * @return List<Cliente> - Os Clientes encontrados
      */
     public List<Cliente> findByNome(String nome) {
         return em.createQuery("""
-                SELECT DISTINCT c
-                FROM clientes c
-                LEFT JOIN FETCH c.documento
-                WHERE lower(c.nome) like lower(:str)
-                """, Cliente.class)
+                SELECT DISTINCT c FROM clientes c LEFT JOIN FETCH c.documento
+                WHERE LOWER(c.nome) LIKE LOWER(:str) """, Cliente.class)
                 .setParameter("str", "%" + nome + "%")
                 .getResultList();
     }
 
     /**
-     * Busca um Cliente pelo documento vinculado
+     * Busca Cliente no banco de dados com base em um documento
      *
-     * @param documento O número do Documento
+     * @param documento string informada para busca
      * @return Optional<Cliente> - O Cliente encontrado
      */
     public List<Cliente> findByDocumento(String documento) {
         return em.createQuery("""
-                        SELECT c
-                        FROM clientes c
-                        LEFT JOIN FETCH c.documento d
-                        WHERE lower(d.documento) LIKE lower(:str)
-                        """, Cliente.class)
+                        SELECT c FROM clientes c LEFT JOIN FETCH c.documento d 
+                        WHERE LOWER(d.documento) LIKE LOWER(:str) """, Cliente.class)
                         .setParameter("str", "%" + documento + "%")
                         .getResultList();
     }

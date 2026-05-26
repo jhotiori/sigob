@@ -31,10 +31,7 @@ public class ProdutoRepository
      */
     public List<Produto> findAll() {
         return em.createQuery("""
-                        SELECT DISTINCT p
-                        FROM produtos p
-                        LEFT JOIN FETCH p.categoria
-                        LEFT JOIN FETCH p.moeda
+                        SELECT DISTINCT p FROM produtos p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.moeda
                         """, Produto.class)
                 .getResultList();
     }
@@ -49,12 +46,8 @@ public class ProdutoRepository
     public Optional<Produto> findById(Integer id) {
         return Optional.ofNullable(
                 em.createQuery("""
-                                SELECT p
-                                FROM produtos p
-                                LEFT JOIN FETCH p.categoria
-                                LEFT JOIN FETCH p.moeda
-                                WHERE p.id = :id
-                                """, Produto.class)
+                                SELECT p FROM produtos p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.moeda
+                                WHERE p.id = :id""", Produto.class)
                         .setParameter("id", id)
                         .getSingleResultOrNull()
         );
@@ -70,17 +63,9 @@ public class ProdutoRepository
             String nome
     ) {
         return em.createQuery("""
-                        SELECT DISTINCT p
-                        FROM produtos p
-                        LEFT JOIN FETCH p.categoria
-                        LEFT JOIN FETCH p.moeda
-                        WHERE LOWER(p.nome)
-                        LIKE LOWER(:str)
-                        """, Produto.class)
-                .setParameter(
-                        "str",
-                        "%" + nome + "%"
-                )
+                        SELECT DISTINCT p FROM produtos p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.moeda
+                        WHERE LOWER(p.nome) LIKE LOWER(:str)""", Produto.class)
+                .setParameter("str","%" + nome + "%")
                 .getResultList();
     }
 
@@ -95,16 +80,9 @@ public class ProdutoRepository
     ) {
         return Optional.ofNullable(
                 em.createQuery("""
-                                SELECT p
-                                FROM produtos p
-                                LEFT JOIN FETCH p.categoria
-                                LEFT JOIN FETCH p.moeda
-                                WHERE p.codigo = :codigo
-                                """, Produto.class)
-                        .setParameter(
-                                "codigo",
-                                codigo
-                        )
+                                SELECT p FROM produtos p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.moeda
+                                WHERE LOWER (p.codigo) LIKE LOWER(:str) """, Produto.class)
+                        .setParameter("str", "%" + codigo + "%")
                         .getSingleResultOrNull()
         );
     }
@@ -119,18 +97,9 @@ public class ProdutoRepository
             String nomeCategoria
     ) {
         return em.createQuery("""
-                        SELECT DISTINCT p
-                        FROM produtos p
-                        LEFT JOIN FETCH p.categoria
-                        LEFT JOIN FETCH p.moeda
-                        JOIN p.categoria c
-                        WHERE LOWER(c.nome)
-                        LIKE LOWER(:nome)
-                        """, Produto.class)
-                .setParameter(
-                        "nome",
-                        "%" + nomeCategoria + "%"
-                )
+                        SELECT DISTINCT p FROM produtos p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.moeda
+                        LEFT JOIN FETCH p.categoria c WHERE LOWER(c.nome) LIKE LOWER(:nome)""", Produto.class)
+                .setParameter("nome","%" + nomeCategoria + "%")
                 .getResultList();
     }
 
@@ -142,9 +111,7 @@ public class ProdutoRepository
      */
     public List<Produto> findByCategoriaId(int idCategoria) {
         return em.createQuery("""
-                        SELECT p FROM produtos p
-                        WHERE p.categoria.id = :id
-                        """, Produto.class)
+                        SELECT p FROM produtos p WHERE p.categoria.id = :id""", Produto.class)
                 .setParameter("id", idCategoria)
                 .getResultList();
     }
@@ -157,9 +124,7 @@ public class ProdutoRepository
      */
     public List<Produto> findByMoedaId(int idMoeda) {
         return em.createQuery("""
-                        SELECT p FROM produtos p
-                        WHERE p.moeda.id = :id
-                        """, Produto.class)
+                        SELECT p FROM produtos p WHERE p.moeda.id = :id """, Produto.class)
                 .setParameter("id", idMoeda)
                 .getResultList();
     }

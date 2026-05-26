@@ -159,8 +159,6 @@ public class ProdutosEstoquesService {
      * @throws IllegalArgumentException Se o ID for inválido
      */
     public Optional<ProdutosEstoques> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new ProdutosEstoquesRepository(em).findById(id);
         });
@@ -174,8 +172,6 @@ public class ProdutosEstoquesService {
      * @throws IllegalArgumentException Se o ID for inválido
      */
     public List<ProdutosEstoques> findByProduto(int produtoId) {
-        validateId(produtoId);
-
         return TransactionExecutor.query(em -> {
             return new ProdutosEstoquesRepository(em).findByProduto(produtoId);
         });
@@ -189,8 +185,6 @@ public class ProdutosEstoquesService {
      * @throws IllegalArgumentException Se o ID for inválido
      */
     public List<ProdutosEstoques> findByEstoque(int estoqueId) {
-        validateId(estoqueId);
-
         return TransactionExecutor.query(em -> {
             return new ProdutosEstoquesRepository(em).findByEstoque(estoqueId);
         });
@@ -205,9 +199,6 @@ public class ProdutosEstoquesService {
      * @throws IllegalArgumentException Se algum ID for inválido
      */
     public Optional<ProdutosEstoques> findUnique(int produtoId, int estoqueId) {
-        validateId(produtoId);
-        validateId(estoqueId);
-
         return TransactionExecutor.query(em -> {
             return new ProdutosEstoquesRepository(em).findUnique(produtoId, estoqueId);
         });
@@ -238,8 +229,6 @@ public class ProdutosEstoquesService {
         Validator.start()
                 .expectNotNull(produtoEstoque.getProduto(), "Produto não pode ser nulo!")
                 .validate();
-
-        validateId(produtoEstoque.getProduto().getId());
     }
 
     /**
@@ -251,20 +240,6 @@ public class ProdutosEstoquesService {
     private void validateEstoque(ProdutosEstoques produtoEstoque) {
         Validator.start()
                 .expectNotNull(produtoEstoque.getEstoque(), "Estoque não pode ser nulo!")
-                .validate();
-
-        validateId(produtoEstoque.getEstoque().getId());
-    }
-
-    /**
-     * Valida um ID
-     *
-     * @param id O ID a ser validado
-     * @throws IllegalArgumentException Se for inválido
-     */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo!")
                 .validate();
     }
 }

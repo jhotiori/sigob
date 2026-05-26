@@ -28,26 +28,26 @@ public class DocumentoRepository extends BaseRepository<Documento, Integer> {
     }
 
     /**
-     * Busca Documento cujo documento (valor dele) inicia com o valor informado
+     * Busca Documento no banco de dados com base em um documento
      *
-     * @param valor de prefixo
+     * @param documento string informada para busca
      * @return List<Documento> - As Documento encontradas
      */
-    public List<Documento> findByDocumento(String valor) {
-        return em.createQuery("SELECT d FROM documentos d WHERE d.documento LIKE :prefix", Documento.class)
-                        .setParameter("prefix", valor + "%")
+    public List<Documento> findByDocumento(String documento) {
+        return em.createQuery("SELECT d FROM documentos d WHERE LOWER (d.documento) LIKE LOWER (:str)", Documento.class)
+                        .setParameter("str", "%" + documento + "%")
                         .getResultList();
     }
 
     /**
-     * Busca por Documentos cujo tipo inicia com o valor informado
+     * Busca Documento no banco de dados com base em um tipo
      *
-     * @param tipo O tipo do Documento
+     * @param tipo string informada para busca
      * @return List<Documento> - Os Documento encontrados
      */
     public List<Documento> findByTipo(String tipo) {
-        return em.createQuery("SELECT d FROM documentos d WHERE d.tipo LIKE :str", Documento.class)
-                .setParameter("str", tipo + "%")
+        return em.createQuery("SELECT d FROM documentos d WHERE LOWER (d.tipo) LIKE LOWER (:str)", Documento.class)
+                .setParameter("str", "%" + tipo + "%")
                 .getResultList();
     }
 }

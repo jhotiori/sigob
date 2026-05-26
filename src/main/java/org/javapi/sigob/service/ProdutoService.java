@@ -105,8 +105,6 @@ public class ProdutoService {
      * @return Optional<Produto> - O produto encontrado, se existir
      */
     public Optional<Produto> findById(int id) {
-        validateId(id);
-
         return TransactionExecutor.query(em -> {
             return new ProdutoRepository(em).findById(id);
         });
@@ -252,17 +250,12 @@ public class ProdutoService {
     }
 
     /**
-     * Valida o ID
+     * Valida se um Produto está vinculado a uma Produtos_Estoques antes de deletar
      *
-     * @param id O ID
-     * @throws IllegalArgumentException Se inválido
+     * @param produto O Produto a ser validado
+     * @return true se é possível deletar o registro de forma segura
+     * @return false se não é possível deletar este registro
      */
-    private void validateId(int id) {
-        Validator.start()
-                .expectNotNull(id, "ID não pode ser nulo!")
-                .validate();
-    }
-
     private boolean validateDeleteProduto(Produto produto){
         return TransactionExecutor.query(em -> {
             return (new ProdutosEstoquesRepository(em).findByProduto(produto.getId()).isEmpty() ? true : false);
