@@ -27,26 +27,26 @@ public class EstoqueRepository extends BaseRepository<Estoque, Integer> {
     }
 
     /**
-     * Busca Estoques cujo nome inicia com o valor informado
+     * Busca Estoques no banco de dados com base em um nome
      *
-     * @param nome O prefixo do nome
+     * @param nome string informada para busca
      * @return List<Estoque> - Os Estoques encontrados
      */
     public List<Estoque> findByNome(String nome) {
-        return em.createQuery("SELECT e FROM estoques e WHERE e.nome LIKE :prefix", Estoque.class)
-                .setParameter("prefix", nome + "%")
+        return em.createQuery("SELECT e FROM estoques e WHERE LOWER (e.nome) LIKE LOWER (:str)", Estoque.class)
+                .setParameter("str", "%" + nome + "%")
                 .getResultList();
     }
 
     /**
-     * Busca Estoques cujo codigo inicia com o valor informado
+     * Busca Estoques no banco de dados com base em um codigo
      *
-     * @param codigo O prefixo do codigo
+     * @param codigo string informada para busca
      * @return List<Estoque> - Os Estoques encontrados
      */
     public List<Estoque> findByCodigo(String codigo) {
-        return em.createQuery("SELECT e FROM estoques e WHERE e.codigo LIKE :prefix", Estoque.class)
-                .setParameter("prefix", codigo + "%")
+        return em.createQuery("SELECT e FROM estoques e WHERE LOWER (e.codigo) LIKE LOWER (:str)", Estoque.class)
+                .setParameter("str", "%" + codigo + "%")
                 .getResultList();
     }
 }

@@ -35,8 +35,8 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      * @return List<Acesso> - Os Acessos encontrados
      */
     public List<Acesso> findByNome(String nome) {
-        return em.createQuery("SELECT a FROM acessos a WHERE a.nome LIKE :str", Acesso.class)
-                .setParameter("str", nome + "%")
+        return em.createQuery("SELECT a FROM acessos a WHERE LOWER (a.nome) LIKE LOWER (:str)", Acesso.class)
+                .setParameter("str", "%" + nome + "%")
                 .getResultList();
     }
 
@@ -48,8 +48,8 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
      */
     public Optional<Acesso> findByCodigo(String codigo) {
         return Optional.ofNullable(
-                em.createQuery("SELECT a FROM acessos a WHERE a.codigo LIKE :str", Acesso.class)
-                        .setParameter("str", codigo + "%")
+                em.createQuery("SELECT a FROM acessos a WHERE LOWER(a.codigo) LIKE LOWER(:str)", Acesso.class)
+                        .setParameter("str", "%" + codigo + "%")
                         .getSingleResultOrNull()
         );
     }
@@ -57,10 +57,8 @@ public class AcessoRepository extends BaseRepository<Acesso, Integer> {
     @Override
     public Optional<Acesso> findById(Integer id) {
         return em.createQuery("""
-            SELECT a FROM acessos a
-            LEFT JOIN FETCH a.funcionarios
-            WHERE a.id = :id
-            """, Acesso.class)
+            SELECT a FROM acessos a LEFT JOIN FETCH a.funcionarios
+            WHERE a.id = :id""", Acesso.class)
                 .setParameter("id", id)
                 .getResultStream()
                 .findFirst();

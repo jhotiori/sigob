@@ -34,8 +34,8 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      * @return List<Moeda> - As Moedas encontradas
      */
     public List<Moeda> findByNome(String nome) {
-        return em.createQuery("SELECT m FROM moedas m WHERE m.nome LIKE :str", Moeda.class)
-                .setParameter("str", nome + "%")
+        return em.createQuery("SELECT m FROM moedas m WHERE LOWER (m.nome) LIKE LOWER (:str)", Moeda.class)
+                .setParameter("str", "%" + nome + "%")
                 .getResultList();
     }
 
@@ -47,8 +47,8 @@ public class MoedaRepository extends BaseRepository<Moeda, Integer> {
      */
     public Optional<Moeda> findBySigla(String sigla) {
         return Optional.ofNullable(
-                em.createQuery("SELECT m FROM moedas m WHERE m.sigla LIKE :str", Moeda.class)
-                        .setParameter("str", sigla + "%")
+                em.createQuery("SELECT m FROM moedas m WHERE LOWER (m.sigla) LIKE LOWER (:str)", Moeda.class)
+                        .setParameter("str", "%" + sigla + "%")
                         .getSingleResultOrNull()
         );
     }

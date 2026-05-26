@@ -28,14 +28,14 @@ public class CategoriaRepository extends BaseRepository<Categoria, Integer> {
     }
 
     /**
-     * Busca Categorias cujo nome inicia com o valor informado
+     * Busca Categorias no banco de dados com base em um nome
      *
-     * @param prefixo O prefixo do nome
+     * @param nome string informada para busca
      * @return List<Categoria> - As Categorias encontradas
      */
-    public List<Categoria> findByNome(String prefixo) {
-        return em.createQuery("SELECT c FROM categorias c WHERE c.nome LIKE :prefix", Categoria.class)
-                .setParameter("prefix", prefixo + "%")
+    public List<Categoria> findByNome(String nome) {
+        return em.createQuery("SELECT c FROM categorias c WHERE LOWER (c.nome) LIKE LOWER (:str)", Categoria.class)
+                .setParameter("str", "%" + nome + "%")
                 .getResultList();
     }
 }

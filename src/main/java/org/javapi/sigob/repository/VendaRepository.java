@@ -25,12 +25,7 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      */
     public List<Venda> findAll() {
         return em.createQuery("""
-                select v
-                from vendas v
-                join fetch v.cliente
-                join fetch v.funcionario
-                order by v.id desc
-                """, Venda.class)
+                SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario ORDER BY v.id DESC""", Venda.class)
                 .getResultList();
     }
 
@@ -42,14 +37,9 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      */
     public List<Venda> findByClienteNome(String nome) {
         return em.createQuery("""
-                select v
-                from vendas v
-                join fetch v.cliente
-                join fetch v.funcionario
-                where lower(v.cliente.nome) like lower(:nome)
-                order by v.id desc
-                """, Venda.class)
-                .setParameter("nome", nome + "%")
+                SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
+                WHERE LOWER(v.cliente.nome) LIKE LOWER(:nome) ORDER BY v.id DESC""", Venda.class)
+                .setParameter("nome", "%" + nome + "%")
                 .getResultList();
     }
 
@@ -61,14 +51,9 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      */
     public List<Venda> findByFuncionarioNome(String nome) {
         return em.createQuery("""
-                select v
-                from vendas v
-                join fetch v.cliente
-                join fetch v.funcionario
-                where lower(v.funcionario.nome) like lower(:nome)
-                order by v.id desc
-                """, Venda.class)
-                .setParameter("nome", nome + "%")
+                SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
+                WHERE LOWER(v.funcionario.nome) LIKE LOWER(:nome) ORDER BY v.id DESC """, Venda.class)
+                .setParameter("nome", "%" + nome + "%")
                 .getResultList();
     }
 
@@ -82,13 +67,8 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
             LocalDate data
     ) {
         return em.createQuery("""
-            select v
-            from vendas v
-            join fetch v.cliente
-            join fetch v.funcionario
-            where cast(v.dataAbertura as date) = :data
-            order by v.dataAbertura desc
-            """, Venda.class)
+            SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
+            WHERE CAST(v.dataAbertura AS DATE) = :data ORDER BY v.dataAbertura DESC """, Venda.class)
                 .setParameter("data", data)
                 .getResultList();
     }
@@ -103,14 +83,9 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
             LocalDate data
     ) {
         return em.createQuery("""
-                select v
-                from vendas v
-                join fetch v.cliente
-                join fetch v.funcionario
-                where v.dataFinalizada is not null
-                and cast(v.dataFinalizada as date) = :data
-                order by v.dataFinalizada desc
-                """, Venda.class)
+                SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
+                WHERE v.dataFinalizada IS NOT NULL AND CAST(v.dataFinalizada AS DATE) = :data 
+                ORDER BY v.dataFinalizada DESC """, Venda.class)
                 .setParameter("data", data)
                 .getResultList();
     }
@@ -127,13 +102,8 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
             LocalDate fim
     ) {
         return em.createQuery("""
-            select v
-            from vendas v
-            join fetch v.cliente
-            join fetch v.funcionario
-            where cast(v.dataAbertura as date) between :inicio and :fim
-            order by v.dataAbertura desc
-            """, Venda.class)
+            SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario
+            WHERE CAST(v.dataAbertura AS DATE) BETWEEN :inicio AND :fim ORDER BY v.dataAbertura DESC """, Venda.class)
                 .setParameter("inicio", inicio)
                 .setParameter("fim", fim)
                 .getResultList();
@@ -145,7 +115,8 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findAbertas() {
-        return em.createQuery("select v from vendas v join fetch v.cliente join fetch v.funcionario where v.status = 'aberta'", Venda.class)
+        return em.createQuery("SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario " +
+                        "WHERE v.status = 'aberta'", Venda.class)
                 .getResultList();
     }
 
@@ -155,7 +126,8 @@ public class VendaRepository extends BaseRepository<Venda, Integer> {
      * @return List<Venda> - Os Venda encontrados
      */
     public List<Venda> findFinalizadas() {
-        return em.createQuery("select v from vendas v join fetch v.cliente join fetch v.funcionario where v.status = 'finalizada'", Venda.class)
+        return em.createQuery("SELECT v FROM vendas v JOIN FETCH v.cliente JOIN FETCH v.funcionario " +
+                        "WHERE v.status = 'finalizada'", Venda.class)
                 .getResultList();
     }
 }
