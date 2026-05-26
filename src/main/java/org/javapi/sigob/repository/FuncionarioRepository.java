@@ -67,16 +67,7 @@ public class FuncionarioRepository extends BaseRepository<Funcionario, Integer> 
         return Optional.ofNullable(
                 em.createQuery("""
                         SELECT DISTINCT f FROM funcionarios f JOIN FETCH f.acessos
-                        WHERE LOWER (f.codigo) LIKE LOWER (:str)
-                                /**
-                                                                     * 
-                                co de dados com base em um codigo
-                                                                     *
-                                                                     * @
-                                mada para busca
-                                                                     * @return
-                                O F
-                                                                                                  */""", Funcionario.class)
+                        WHERE LOWER (f.codigo) LIKE LOWER (:str)""", Funcionario.class)
                         .setParameter("str", "%" + codigo + "%")
                         .getSingleResultOrNull()
         );
