@@ -193,6 +193,7 @@ public final class ApplicationWindow extends BaseWindow {
 
         if (hasAdminAcesso || hasVendedorAcesso) {
             builder.menu("Operações", menu -> {
+                menu.item("Caixa", () -> showScreen("caixa"));
                 menu.item("Vendas", () -> showScreen("vendas"));
                 menu.item("Mercadorias", () -> showScreen("mercadorias"));
             });

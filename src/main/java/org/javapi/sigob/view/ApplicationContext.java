@@ -3,18 +3,9 @@ package org.javapi.sigob.view;
 import java.util.List;
 
 import org.javapi.sigob.entity.Acesso;
+import org.javapi.sigob.entity.Caixa;
 import org.javapi.sigob.entity.Funcionario;
-import org.javapi.sigob.service.AcessoService;
-import org.javapi.sigob.service.CategoriaService;
-import org.javapi.sigob.service.ClienteService;
-import org.javapi.sigob.service.DocumentoService;
-import org.javapi.sigob.service.EstoqueService;
-import org.javapi.sigob.service.FuncionarioService;
-import org.javapi.sigob.service.ItemVendaService;
-import org.javapi.sigob.service.MoedaService;
-import org.javapi.sigob.service.ProdutoService;
-import org.javapi.sigob.service.ProdutosEstoquesService;
-import org.javapi.sigob.service.VendaService;
+import org.javapi.sigob.service.*;
 import org.javapi.sigob.view.windows.ApplicationWindow;
 
 /**
@@ -112,6 +103,20 @@ public final class ApplicationContext {
      * @see {@link VendaService}
      */
     private static final VendaService vendaService = new VendaService();
+
+    /**
+     * Serviço de Caixa.
+     *
+     * @see {@link CaixaService}
+     */
+    private static final CaixaService caixaService = new CaixaService();
+
+    /**
+     * Serviço de Saldo.
+     *
+     * @see {@link SaldoService}
+     */
+    private static final SaldoService saldoService = new SaldoService();
 
     /**
      * Impede instanciação.
@@ -280,4 +285,21 @@ public final class ApplicationContext {
         return vendaService;
     }
 
+    /**
+     * Retorna serviço de caixa.
+     *
+     * @return CaixaService - Serviço de caixa
+     */
+    public static CaixaService getCaixaService() {
+        return caixaService;
+    }
+
+    /**
+     * Retorna serviço de caixa.
+     *
+     * @return CaixaService - Serviço de caixa
+     */
+    public static SaldoService getSaldoService() {
+        return saldoService;
+    }
 }

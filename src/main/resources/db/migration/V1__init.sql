@@ -96,3 +96,23 @@ CREATE TABLE IF NOT EXISTS item_vendas (
     FOREIGN KEY (produtoEstoque_id) REFERENCES produtos_estoques(id),
     FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS caixas (
+    id SERIAL PRIMARY KEY,
+    valor_abertura DECIMAL(10,2) NOT NULL,
+    valor_saldo DECIMAL(10,2) NOT NULL,
+    valor_fecha DECIMAL(10,2) NOT NULL,
+    status VARCHAR(16) NOT NULL,
+    data_abertura TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    data_fecha TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS saldos (
+    id SERIAL PRIMARY KEY,
+    valor_saldo DECIMAL(10,2) NOT NULL,
+    descricao VARCHAR(255),
+    tipo VARCHAR(255) NOT NULL,
+    data_saldo TIMESTAMPTZ NOT NULL,
+    venda_id INT,
+    FOREIGN KEY (venda_id) REFERENCES vendas(id)
+);
