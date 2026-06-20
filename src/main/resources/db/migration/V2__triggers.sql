@@ -107,3 +107,36 @@ CREATE TRIGGER trigger_valida_venda
     BEFORE INSERT OR UPDATE ON vendas
                          FOR EACH ROW
                          EXECUTE FUNCTION fn_trigger_valida_venda();
+
+CREATE OR REPLACE FUNCTION fn_trigger_bloqueia_delete_acesso()
+RETURNS TRIGGER AS $$
+DECLARE
+    vTotal BIGINT;
+BEGIN
+
+SELECT COUNT(*)
+INTO vTotal
+FROM funcionarios_acessos
+WHERE acesso_id = OLD.id;
+
+
+IF vTotal > 0 THEN
+
+    RAISE EXCEPTION
+    'Acesso "%" não pode ser removido - possui % funcionário(s).',
+    OLD.nome,
+    vTotal;
+
+END IF;
+
+
+RETURN OLD;
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trigger_bloqueia_delete_acesso
+    BEFORE DELETE ON acessos
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_trigger_bloqueia_delete_acesso();

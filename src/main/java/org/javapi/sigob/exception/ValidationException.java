@@ -3,7 +3,7 @@ package org.javapi.sigob.exception;
 /**
  * Exception para validações
  */
-public class ValidationException extends SigobException {
+public final class ValidationException extends SigobException {
 
     /**
      * Construtor da exception
