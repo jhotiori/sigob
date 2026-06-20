@@ -1,6 +1,6 @@
 package org.javapi.sigob.view;
 
-public class Settings {
+public final class Settings {
 
     /**
      * Tamanho vertical minimo para a tela
@@ -21,7 +21,6 @@ public class Settings {
      * Tamanho horizontal maximo para a tela
      */
     public static final int APP_MAX_WIDTH = 1920;
-
 
     /**
      * Titulo da janela principal

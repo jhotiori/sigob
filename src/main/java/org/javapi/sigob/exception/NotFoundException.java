@@ -3,7 +3,7 @@ package org.javapi.sigob.exception;
 /**
  * Exception para casos de não encontrados (nulos, vazios, etc)
  */
-public class NotFoundException extends SigobException {
+public final class NotFoundException extends SigobException {
 
     /**
      * Construtor da exception

@@ -9,17 +9,19 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <!-- CLASSES -->
         <!-- <class>org.javapi.sigob.entity.Name</class> -->
-        <class>org.javapi.sigob.entity.Cliente</class>
-        <class>org.javapi.sigob.entity.Estoque</class>
-        <class>org.javapi.sigob.entity.Produto</class>
-        <class>org.javapi.sigob.entity.Venda</class>
-        <class>org.javapi.sigob.entity.ProdutosEstoques</class>
-        <class>org.javapi.sigob.entity.ItemVenda</class>
-        <class>org.javapi.sigob.entity.Documento</class>
-        <class>org.javapi.sigob.entity.Categoria</class>
-        <class>org.javapi.sigob.entity.Acesso</class>
-        <class>org.javapi.sigob.entity.Funcionario</class>
-        <class>org.javapi.sigob.entity.Moeda</class>
+        <class>org.javapi.sigob.model.entity.Cliente</class>
+        <class>org.javapi.sigob.model.entity.Caixa</class>
+        <class>org.javapi.sigob.model.entity.Saldo</class>
+        <class>org.javapi.sigob.model.entity.Estoque</class>
+        <class>org.javapi.sigob.model.entity.Produto</class>
+        <class>org.javapi.sigob.model.entity.Venda</class>
+        <class>org.javapi.sigob.model.entity.ProdutosEstoques</class>
+        <class>org.javapi.sigob.model.entity.ItemVenda</class>
+        <class>org.javapi.sigob.model.entity.Documento</class>
+        <class>org.javapi.sigob.model.entity.Categoria</class>
+        <class>org.javapi.sigob.model.entity.Acesso</class>
+        <class>org.javapi.sigob.model.entity.Funcionario</class>
+        <class>org.javapi.sigob.model.entity.Moeda</class>
         <properties>
             <!-- JDBC CONFIGURATION -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
